@@ -1122,18 +1122,22 @@ document.addEventListener('keydown',e=>{
 // ═══════════════════════════════════════════════════════════════════
 //  COLUMN MAP + MULTI-MEASUREMENT ENGINE
 // =================================================================
-const C={factory:0,calo:1,order:2,kitNo:3,compType:4,
-  // Set values K-U
+const C={
+  // A-J: identification
+  factory:0,calo:1,order:2,kitNo:3,compType:4,
+  date:5,time:6,code:7,operator:8,remark:9,
+  // K-U: set values (conditions)
   Te_set:10,Tc_set:11,Tamb_set:12,Tsuc_set:13,Tliq_set:14,
-  voltage:15,freq:16,cooling:17,rpm:18,
-  refrigerant:19,capacitor:20,
-  // Measured values W-AK
+  voltage:15,freq:16,cooling:17,rpm:18,refrigerant:19,capacitor:20,
+  // V(21): empty gap
+  // W-AK: measured values
   P1:22,
   Qo_ashrae:23,COP_ashrae:24,Qo_cecomaf:25,COP_cecomaf:26,
   Te_meas:27,Tc_meas:28,Qvessel:29,
   Tcomp_meas:30,Tsuc_meas:31,Tdisch_meas:32,Tamb_meas:33,
   current_meas:34,voltage_meas:35,rpm_meas:36,
-  Pe_uncorr:38,Tliq_meas:39,Tvout_meas:40};
+  Pe_uncorr:38,Tliq_meas:39,Tvout_meas:40
+};
 const FLUID_MAP={'R-290':'R290','R-134a':'R134a','R-404A':'R404A','R-22':'R22',
   'R-407C':'R407C','R-410A':'R410A','R-600a':'R600a','R-32':'R32'};
 
@@ -1141,8 +1145,12 @@ function parseRowCols(raw){
   const c=raw.split(/\t/);
   const s=i=>(c[i]||'').trim(), n=i=>parseFloat(c[i])||0;
   let fluid=s(C.refrigerant); fluid=FLUID_MAP[fluid]||fluid||'R290';
-  return {factory:s(C.factory),calo:s(C.calo),order:s(C.order),
-    kitNo:s(C.kitNo),compType:s(C.compType),refrigerant:fluid,
+  return {
+    factory:s(C.factory),calo:s(C.calo),order:s(C.order),
+    kitNo:s(C.kitNo),compType:s(C.compType),
+    date:s(C.date),time:s(C.time),code:s(C.code),
+    operator:s(C.operator),remark:s(C.remark),
+    refrigerant:fluid,
     // Set values (K-U)
     Te_set:n(C.Te_set),Tc_set:n(C.Tc_set),Tamb_set:n(C.Tamb_set),
     Tsuc_set:n(C.Tsuc_set),Tliq_set:n(C.Tliq_set),
@@ -1363,7 +1371,16 @@ function buildRowHTML(row,num){
       +(d.colCount<41?'<span class="mrow-tag warn">⚠ '+d.colCount+' cols</span>':'')
       +'</div>';
     setVals='<div class="mrow-setvals">'
-      +'<div class="mrow-setvals-title">Set values (K–U)</div>'
+      +'<div class="mrow-setvals-title">Set values (B–U)</div>'
+      // B-J: identification
+      +(d.calo?'<span class="sv-tag"><span>Calo</span>'+d.calo+'</span>':'')
+      +(d.order?'<span class="sv-tag"><span>Order</span>'+d.order+'</span>':'')
+      +(d.code?'<span class="sv-tag"><span>Code</span>'+d.code+'</span>':'')
+      +(d.operator?'<span class="sv-tag"><span>Operator</span>'+d.operator+'</span>':'')
+      +(d.date?'<span class="sv-tag"><span>Date</span>'+d.date+'</span>':'')
+      +(d.time?'<span class="sv-tag"><span>Time</span>'+d.time+'</span>':'')
+      +(d.remark?'<span class="sv-tag"><span>Remark</span>'+d.remark+'</span>':'')
+      // K-U: conditions
       +'<span class="sv-tag"><span>Te</span>'+d.Te_set+'°C</span>'
       +'<span class="sv-tag"><span>Tc</span>'+d.Tc_set+'°C</span>'
       +'<span class="sv-tag"><span>Tamb</span>'+d.Tamb_set+'°C</span>'
@@ -1373,6 +1390,7 @@ function buildRowHTML(row,num){
       +'<span class="sv-tag"><span>Hz</span>'+d.freq+' Hz</span>'
       +(d.cooling?'<span class="sv-tag"><span>Cooling</span>'+d.cooling+'</span>':'')
       +(d.rpm?'<span class="sv-tag"><span>RPM</span>'+d.rpm+'</span>':'')
+      +'<span class="sv-tag"><span>Ref.</span>'+d.refrigerant+'</span>'
       +(d.capacitor?'<span class="sv-tag"><span>Cap</span>'+d.capacitor+' µF</span>':'')
       +'</div>'
       // Measured values (W-AK) — same strip style, teal colour
@@ -1754,11 +1772,18 @@ async function exportToWord(){
       }));
 
       // ── SET VALUES ────────────────────────────────────────────
-      children.push(sectionTitle('Set values  (K – U)','92400E'));
+      children.push(sectionTitle('Set values  (B – U)','92400E'));
+      // Row 1: identification (B-J)
+      const idHdrs=['Factory','Calo','Order','Kit #','Compressor','Date','Time','Code','Operator','Remark'];
+      const idVals=[d.factory||'—',d.calo||'—',d.order||'—',d.kitNo||'—',d.compType||'—',
+                    d.date||'—',d.time||'—',d.code||'—',d.operator||'—',d.remark||'—'];
+      children.push(WideTable(idHdrs,idVals,'FEF3C7','92400E','FFFBEB','78350F',brdAllYellow));
+      children.push(sp(60));
+      // Row 2: conditions (K-U)
       children.push(WideTable(
-        ['Te set','Tc set','Tamb set','Tsuc set','Tliq set','Voltage','Frequency','Cooling','RPM','Capacitor'],
+        ['Te set','Tc set','Tamb set','Tsuc set','Tliq set','Voltage','Frequency','Cooling','RPM','Refrigerant','Capacitor'],
         [d.Te_set+'°C',d.Tc_set+'°C',d.Tamb_set+'°C',d.Tsuc_set+'°C',d.Tliq_set+'°C',
-         d.voltage+' V',d.freq+' Hz',d.cooling||'—',d.rpm||'—',d.capacitor?d.capacitor+' µF':'—'],
+         d.voltage+' V',d.freq+' Hz',d.cooling||'—',d.rpm||'—',d.refrigerant,d.capacitor?d.capacitor+' µF':'—'],
         'FEF3C7','92400E','FFFBEB','78350F',brdAllYellow
       ));
       children.push(sp(160));
