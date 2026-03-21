@@ -934,7 +934,7 @@ const THERMO = (function(){
 // ═══════════════════════════════════════════════════════════════════
 //  CoolProp.js INTEGRATION
 //  CoolProp v7.0.0 is an ES Module — must use dynamic import(), NOT
-//  classic <script> tag. The Module config is passed to the factory fn.
+//  classic SCRIPT tag. The Module config is passed to the factory fn.
 // ═══════════════════════════════════════════════════════════════════
 let cpReady = false;
 var Module = {}; // populated after factory call
@@ -1014,7 +1014,7 @@ function makeInstantiateWasm() {
     })
     .catch(function(err) {
       console.warn('[CoolProp] ES import failed:', err.message, '— trying classic script');
-      // Fallback: classic <script> for older coolprop.js builds
+      // Fallback: classic SCRIPT tag for older coolprop.js builds
       var s = document.createElement('script');
       s.src = 'coolprop.js';
       s.onerror = function() { cpFallback('JS file not found'); };
@@ -1269,7 +1269,6 @@ function saveStds(){
 //  MULTI-MEASUREMENT ROWS
 // =================================================================
 let measRows=[], rowCounter=0;
-let measData=null; // kept for legacy compat
 
 function addMeasRow(){
   const id=++rowCounter;
