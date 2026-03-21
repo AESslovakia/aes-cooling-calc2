@@ -1395,16 +1395,36 @@ function updateRowCustom(id){
 function setRowStd(id,stdKey){
   const row=measRows.find(r=>r.id===id);if(!row)return;
   row.stdKey=stdKey;row.result=null;
-  // Show/hide custom block without full re-render
+
+  // Update standard buttons active state
+  const body=document.getElementById('mrow_body_'+id);
+  if(body){
+    body.querySelectorAll('.mrow-std-btn').forEach(btn=>{
+      const p=STANDARDS[stdKey];
+      const match=p&&(btn.textContent.trim()===p.label+' '+p.range);
+      btn.classList.toggle('active',match);
+    });
+  }
+
+  // Show/hide custom block
   const custBlock=document.getElementById('mrow_cust_'+id);
   if(custBlock) custBlock.className='mrow-custom'+(stdKey==='custom'?' visible':'');
-  // Update active button
-  const body=document.getElementById('mrow_body_'+id);
-  if(body) body.querySelectorAll('.mrow-std-btn').forEach(btn=>{
-    btn.classList.toggle('active', btn.textContent.trim()===(STANDARDS[stdKey]?.label+' '+STANDARDS[stdKey]?.range)||false);
-  });
-  // Re-render just this row to update calc button label
-  renderAllRows();
+
+  // Update calculate button label
+  const calcBtn=document.querySelector('#mrow_body_'+id+' .mrow-calc-btn');
+  if(calcBtn){
+    const stdLabel=STANDARDS[stdKey]?STANDARDS[stdKey].label+' '+STANDARDS[stdKey].range:stdKey;
+    calcBtn.textContent='🧮 Calculate — '+stdLabel;
+    calcBtn.disabled=!row.data;
+  }
+
+  // Update header badge
+  const badge=document.querySelector('#mrow_'+id+' .mrow-std-badge');
+  if(badge) badge.textContent=STANDARDS[stdKey]?STANDARDS[stdKey].label+' '+STANDARDS[stdKey].range:stdKey;
+
+  // Clear result display if present
+  const existing=body?body.querySelector('.mrow-result'):null;
+  if(existing) existing.remove();
 }
 function parseRowPaste(id){
   const ta=document.getElementById('mrow_ta_'+id);if(!ta)return;
