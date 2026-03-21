@@ -345,38 +345,7 @@ body{font-family:'Inter',Arial,sans-serif;font-size:13px;color:#1e2433;backgroun
   <div class="main-layout">
     <div>
 
-      <!-- CARD 1: Refrigerant (default) -->
-      <div class="card">
-        <div class="card-header">
-          <div class="card-num">1</div>
-          <div class="card-title" data-i18n="c3_title">Refrigerant</div>
-          <div class="card-hint" data-i18n="c3_hint">Auto-detected per row · editable</div>
-        </div>
-        <div class="g2">
-          <div class="f">
-            <label data-i18n="c3_ref_lbl">Default refrigerant</label>
-            <select id="refrigerant">
-              <option value="R290">R290 — Propane</option>
-              <option value="R134a">R134a</option>
-              <option value="R404A">R404A</option>
-              <option value="R407C">R407C</option>
-              <option value="R410A">R410A</option>
-              <option value="R22">R22</option>
-              <option value="R507A">R507A</option>
-              <option value="R600a">R600a — Isobutane</option>
-              <option value="R32">R32</option>
-              <option value="R1234yf">R1234yf</option>
-              <option value="R744">R744 — CO2</option>
-            </select>
-          </div>
-          <div class="f">
-            <label data-i18n="c3_custom_lbl">Custom (CoolProp.js only)</label>
-            <input type="text" id="refrigerantCustom" placeholder="R448A, R452A…">
-          </div>
-        </div>
-      </div>
-
-      <!-- hidden: global refs needed by setStd() -->
+      <!-- hidden global refs needed by setStd() -->
       <div style="display:none">
         <input type="number" id="req_Te" value="-35">
         <input type="number" id="req_Tc" value="40">
@@ -384,6 +353,8 @@ body{font-family:'Inter',Arial,sans-serif;font-size:13px;color:#1e2433;backgroun
         <input type="number" id="req_Tsuc" value="20">
         <input type="number" id="req_Tliq" value="40">
         <div id="stdButtonsPanel"></div>
+        <select id="refrigerant"><option value="R290">R290</option><option value="R134a">R134a</option><option value="R404A">R404A</option><option value="R407C">R407C</option><option value="R410A">R410A</option><option value="R22">R22</option><option value="R507A">R507A</option><option value="R600a">R600a</option><option value="R32">R32</option><option value="R1234yf">R1234yf</option><option value="R744">R744</option></select>
+        <input type="text" id="refrigerantCustom">
       </div>
 
       <!-- MEASUREMENTS TOOLBAR -->
