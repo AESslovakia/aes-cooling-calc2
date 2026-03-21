@@ -192,6 +192,9 @@ body{font-family:'Inter',Arial,sans-serif;font-size:13px;color:#1e2433;backgroun
 .calc-all-meas-btn{display:flex;align-items:center;gap:6px;padding:9px 18px;background:linear-gradient(135deg,#059669,#047857);color:#fff;border:none;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;margin-left:auto;box-shadow:0 2px 8px rgba(5,150,105,.25)}
 .calc-all-meas-btn:hover{opacity:.9;transform:translateY(-1px)}
 .calc-all-meas-btn:disabled{background:#b0bfd8;cursor:not-allowed;transform:none;box-shadow:none}
+.export-word-btn{display:flex;align-items:center;gap:6px;padding:9px 16px;background:linear-gradient(135deg,#0d1f3c,#1a3254);color:#7dd3fc;border:1.5px solid #1e3a5f;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;white-space:nowrap}
+.export-word-btn:hover:not(:disabled){background:linear-gradient(135deg,#122a52,#1e3a5f);border-color:#3b82f6}
+.export-word-btn:disabled{opacity:.4;cursor:not-allowed}
 
 /* Measurement row card */
 .mrow-card{background:#fff;border:1.5px solid #e4e9f4;border-radius:12px;margin-bottom:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.04);transition:border-color .15s}
@@ -364,6 +367,9 @@ body{font-family:'Inter',Arial,sans-serif;font-size:13px;color:#1e2433;backgroun
         <button class="calc-all-meas-btn" id="calcAllMeasBtn" onclick="calcAllMeas()" disabled>
           🧮 <span data-i18n="calc_all_meas">Calculate all</span>
         </button>
+        <button class="export-word-btn" id="exportWordBtn" onclick="exportToWord()" disabled title="Export all calculated results to Word (.docx)">
+          📄 Export .docx
+        </button>
         <button class="clear-all-btn" onclick="clearAllMeas()" data-i18n="c1_clear">✕ Clear all</button>
       </div>
 
@@ -401,6 +407,7 @@ body{font-family:'Inter',Arial,sans-serif;font-size:13px;color:#1e2433;backgroun
   </div>
 </div><!-- end app -->
 
+<script src="https://unpkg.com/docx@7.8.2/build/index.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════════════════
 //  INTERNATIONALISATION (i18n)
@@ -1144,6 +1151,8 @@ function computeQo(m, Te_r, Tc_r, Tsuc_r, Tliq_r, fluid){
 function updateBtns(){
   const btn=document.getElementById('calcAllMeasBtn');
   if(btn) btn.disabled=measRows.length===0;
+  const exp=document.getElementById('exportWordBtn');
+  if(exp) exp.disabled=!measRows.some(r=>r.result);
 }
 
 // =================================================================
@@ -1427,7 +1436,7 @@ function calcRow(id){
   try{
     const result=computeQo(row.data,p.Te,p.Tc,p.Tsuc,p.Tliq,fluid);
     row.result=result;row.result._fluid=fluid;row.result._stdKey=row.stdKey;
-    renderAllRows();updateDebugDropdown();showDebugForRow(id);
+    renderAllRows();updateDebugDropdown();updateBtns();showDebugForRow(id);
     setTimeout(()=>{const el=document.getElementById('mrow_'+id);if(el)el.scrollIntoView({behavior:'smooth',block:'nearest'});},80);
   }catch(e){showErrForRow(id,e);}
 }
@@ -1528,6 +1537,209 @@ function renderDebug(r,fluid,Te_r,Tc_r,Tsuc_r,Tliq_r,m){
     +(!cpReady?'<div style="font-size:9px;color:#64748b;margin-top:6px;border-top:1px solid #1e3a5f;padding-top:6px">'+t('eos_note')+'</div>':'')
     +'</div>';
   showTab('measured');
+}
+
+// =================================================================
+//  EXPORT TO WORD (.docx)
+// =================================================================
+async function exportToWord(){
+  const btn=document.getElementById('exportWordBtn');
+  if(btn){ btn.disabled=true; btn.textContent='⏳ Generating...'; }
+
+  try {
+    const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
+            AlignmentType, BorderStyle, WidthType, ShadingType, HeadingLevel } = docx;
+
+    const rows=measRows.filter(r=>r.result&&r.data);
+    if(!rows.length){ alert('No calculated results to export.'); return; }
+
+    // ── helpers ──────────────────────────────────────────────────
+    const P=(text,opts={})=>new Paragraph({
+      alignment: opts.center ? AlignmentType.CENTER : AlignmentType.LEFT,
+      spacing: { after: opts.after||80 },
+      children:[new TextRun({
+        text:String(text), bold:!!opts.bold, size:opts.size||20,
+        color:opts.color||'000000', font:'Calibri', italics:!!opts.italic
+      })]
+    });
+
+    const HEAD=(text,level=1)=>new Paragraph({
+      heading: level===1?HeadingLevel.HEADING_1:HeadingLevel.HEADING_2,
+      spacing:{after:120},
+      children:[new TextRun({text,bold:true,size:level===1?28:24,color:level===1?'0D1F3C':'1A4DB5',font:'Calibri'})]
+    });
+
+    const brd={style:BorderStyle.SINGLE,size:4,color:'E4E9F4'};
+    const brdAll={top:brd,bottom:brd,left:brd,right:brd};
+    const cp={top:120,bottom:120,left:160,right:160};
+
+    function KVTable(pairs){
+      return new Table({
+        width:{size:9360,type:WidthType.DXA},
+        columnWidths:[3600,5760],
+        rows: pairs.filter(p=>p[1]!=null&&p[1]!=='').map(([k,v])=>new TableRow({children:[
+          new TableCell({borders:brdAll,margins:cp,
+            shading:{fill:'F8FAFF',type:ShadingType.CLEAR},
+            children:[new Paragraph({children:[new TextRun({text:k,size:18,color:'7A8299',font:'Calibri'})]})]
+          }),
+          new TableCell({borders:brdAll,margins:cp,
+            children:[new Paragraph({children:[new TextRun({text:String(v),size:20,bold:true,font:'Calibri',color:'0D1F3C'})]})]
+          })
+        ]}))
+      });
+    }
+
+    // ── build document children ───────────────────────────────────
+    const children=[];
+
+    // Title
+    children.push(new Paragraph({
+      alignment:AlignmentType.CENTER, spacing:{after:200},
+      children:[new TextRun({text:'AES — Compressor Cooling Capacity Report',bold:true,size:36,color:'0D1F3C',font:'Calibri'})]
+    }));
+    children.push(new Paragraph({
+      alignment:AlignmentType.CENTER, spacing:{after:80},
+      children:[new TextRun({text:'EN 12900 · CECOMAF · ARI 540 · ASHRAE · Custom',size:20,color:'7A8299',font:'Calibri'})]
+    }));
+    children.push(new Paragraph({
+      alignment:AlignmentType.CENTER, spacing:{after:400},
+      children:[new TextRun({text:'Generated: '+new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'}),size:18,color:'9AA3B8',font:'Calibri',italics:true})]
+    }));
+
+    // Summary table
+    children.push(HEAD('Summary'));
+    children.push(new Table({
+      width:{size:9360,type:WidthType.DXA},
+      columnWidths:[400,2400,1960,1560,1200,1200,1640],
+      rows:[
+        new TableRow({children:[
+          '#','Compressor','Standard','Refrigerant','Qo [W]','COP','P1 [W]'
+        ].map((h,i)=>new TableCell({
+          borders:brdAll, margins:{top:100,bottom:100,left:120,right:120},
+          shading:{fill:'0D1F3C',type:ShadingType.CLEAR},
+          children:[new Paragraph({children:[new TextRun({text:h,bold:true,size:18,color:'FFFFFF',font:'Calibri'})]})]
+        }))
+        }),
+        ...rows.map((row,i)=>{
+          const p=row.stdKey==='custom'
+            ?{label:'Custom',range:'—'}
+            :(STANDARDS[row.stdKey]||{label:row.stdKey,range:''});
+          return new TableRow({children:[
+            String(i+1),
+            row.data.kitNo||row.data.compType||'—',
+            p.label+' '+p.range,
+            row.result._fluid||row.data.refrigerant,
+            row.result.Qo.toFixed(2),
+            row.result.COP.toFixed(4),
+            row.data.P1.toFixed(2)
+          ].map((v,ci)=>new TableCell({
+            borders:brdAll, margins:{top:80,bottom:80,left:120,right:120},
+            shading:{fill:i%2===0?'FFFFFF':'F8FAFF',type:ShadingType.CLEAR},
+            children:[new Paragraph({children:[new TextRun({
+              text:String(v), size:18, font:'Calibri',
+              bold:ci===4, color:ci===4?'059669':'1E2433'
+            })]})]
+          }))
+          });
+        })
+      ]
+    }));
+    children.push(P('',{after:400}));
+
+    // Detailed section per measurement
+    rows.forEach((row,i)=>{
+      const d=row.data, r=row.result;
+      const fluid=r._fluid||d.refrigerant;
+      const p=row.stdKey==='custom'
+        ?(row.custom||{Te:-35,Tc:40,Tsuc:20,Tliq:40,label:'Custom',range:'—'})
+        :(STANDARDS[row.stdKey]||{Te:0,Tc:0,Tsuc:0,Tliq:0,label:row.stdKey,range:''});
+      const stdLabel=(p.label||'')+(p.range?' '+p.range:'');
+
+      children.push(HEAD(`${i+1}. ${d.kitNo||d.compType||'—'}  ·  ${stdLabel}`, 1));
+
+      children.push(HEAD('Measured conditions', 2));
+      children.push(KVTable([
+        ['Compressor ID', d.kitNo||d.compType||'—'],
+        ['Refrigerant', fluid],
+        ['Te measured', d.Te_meas.toFixed(5)+' °C'],
+        ['Tc measured', d.Tc_meas.toFixed(5)+' °C'],
+        ['Tsuc measured', d.Tsuc_meas.toFixed(5)+' °C'],
+        ['Tliq measured (vessel inlet)', d.Tliq_meas.toFixed(5)+' °C'],
+        ['Q calorimeter (Qvessel)', d.Qvessel.toFixed(4)+' W'],
+        ['Compressor power input P1', d.P1.toFixed(4)+' W'],
+      ]));
+      children.push(P('',{after:160}));
+
+      children.push(HEAD('Thermodynamics — measurement (CoolProp)', 2));
+      children.push(KVTable([
+        ['pe (sat. pressure Te_meas)', r.pe_m.toFixed(6)+' bar'],
+        ['pc (sat. pressure Tc_meas)', r.pc_m.toFixed(5)+' bar'],
+        ['hA = H(pc, Tliq_meas) — liquid', r.hA_m.toFixed(4)+' kJ/kg'],
+        ['hB = H(pe, Tsuc_meas) — vapour', r.hB_m.toFixed(4)+' kJ/kg'],
+        ['Δh = hB − hA', r.dh_m.toFixed(4)+' kJ/kg'],
+        ['ṁ = Qvessel / (Δh × 1000)', r.mdot.toFixed(8)+' kg/s'],
+        ['ρ_meas = ρ(pe, Tsuc_meas)', r.rho_m.toFixed(5)+' kg/m³'],
+      ]));
+      children.push(P('',{after:160}));
+
+      children.push(HEAD('Reference conditions — '+stdLabel, 2));
+      children.push(KVTable([
+        ['Te reference', p.Te+' °C'],
+        ['Tc reference', p.Tc+' °C'],
+        ['Tsuc reference', p.Tsuc+' °C'],
+        ['Tliq reference', p.Tliq+' °C'],
+        ['pe_r', r.pe_r.toFixed(6)+' bar'],
+        ['pc_r', r.pc_r.toFixed(5)+' bar'],
+        ['hA_r — liquid', r.hA_r.toFixed(4)+' kJ/kg'],
+        ['hB_r — vapour', r.hB_r.toFixed(4)+' kJ/kg'],
+        ['Δh_r', r.dh_r.toFixed(4)+' kJ/kg'],
+        ['ρ_req', r.rho_r.toFixed(5)+' kg/m³'],
+      ]));
+      children.push(P('',{after:160}));
+
+      children.push(HEAD('Correction factors & result', 2));
+      children.push(KVTable([
+        ['CF_ρ = ρ_req / ρ_meas', r.CF_rho.toFixed(8)],
+        ['CF_Δh = Δh_req / Δh_meas', r.CF_dh.toFixed(8)],
+        ['Qo = Qvessel × CF_ρ × CF_Δh', r.Qo.toFixed(4)+' W'],
+        ['COP = Qo / P1', r.COP.toFixed(5)+' W/W'],
+        ['Mass flow ṁ', (r.mdot*1000).toFixed(5)+' g/s'],
+      ]));
+
+      if(i<rows.length-1){
+        children.push(new Paragraph({pageBreakBefore:true,children:[new TextRun({text:''})]}));
+      }
+    });
+
+    // Footer
+    children.push(P('',{after:200}));
+    children.push(new Paragraph({
+      alignment:AlignmentType.CENTER, spacing:{after:0},
+      children:[new TextRun({text:'AES s.r.o. — Advanced Energy Systems | www.aes-slovakia.eu | Farská 50, 949 01 Nitra, Slovakia',size:16,color:'AAAAAA',font:'Calibri',italics:true})]
+    }));
+
+    // ── generate file ─────────────────────────────────────────────
+    const doc=new Document({
+      sections:[{
+        properties:{page:{size:{width:11906,height:16838},margin:{top:1134,right:1134,bottom:1134,left:1134}}},
+        children
+      }]
+    });
+    const blob=await Packer.toBlob(doc);
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    const dt=new Date().toISOString().slice(0,10);
+    a.download='AES_Cooling_Report_'+dt+'.docx';
+    a.click();
+    URL.revokeObjectURL(url);
+
+  } catch(err){
+    console.error('Export error:',err);
+    alert('Export failed: '+err.message);
+  } finally {
+    if(btn){ btn.disabled=false; btn.textContent='📄 Export .docx'; updateBtns(); }
+  }
 }
 
 // Apply default language (EN) on load
