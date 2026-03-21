@@ -378,7 +378,13 @@ body{font-family:'Inter',Arial,sans-serif;font-size:13px;color:#1e2433;backgroun
         <div class="card-header">
           <div class="card-title" style="color:#e2e8f0" data-i18n="dbg_title">🔧 Debug — intermediate calculations</div>
         </div>
-        <div style="font-size:10px;color:#475569;margin-bottom:8px;min-height:16px" id="debugRowLabel"></div>
+        <!-- Row selector dropdown -->
+        <div style="margin-bottom:10px">
+          <select id="debugRowSelect" onchange="debugSelectRow(this.value)"
+            style="width:100%;padding:7px 10px;border:1.5px solid #1e3a5f;border-radius:8px;background:#0a1628;color:#94a3b8;font-size:11px;font-family:'Inter',sans-serif;cursor:pointer">
+            <option value="">— select measurement row —</option>
+          </select>
+        </div>
         <div class="dtab-row" id="debugTabs" style="display:none">
           <div class="dtab active" onclick="showTab('measured')" data-i18n="dbg_meas">Measurement</div>
           <div class="dtab" onclick="showTab('requested')" data-i18n="dbg_req">Ref. conditions</div>
@@ -1421,17 +1427,46 @@ function calcRow(id){
   try{
     const result=computeQo(row.data,p.Te,p.Tc,p.Tsuc,p.Tliq,fluid);
     row.result=result;row.result._fluid=fluid;row.result._stdKey=row.stdKey;
-    renderAllRows();showDebugForRow(id);
+    renderAllRows();updateDebugDropdown();showDebugForRow(id);
     setTimeout(()=>{const el=document.getElementById('mrow_'+id);if(el)el.scrollIntoView({behavior:'smooth',block:'nearest'});},80);
   }catch(e){showErrForRow(id,e);}
 }
 function calcAllMeas(){
   measRows.forEach(row=>{if(row.data)calcRow(row.id);});
 }
+function updateDebugDropdown(){
+  const sel=document.getElementById('debugRowSelect');
+  if(!sel) return;
+  const cur=sel.value;
+  const opts=measRows.filter(r=>r.result);
+  sel.innerHTML='<option value="">— select measurement row —</option>'
+    +opts.map(r=>{
+      const compId=r.data?(r.data.kitNo||r.data.compType||'Row #'+r.id):'Row #'+r.id;
+      const p=r.stdKey==='custom'?{label:'Custom',range:'—'}:(STANDARDS[r.stdKey]||{label:r.stdKey,range:''});
+      const qo=r.result?r.result.Qo.toFixed(2)+' W':'';
+      return '<option value="'+r.id+'"'+(String(r.id)===String(cur)?' selected':'')+'>'
+        +'#'+r.id+' '+compId+' · '+p.label+' '+p.range+(qo?' · '+qo:'')+'</option>';
+    }).join('');
+}
+
+function debugSelectRow(idStr){
+  if(!idStr) return;
+  showDebugForRow(parseInt(idStr,10));
+}
+
 function showDebugForRow(id){
   const row=measRows.find(r=>r.id===id);if(!row||!row.result||!row.data)return;
-  const p=STANDARDS[row.stdKey],fluid=row.result._fluid||row.data.refrigerant;
-  document.getElementById('debugRowLabel').textContent='Row #'+id+' · '+(row.data.kitNo||row.data.compType||'—')+' · '+(p?p.label+' '+p.range:row.stdKey);
+  const fluid=row.result._fluid||row.data.refrigerant;
+  let p;
+  if(row.stdKey==='custom'){
+    const c=row.custom||{Te:-35,Tc:40,Tsuc:20,Tliq:40};
+    p={Te:c.Te,Tc:c.Tc,Tsuc:c.Tsuc,Tliq:c.Tliq,label:'Custom',range:'—'};
+  } else {
+    p=STANDARDS[row.stdKey]||{Te:0,Tc:0,Tsuc:0,Tliq:0,label:row.stdKey,range:''};
+  }
+  // Sync dropdown
+  const sel=document.getElementById('debugRowSelect');
+  if(sel) sel.value=String(id);
   renderDebug(row.result,fluid,p.Te,p.Tc,p.Tsuc,p.Tliq,row.data);
 }
 function showErrForRow(id,e){
