@@ -228,6 +228,14 @@ body{font-family:'Inter',Arial,sans-serif;font-size:13px;color:#1e2433;backgroun
 .mrow-calc-btn{width:100%;padding:10px;background:linear-gradient(135deg,#2563eb,#1a4db5);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;margin-top:6px}
 .mrow-calc-btn:hover:not(:disabled){opacity:.9}
 .mrow-calc-btn:disabled{background:#b0bfd8;cursor:not-allowed}
+/* inline custom conditions per row */
+.mrow-custom{display:none;background:#f8faff;border:1.5px dashed #93b4f0;border-radius:9px;padding:10px 12px;margin:6px 0 4px}
+.mrow-custom.visible{display:block}
+.mrow-custom-title{font-size:9px;font-weight:700;color:#2563eb;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px}
+.mrow-custom .g5{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
+.mrow-custom label{font-size:9px;color:#7a8299;font-weight:700;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:3px}
+.mrow-custom input{width:100%;padding:6px 8px;border:1.5px solid #e4e9f4;border-radius:7px;font-size:11.5px;font-family:'Inter',sans-serif;background:#fff;color:#1e2433}
+.mrow-custom input:focus{outline:none;border-color:#2563eb}
 .meas-count-badge{font-size:10px;font-weight:700;padding:3px 9px;background:#eef3ff;border:1px solid #93c5fd;border-radius:6px;color:#2563eb}
 
 /* ── LANGUAGE SWITCHER ── */
@@ -337,28 +345,10 @@ body{font-family:'Inter',Arial,sans-serif;font-size:13px;color:#1e2433;backgroun
   <div class="main-layout">
     <div>
 
-      <!-- CARD 1: Standard selector (global) -->
+      <!-- CARD 1: Refrigerant (default) -->
       <div class="card">
         <div class="card-header">
           <div class="card-num">1</div>
-          <div class="card-title" data-i18n="c2_title">Standard and reference conditions</div>
-          <div class="card-hint" data-i18n="c2_hint">Selected per measurement row</div>
-        </div>
-        <div id="stdButtonsPanel"></div>
-        <div class="sec-label" data-i18n="c2_cond">Custom conditions</div>
-        <div class="g5">
-          <div class="f"><label>Te [°C]</label><input type="number" id="req_Te" value="-35" step="0.5" oninput="setStd('custom',true)"></div>
-          <div class="f"><label>Tc [°C]</label><input type="number" id="req_Tc" value="40" step="0.5" oninput="setStd('custom',true)"></div>
-          <div class="f"><label>Tamb [°C]</label><input type="number" id="req_Tamb" value="32" step="0.5" oninput="setStd('custom',true)"></div>
-          <div class="f"><label>Tsuc [°C]</label><input type="number" id="req_Tsuc" value="20" step="0.5" oninput="setStd('custom',true)"></div>
-          <div class="f"><label>Tliq [°C]</label><input type="number" id="req_Tliq" value="40" step="0.5" oninput="setStd('custom',true)"></div>
-        </div>
-      </div>
-
-      <!-- CARD 2: Refrigerant -->
-      <div class="card">
-        <div class="card-header">
-          <div class="card-num">2</div>
           <div class="card-title" data-i18n="c3_title">Refrigerant</div>
           <div class="card-hint" data-i18n="c3_hint">Auto-detected per row · editable</div>
         </div>
@@ -384,6 +374,16 @@ body{font-family:'Inter',Arial,sans-serif;font-size:13px;color:#1e2433;backgroun
             <input type="text" id="refrigerantCustom" placeholder="R448A, R452A…">
           </div>
         </div>
+      </div>
+
+      <!-- hidden: global refs needed by setStd() -->
+      <div style="display:none">
+        <input type="number" id="req_Te" value="-35">
+        <input type="number" id="req_Tc" value="40">
+        <input type="number" id="req_Tamb" value="32">
+        <input type="number" id="req_Tsuc" value="20">
+        <input type="number" id="req_Tliq" value="40">
+        <div id="stdButtonsPanel"></div>
       </div>
 
       <!-- MEASUREMENTS TOOLBAR -->
@@ -1309,12 +1309,28 @@ function buildRowHTML(row,num){
   const compId=d?(d.kitNo||d.compType||'—'):'—';
   const stdLabel=STANDARDS[row.stdKey]?STANDARDS[row.stdKey].label+' '+STANDARDS[row.stdKey].range:row.stdKey;
   const qoStr=r?r.Qo.toFixed(2)+' W':'';
-  const stdBtns=ALL_STD_KEYS.map(k=>{
-    const p=STANDARDS[k],isA=k===row.stdKey;
+  const isCustom=row.stdKey==='custom';
+
+  // Standard buttons including Custom
+  const stdBtns=ALL_STD_KEYS.concat(['custom']).map(k=>{
+    const p=STANDARDS[k]; if(!p) return '';
+    const isA=k===row.stdKey;
     const cls='mrow-std-btn'+(isA?' active':'');
     const onclick='setRowStd('+row.id+',"'+k+'")';
     return '<button class="'+cls+'" onclick="'+onclick+'">'+p.label+' '+p.range+'</button>';
   }).join('');
+
+  // Custom condition inputs (shown only when Custom is selected)
+  const cust=row.custom||{Te:-35,Tc:40,Tsuc:20,Tliq:40};
+  const customBlock='<div class="mrow-custom'+(isCustom?' visible':'')+'" id="mrow_cust_'+row.id+'">'
+    +'<div class="mrow-custom-title">Custom conditions</div>'
+    +'<div class="g5">'
+    +'<div><label>Te [°C]</label><input type="number" value="'+cust.Te+'" step="0.5" id="mrow_Te_'+row.id+'" oninput="updateRowCustom('+row.id+')"></div>'
+    +'<div><label>Tc [°C]</label><input type="number" value="'+cust.Tc+'" step="0.5" id="mrow_Tc_'+row.id+'" oninput="updateRowCustom('+row.id+')"></div>'
+    +'<div><label>Tsuc [°C]</label><input type="number" value="'+cust.Tsuc+'" step="0.5" id="mrow_Tsuc_'+row.id+'" oninput="updateRowCustom('+row.id+')"></div>'
+    +'<div><label>Tliq [°C]</label><input type="number" value="'+cust.Tliq+'" step="0.5" id="mrow_Tliq_'+row.id+'" oninput="updateRowCustom('+row.id+')"></div>'
+    +'</div></div>';
+
   let tags='';
   if(d){
     tags='<div class="mrow-parsed-tags">'
@@ -1354,6 +1370,7 @@ function buildRowHTML(row,num){
     +'</div>'
     +tags
     +'<div class="mrow-std-sel"><span class="mrow-std-lbl">Standard:</span>'+stdBtns+'</div>'
+    +customBlock
     +'<button class="mrow-calc-btn" onclick="calcRow('+row.id+')"'+(d?'':' disabled')+'>🧮 Calculate — '+stdLabel+'</button>'
     +resultHtml
     +'</div>'
@@ -1364,20 +1381,51 @@ function toggleRowBody(id){
   const b=document.getElementById('mrow_body_'+id);
   if(b) b.style.display=b.style.display==='none'?'':'none';
 }
+
+function updateRowCustom(id){
+  const row=measRows.find(r=>r.id===id);if(!row)return;
+  row.custom={
+    Te: parseFloat(document.getElementById('mrow_Te_'+id)?.value)||0,
+    Tc: parseFloat(document.getElementById('mrow_Tc_'+id)?.value)||0,
+    Tsuc: parseFloat(document.getElementById('mrow_Tsuc_'+id)?.value)||0,
+    Tliq: parseFloat(document.getElementById('mrow_Tliq_'+id)?.value)||0
+  };
+}
+
+function setRowStd(id,stdKey){
+  const row=measRows.find(r=>r.id===id);if(!row)return;
+  row.stdKey=stdKey;row.result=null;
+  // Show/hide custom block without full re-render
+  const custBlock=document.getElementById('mrow_cust_'+id);
+  if(custBlock) custBlock.className='mrow-custom'+(stdKey==='custom'?' visible':'');
+  // Update active button
+  const body=document.getElementById('mrow_body_'+id);
+  if(body) body.querySelectorAll('.mrow-std-btn').forEach(btn=>{
+    btn.classList.toggle('active', btn.textContent.trim()===(STANDARDS[stdKey]?.label+' '+STANDARDS[stdKey]?.range)||false);
+  });
+  // Re-render just this row to update calc button label
+  renderAllRows();
+}
 function parseRowPaste(id){
   const ta=document.getElementById('mrow_ta_'+id);if(!ta)return;
   const raw=ta.value.trim();if(!raw)return;
   const row=measRows.find(r=>r.id===id);if(!row)return;
   row.data=parseRowCols(raw);row.result=null;renderAllRows();
 }
-function setRowStd(id,stdKey){
-  const row=measRows.find(r=>r.id===id);if(!row)return;
-  row.stdKey=stdKey;row.result=null;renderAllRows();
-}
+
 function calcRow(id){
   const row=measRows.find(r=>r.id===id);if(!row||!row.data)return;
   const fluid=document.getElementById('refrigerantCustom').value.trim()||row.data.refrigerant||document.getElementById('refrigerant').value;
-  const p=STANDARDS[row.stdKey];if(!p){alert('Unknown standard: '+row.stdKey);return;}
+  let p;
+  if(row.stdKey==='custom'){
+    // Use per-row custom values (read live from inputs)
+    updateRowCustom(id);
+    const c=row.custom||{Te:-35,Tc:40,Tsuc:20,Tliq:40};
+    p={Te:c.Te,Tc:c.Tc,Tsuc:c.Tsuc,Tliq:c.Tliq,label:'Custom',range:'—'};
+  } else {
+    p=STANDARDS[row.stdKey];
+    if(!p){alert('Unknown standard: '+row.stdKey);return;}
+  }
   try{
     const result=computeQo(row.data,p.Te,p.Tc,p.Tsuc,p.Tliq,fluid);
     row.result=result;row.result._fluid=fluid;row.result._stdKey=row.stdKey;
