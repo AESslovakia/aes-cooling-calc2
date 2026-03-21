@@ -3,12 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>AES — Cooling Capacity Calculator for condensing units</title>
+<title>AES — Chladiaci Okruh Analyzátor v1.0</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',Arial,sans-serif;font-size:13px;color:#1e2433;background:#f0f3f9;padding:16px;min-height:100vh}
 
+/* ── PIN ── */
 #pinScreen{position:fixed;inset:0;background:linear-gradient(135deg,#0a1628 0%,#0d1f3c 60%,#122a52 100%);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px}
 .pin-box{background:#fff;border-radius:20px;padding:40px 44px;width:100%;max-width:380px;box-shadow:0 24px 80px rgba(0,0,0,.5);text-align:center}
 .pin-logo{width:70px;height:70px;background:linear-gradient(135deg,#0d1f3c,#1a4db5);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:28px}
@@ -24,7 +25,8 @@ body{font-family:'Inter',Arial,sans-serif;font-size:13px;color:#1e2433;backgroun
 .pin-btn.wide{grid-column:2/-1}
 .pin-err{color:#E24B4A;font-size:12px;font-weight:600;min-height:18px;margin-top:4px}
 
-.app{max-width:1380px;margin:0 auto}
+/* ── APP LAYOUT ── */
+.app{max-width:1420px;margin:0 auto}
 .topbar{background:linear-gradient(135deg,#0a1628 0%,#0d1f3c 60%,#122a52 100%);border-radius:14px;margin-bottom:18px;overflow:hidden;display:flex;align-items:stretch;box-shadow:0 4px 24px rgba(13,31,60,.25)}
 .tb-logo{width:86px;flex-shrink:0;background:#fff;display:flex;align-items:center;justify-content:center;padding:10px;border-radius:10px 0 0 10px}
 .tb-logo-inner{width:58px;height:58px;background:linear-gradient(135deg,#0d1f3c,#1a4db5);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;font-weight:800}
@@ -36,91 +38,135 @@ body{font-family:'Inter',Arial,sans-serif;font-size:13px;color:#1e2433;backgroun
 .st-ok{background:rgba(16,185,129,.15);color:#34d399;border-color:rgba(16,185,129,.35)}
 .st-warn{background:rgba(234,179,8,.15);color:#fbbf24;border-color:rgba(234,179,8,.35)}
 .st-dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0}
+.tb-edit-btn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:7px;padding:5px 10px;font-size:10px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;white-space:nowrap;flex-shrink:0}
+.tb-edit-btn:hover{background:rgba(255,255,255,.22)}
+.admin-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;background:rgba(234,179,8,.15);border:1px solid rgba(234,179,8,.4);border-radius:5px;font-size:9.5px;font-weight:700;color:#fbbf24;font-family:'Inter',sans-serif;flex-shrink:0}
 
-.main-layout{display:grid;grid-template-columns:1fr 400px;gap:14px;align-items:start}
-@media(max-width:960px){.main-layout{grid-template-columns:1fr}}
+/* ── LANG BAR ── */
+.lang-bar{display:flex;align-items:center;justify-content:flex-end;gap:6px;margin-bottom:12px}
+.lang-label{font-size:9px;font-weight:700;color:#94a3b8;letter-spacing:1.5px;text-transform:uppercase;margin-right:4px}
+.lang-btn{display:flex;align-items:center;gap:5px;padding:5px 12px;border:1.5px solid #e4e9f4;border-radius:8px;background:#fafbfd;cursor:pointer;font-size:11px;font-weight:700;color:#7a8299;font-family:'Inter',sans-serif;transition:all .15s;white-space:nowrap}
+.lang-btn:hover{border-color:#93b4f0;background:#f0f5ff;color:#2563eb}
+.lang-btn.active{border-color:#2563eb;background:#eef3ff;color:#2563eb;box-shadow:0 0 0 2px rgba(37,99,235,.12)}
 
+/* ── CARDS ── */
 .card{background:#fff;border:1px solid #e4e9f4;border-radius:12px;padding:18px 22px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.04)}
 .card-header{display:flex;align-items:center;gap:9px;margin-bottom:14px;padding-bottom:11px;border-bottom:1px solid #f0f3f9}
 .card-num{width:26px;height:26px;background:linear-gradient(135deg,#2563eb,#1a4db5);color:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.card-num.green{background:linear-gradient(135deg,#059669,#047857)}
+.card-num.orange{background:linear-gradient(135deg,#ea580c,#c2410c)}
+.card-num.purple{background:linear-gradient(135deg,#7c3aed,#5b21b6)}
 .card-title{font-size:13.5px;font-weight:700;color:#0d1f3c}
 .card-hint{font-size:9.5px;color:#9aa3b8;margin-left:auto;padding:3px 8px;background:#f8faff;border:1px solid #e4e9f4;border-radius:5px;white-space:nowrap}
 
+/* ── MAIN GRID ── */
+.main-layout{display:grid;grid-template-columns:1fr 460px;gap:14px;align-items:start}
+@media(max-width:1000px){.main-layout{grid-template-columns:1fr}}
+
+/* ── FORM ELEMENTS ── */
 .f{display:flex;flex-direction:column;gap:4px}
 .f label{font-size:9.5px;color:#7a8299;font-weight:700;text-transform:uppercase;letter-spacing:.6px}
-.f input,.f select,.f textarea{width:100%;padding:8px 10px;border:1.5px solid #e4e9f4;border-radius:8px;font-size:12px;color:#1e2433;font-family:'Inter',sans-serif;background:#fafbfd;transition:border-color .15s,box-shadow .15s}
-.f input:focus,.f select:focus,.f textarea:focus{outline:none;border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.1);background:#fff}
-.f textarea{resize:vertical;min-height:68px;line-height:1.5;font-size:11px}
+.f input,.f select{width:100%;padding:8px 10px;border:1.5px solid #e4e9f4;border-radius:8px;font-size:12px;color:#1e2433;font-family:'Inter',sans-serif;background:#fafbfd;transition:border-color .15s,box-shadow .15s}
+.f input:focus,.f select:focus{outline:none;border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.1);background:#fff}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.g5{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px}
 .sec-label{font-size:9px;font-weight:700;color:#2563eb;letter-spacing:2px;text-transform:uppercase;margin:14px 0 8px;display:flex;align-items:center;gap:8px}
 .sec-label::after{content:'';flex:1;height:1px;background:#e4e9f4}
+.sec-label.green{color:#059669}
+.sec-label.orange{color:#ea580c}
+.sec-label.purple{color:#7c3aed}
+.sec-label.gray{color:#6b7280}
 
-.parse-row{display:flex;gap:8px;margin-top:8px}
-.parse-btn{padding:8px 18px;background:linear-gradient(135deg,#2563eb,#1a4db5);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s}
-.parse-btn:hover{opacity:.9;transform:translateY(-1px)}
-.clear-btn{padding:8px 14px;background:#fff;border:1.5px solid #e4e9f4;color:#7a8299;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s}
-.clear-btn:hover{border-color:#E24B4A;color:#E24B4A}
+/* ── BLOCK DIAGRAM ── */
+.circuit-svg-wrap{background:#f8faff;border:1.5px solid #e4e9f4;border-radius:10px;overflow:hidden;margin-bottom:16px}
+.circuit-svg-wrap svg{display:block;width:100%;height:auto}
 
-.parsed-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:6px}
-.pv{background:#f8faff;border:1px solid #e4e9f4;border-radius:8px;padding:7px 10px}
-.pv-label{font-size:8.5px;color:#9aa3b8;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
-.pv-val{font-size:13px;font-weight:700;color:#0d1f3c}
-.pv.ok{border-color:#6ee7b7;background:#f0fdf8}
-.pv.bold .pv-val{color:#2563eb;font-size:14px}
-.pv.warn{border-color:#fcd34d;background:#fffbeb}
+/* ── POINT INPUT PANELS ── */
+.pt-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.pt-panel{background:#fafbfd;border:1.5px solid #e4e9f4;border-radius:10px;padding:12px 14px}
+.pt-panel.pt1{border-color:#93c5fd;background:#eff6ff}
+.pt-panel.pt2{border-color:#fca5a5;background:#fff1f2}
+.pt-panel.pt3{border-color:#6ee7b7;background:#ecfdf5}
+.pt-panel.pt4{border-color:#c4b5fd;background:#f5f3ff}
+.pt-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.pt-circle{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;color:#fff}
+.pt-circle.c1{background:#2563eb}
+.pt-circle.c2{background:#dc2626}
+.pt-circle.c3{background:#059669}
+.pt-circle.c4{background:#7c3aed}
+.pt-name{font-size:11px;font-weight:700;color:#0d1f3c}
+.pt-sub{font-size:9px;color:#9aa3b8}
 
-.std-family{margin-bottom:12px}
-.std-family-label{font-size:9px;font-weight:700;color:#7a8299;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:7px}
-.std-row{display:flex;gap:6px;flex-wrap:wrap}
-.std-btn{padding:8px 12px;border:1.5px solid #e4e9f4;border-radius:9px;cursor:pointer;transition:all .15s;background:#fafbfd;user-select:none;text-align:center;min-width:88px}
-.std-btn:hover{border-color:#93b4f0;background:#f0f5ff}
-.std-btn.active{border-color:#2563eb;background:#eef3ff;box-shadow:0 0 0 3px rgba(37,99,235,.1)}
-.std-name{font-size:10.5px;font-weight:700;color:#0d1f3c;line-height:1.2}
-.std-sub{font-size:8.5px;color:#9aa3b8;margin-top:2px}
-.std-btn.active .std-name{color:#2563eb}
-
+/* ── BUTTONS ── */
 .calc-btn{width:100%;padding:15px;background:linear-gradient(135deg,#2563eb,#1a4db5);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:12px;font-family:'Inter',sans-serif;box-shadow:0 4px 16px rgba(37,99,235,.3);transition:all .2s}
 .calc-btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 20px rgba(37,99,235,.4)}
 .calc-btn:disabled{background:#b0bfd8;cursor:not-allowed;transform:none;box-shadow:none}
-.calc-btn.all{background:linear-gradient(135deg,#7c3aed,#5b21b6)}
-.calc-btn.all:hover:not(:disabled){box-shadow:0 6px 20px rgba(124,58,237,.4)}
+.reset-btn{width:100%;padding:10px;background:#fff;border:1.5px solid #e4e9f4;color:#7a8299;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s}
+.reset-btn:hover{border-color:#E24B4A;color:#E24B4A}
 
-.result-card{border-color:#a7f3d0}
-.result-main{text-align:center;padding:18px 0 14px;border-bottom:1px solid #f0f3f9;margin-bottom:14px}
-.res-label{font-size:10px;color:#9aa3b8;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
-.res-big{font-size:46px;font-weight:800;color:#059669;line-height:1;letter-spacing:-1px}
-.res-unit{font-size:18px;font-weight:600;color:#6ee7b7;margin-left:3px}
-.result-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
-.ri{background:#f8faff;border:1px solid #e4e9f4;border-radius:9px;padding:11px;text-align:center}
-.ri-lbl{font-size:8.5px;color:#9aa3b8;font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px}
-.ri-val{font-size:17px;font-weight:700;color:#0d1f3c}
-.ri-u{font-size:9.5px;color:#9aa3b8}
-.ri.hl{border-color:#93c5fd;background:#eff6ff}
-.ri.hl .ri-val{color:#2563eb}
+/* ── RESULTS ── */
+.res-state-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.res-state-pt{border-radius:9px;padding:11px 12px}
+.rs1{background:#eff6ff;border:1px solid #93c5fd}
+.rs2{background:#fff1f2;border:1px solid #fca5a5}
+.rs3{background:#ecfdf5;border:1px solid #6ee7b7}
+.rs4{background:#f5f3ff;border:1px solid #c4b5fd}
+.rs-ptnum{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
+.rs1 .rs-ptnum{color:#2563eb}
+.rs2 .rs-ptnum{color:#dc2626}
+.rs3 .rs-ptnum{color:#059669}
+.rs4 .rs-ptnum{color:#7c3aed}
+.rs-row{display:flex;justify-content:space-between;align-items:baseline;font-size:11px;color:#4b5563;padding:1px 0}
+.rs-val{font-weight:700;color:#0d1f3c;font-size:11.5px}
 
-.comp-wrap{overflow-x:auto;margin-top:4px}
-.comp-table{width:100%;border-collapse:collapse;font-size:11.5px}
-.comp-table th{background:#0d1f3c;color:#fff;padding:8px 10px;text-align:left;font-size:9.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap}
-.comp-table th:first-child{border-radius:8px 0 0 0}
-.comp-table th:last-child{border-radius:0 8px 0 0;text-align:right}
-.comp-table td{padding:7px 10px;border-bottom:1px solid #f0f3f9;vertical-align:middle}
-.comp-table tr:last-child td{border-bottom:none}
-.comp-table tr:hover td{background:#fafbfd}
-.comp-table tr.sel td{background:#eff6ff}
-.comp-table tr.sel td:first-child{border-left:3px solid #2563eb}
-.nb{font-size:8px;font-weight:700;padding:2px 6px;border-radius:4px;text-transform:uppercase;white-space:nowrap}
-.nb-en{background:#dbeafe;color:#1e40af}
-.nb-cc{background:#f3e8ff;color:#5b21b6}
-.nb-ash{background:#dcfce7;color:#14532d}
-.nb-ari{background:#fef3c7;color:#92400e}
-.qv{font-weight:700;font-size:13px;color:#059669}
-.dv{font-size:11px;color:#9aa3b8}
-.dv.pos{color:#059669}.dv.neg{color:#dc2626}
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.kpi{background:#f8faff;border:1px solid #e4e9f4;border-radius:9px;padding:11px;text-align:center}
+.kpi.hl-blue{border-color:#93c5fd;background:#eff6ff}
+.kpi.hl-green{border-color:#6ee7b7;background:#ecfdf5}
+.kpi.hl-orange{border-color:#fed7aa;background:#fff7ed}
+.kpi-lbl{font-size:8.5px;color:#9aa3b8;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.kpi-val{font-size:18px;font-weight:800;color:#0d1f3c}
+.kpi-u{font-size:9.5px;color:#9aa3b8;margin-left:2px}
+.kpi.hl-blue .kpi-val{color:#2563eb}
+.kpi.hl-green .kpi-val{color:#059669}
+.kpi.hl-orange .kpi-val{color:#ea580c}
 
-/* ── STANDARDS EDITOR MODAL ── */
+.extra-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.ev{background:#f8faff;border:1px solid #e4e9f4;border-radius:8px;padding:9px 11px;display:flex;justify-content:space-between;align-items:center}
+.ev-lbl{font-size:10px;color:#7a8299;font-weight:600}
+.ev-val{font-size:12px;font-weight:700;color:#0d1f3c}
+.ev-u{font-size:9px;color:#9aa3b8}
+
+/* ── P-H DIAGRAM ── */
+.ph-wrap{background:#fafbfd;border:1.5px solid #e4e9f4;border-radius:10px;overflow:hidden;min-height:200px;display:flex;align-items:center;justify-content:center}
+.ph-placeholder{text-align:center;color:#9aa3b8;padding:40px 20px}
+.ph-placeholder .ph-icon{font-size:40px;margin-bottom:10px}
+.ph-placeholder p{font-size:12px}
+
+/* ── DIAGNOSTICS ── */
+.diag-empty{text-align:center;padding:30px;color:#9aa3b8}
+.diag-empty span{font-size:32px;display:block;margin-bottom:8px}
+.fault-item{border-radius:10px;padding:12px 14px;margin-bottom:8px;border:1.5px solid}
+.fault-critical{background:#fff1f2;border-color:#fca5a5}
+.fault-warning{background:#fffbeb;border-color:#fcd34d}
+.fault-info{background:#f0fdf4;border-color:#a7f3d0}
+.fault-ok{background:#f0fdf4;border-color:#6ee7b7}
+.fault-head{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.fault-badge{font-size:8px;font-weight:700;letter-spacing:1px;padding:2px 7px;border-radius:4px;text-transform:uppercase}
+.fb-critical{background:#fca5a5;color:#7f1d1d}
+.fb-warning{background:#fde68a;color:#78350f}
+.fb-info{background:#a7f3d0;color:#064e3b}
+.fault-name{font-size:12px;font-weight:700;color:#0d1f3c}
+.fault-conf{font-size:9px;color:#9aa3b8;margin-left:auto;font-weight:600}
+.fault-desc{font-size:11px;color:#4b5563;margin-bottom:6px;line-height:1.5}
+.fault-causes{font-size:10px;color:#6b7280;margin-bottom:4px}
+.fault-causes strong{color:#4b5563}
+.fault-action{display:inline-block;font-size:9.5px;background:#fff;border:1px solid #e4e9f4;border-radius:5px;padding:2px 8px;margin:2px 2px 2px 0;color:#2563eb;font-weight:600}
+
+/* ── MODAL ── */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(3px)}
-.modal-box{background:#fff;border-radius:16px;width:100%;max-width:860px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,.4);overflow:hidden}
+.modal-box{background:#fff;border-radius:16px;width:100%;max-width:500px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,.4);overflow:hidden}
 .modal-head{display:flex;align-items:center;gap:10px;padding:18px 22px;border-bottom:1px solid #f0f3f9;flex-shrink:0}
 .modal-head-icon{width:34px;height:34px;background:linear-gradient(135deg,#2563eb,#1a4db5);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
 .modal-title{font-size:15px;font-weight:700;color:#0d1f3c;flex:1}
@@ -128,146 +174,44 @@ body{font-family:'Inter',Arial,sans-serif;font-size:13px;color:#1e2433;backgroun
 .modal-close:hover{background:#fee2e2;color:#E24B4A}
 .modal-body{flex:1;overflow-y:auto;padding:18px 22px}
 .modal-foot{padding:14px 22px;border-top:1px solid #f0f3f9;display:flex;gap:8px;align-items:center;flex-shrink:0;background:#fafbfd}
-.std-editor-table{width:100%;border-collapse:collapse;font-size:12px}
-.std-editor-table th{background:#0d1f3c;color:#fff;padding:8px 9px;text-align:left;font-size:9.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;white-space:nowrap}
-.std-editor-table th:first-child{border-radius:7px 0 0 0}
-.std-editor-table th:last-child{border-radius:0 7px 0 0;text-align:center}
-.std-editor-table td{padding:4px 5px;border-bottom:1px solid #f0f3f9;vertical-align:middle}
-.std-editor-table tr.custom-row td{background:#f8faff}
-.std-editor-table tr.new-row td{background:#f0fdf8}
-.std-editor-table input[type=text],.std-editor-table input[type=number]{width:100%;padding:5px 7px;border:1.5px solid #e4e9f4;border-radius:6px;font-size:11.5px;font-family:'Inter',sans-serif;background:#fff;color:#1e2433}
-.std-editor-table input:focus{outline:none;border-color:#2563eb}
-.std-editor-table input.narrow{max-width:70px}
-.ed-del{background:none;border:none;color:#ccc;cursor:pointer;font-size:16px;padding:2px 5px;transition:color .15s;display:block;margin:auto}
-.ed-del:hover{color:#E24B4A}
-.ed-del:disabled{opacity:.3;cursor:not-allowed}
-.add-std-btn{padding:8px 16px;background:linear-gradient(135deg,#2563eb,#1a4db5);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s}
-.add-std-btn:hover{opacity:.9}
-.save-std-btn{padding:8px 20px;background:linear-gradient(135deg,#059669,#047857);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;margin-left:auto}
-.save-std-btn:hover{opacity:.9}
-.cancel-std-btn{padding:8px 16px;background:#fff;border:1.5px solid #e4e9f4;color:#7a8299;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif}
-.cancel-std-btn:hover{border-color:#E24B4A;color:#E24B4A}
-.edit-stds-btn{display:flex;align-items:center;gap:6px;padding:6px 14px;border:1.5px solid #e4e9f4;border-radius:8px;background:#fafbfd;font-size:11px;font-weight:700;color:#2563eb;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;white-space:nowrap}
-.edit-stds-btn:hover{background:#eef3ff;border-color:#2563eb}
+.save-btn{padding:8px 20px;background:linear-gradient(135deg,#059669,#047857);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;margin-left:auto}
+.cancel-btn{padding:8px 16px;background:#fff;border:1.5px solid #e4e9f4;color:#7a8299;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif}
+.cancel-btn:hover{border-color:#E24B4A;color:#E24B4A}
+.logo-upload-area{width:80px;height:80px;border:2px dashed #93b4f0;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;background:#f8faff;flex-shrink:0}
+.logo-upload-area:hover{border-color:#2563eb;background:#eef3ff}
+.lu-hint{font-size:9px;color:#9aa3b8;text-align:center;padding:4px;line-height:1.3}
 
+/* ── INFO BAR ── */
 .info-bar{background:#0d1f3c;border:1px solid #1e3a5f;border-radius:10px;padding:10px 16px;margin-bottom:14px;font-size:11px;color:#94a3b8;display:flex;align-items:center;gap:10px;line-height:1.5}
 .info-bar strong{color:#7dd3fc}
-.info-bar code{background:#0a1628;padding:1px 5px;border-radius:3px;color:#34d399;font-size:10px}
+.info-ok{background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);border-radius:10px;padding:9px 14px;margin-bottom:14px;font-size:11px;color:#065f46;display:flex;align-items:center;gap:8px}
 
-.debug-card{background:#0d1f3c;border-color:#1a3254}
-.debug-card .card-header{border-bottom-color:#1a3254}
-.debug-card .card-title{color:#e2e8f0}
-.dtab-row{display:flex;gap:5px;margin-bottom:14px;flex-wrap:wrap}
-.dtab{padding:5px 11px;border-radius:7px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid #1e3a5f;color:#64748b;background:#0a1628;transition:all .15s}
-.dtab:hover{color:#94a3b8;border-color:#2563eb}
-.dtab.active{background:#1e3a5f;border-color:#3b82f6;color:#7dd3fc}
-.dcontent{display:none}
-.dcontent.active{display:block}
-.dsect{font-size:8px;font-weight:700;color:#3b82f6;letter-spacing:2px;text-transform:uppercase;margin:10px 0 6px;padding-bottom:4px;border-bottom:1px solid #1e3a5f}
-.drow{display:flex;justify-content:space-between;align-items:baseline;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04)}
-.drow:last-child{border-bottom:none}
-.dk{font-size:10px;color:#94a3b8;flex:1}
-.dv2{font-size:11px;font-weight:700;color:#7dd3fc;font-variant-numeric:tabular-nums;min-width:90px;text-align:right}
-.du{font-size:9px;color:#475569;margin-left:4px;min-width:26px}
-.cf-box{background:#0a1628;border:1px solid #1e3a5f;border-radius:8px;padding:10px 12px;margin:6px 0;display:flex;align-items:center;gap:10px}
-.cf-key{font-size:10px;color:#94a3b8;flex:1}
-.cf-val{font-size:14px;font-weight:800;color:#fbbf24;font-variant-numeric:tabular-nums}
-.dres{background:#0a1628;border:1px solid #1e3a5f;border-radius:10px;padding:14px;text-align:center;margin-top:10px}
-.dres-lbl{font-size:9px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
-.dres-val{font-size:26px;font-weight:800;color:#10b981}
-.dph{color:#475569;font-size:12px;text-align:center;padding:30px 10px;line-height:1.8}
+/* ── LEGEND ── */
+.ph-legend{display:flex;gap:14px;flex-wrap:wrap;padding:8px 12px;font-size:10px;color:#7a8299;border-top:1px solid #e4e9f4}
+.ph-leg-item{display:flex;align-items:center;gap:5px}
+.ph-leg-line{width:20px;height:3px;border-radius:2px}
 
-.cond-mini{margin-top:10px}
-.cond-mini input{width:100%;padding:7px 10px;border:1.5px dashed #93b4f0;border-radius:8px;font-size:11px;color:#1e2433;font-family:'Inter',sans-serif;background:#f8faff}
-.cond-mini input:focus{outline:none;border-color:#2563eb;border-style:solid}
-.acc-note{font-size:9.5px;color:#9aa3b8;background:#f8faff;border:1px solid #e4e9f4;border-radius:6px;padding:6px 10px;margin-top:6px;line-height:1.5}
-.acc-note strong{color:#2563eb}
-
-/* ── MULTI-MEASUREMENT ── */
-.meas-toolbar{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap}
-.add-meas-btn{display:flex;align-items:center;gap:6px;padding:9px 18px;background:linear-gradient(135deg,#2563eb,#1a4db5);color:#fff;border:none;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;box-shadow:0 2px 8px rgba(37,99,235,.25)}
-.add-meas-btn:hover{opacity:.9;transform:translateY(-1px)}
-.clear-all-btn{padding:9px 16px;background:#fff;border:1.5px solid #e4e9f4;color:#7a8299;border-radius:9px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s}
-.clear-all-btn:hover{border-color:#E24B4A;color:#E24B4A}
-.calc-all-meas-btn{display:flex;align-items:center;gap:6px;padding:9px 18px;background:linear-gradient(135deg,#059669,#047857);color:#fff;border:none;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;margin-left:auto;box-shadow:0 2px 8px rgba(5,150,105,.25)}
-.calc-all-meas-btn:hover{opacity:.9;transform:translateY(-1px)}
-.calc-all-meas-btn:disabled{background:#b0bfd8;cursor:not-allowed;transform:none;box-shadow:none}
-.export-word-btn{display:flex;align-items:center;gap:6px;padding:9px 16px;background:linear-gradient(135deg,#0d1f3c,#1a3254);color:#7dd3fc;border:1.5px solid #1e3a5f;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;white-space:nowrap}
-.export-word-btn:hover:not(:disabled){background:linear-gradient(135deg,#122a52,#1e3a5f);border-color:#3b82f6}
-.export-word-btn:disabled{opacity:.4;cursor:not-allowed}
-
-/* Measurement row card */
-.mrow-card{background:#fff;border:1.5px solid #e4e9f4;border-radius:12px;margin-bottom:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.04);transition:border-color .15s}
-.mrow-card.has-result{border-color:#6ee7b7}
-.mrow-card.has-error{border-color:#fca5a5}
-.mrow-head{display:flex;align-items:center;gap:10px;padding:11px 16px;background:#f8faff;border-bottom:1px solid #f0f3f9;cursor:pointer;user-select:none}
-.mrow-num{width:24px;height:24px;background:linear-gradient(135deg,#2563eb,#1a4db5);color:#fff;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
-.mrow-id{font-size:12px;font-weight:700;color:#0d1f3c;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.mrow-std-badge{font-size:9px;font-weight:700;padding:2px 8px;border-radius:5px;background:#eef3ff;color:#2563eb;border:1px solid #93c5fd;white-space:nowrap;flex-shrink:0}
-.mrow-qo{font-size:12px;font-weight:800;color:#059669;white-space:nowrap;flex-shrink:0;min-width:70px;text-align:right}
-.mrow-del{background:none;border:none;color:#ccc;cursor:pointer;font-size:16px;padding:0 3px;transition:color .15s;flex-shrink:0}
-.mrow-del:hover{color:#E24B4A}
-.mrow-body{padding:14px 16px}
-.mrow-paste-row{display:flex;gap:7px;margin-bottom:10px}
-.mrow-paste{flex:1;padding:8px 10px;border:1.5px dashed #93b4f0;border-radius:8px;font-size:11px;color:#1e2433;font-family:'Inter',sans-serif;background:#f8faff;resize:none;height:44px;line-height:1.4}
-.mrow-paste:focus{outline:none;border-color:#2563eb;border-style:solid;background:#fff}
-.mrow-parse-btn{padding:8px 14px;background:linear-gradient(135deg,#2563eb,#1a4db5);color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap}
-.mrow-std-sel{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;align-items:center}
-.mrow-std-lbl{font-size:9px;font-weight:700;color:#7a8299;text-transform:uppercase;letter-spacing:1px;margin-right:3px;white-space:nowrap}
-.mrow-std-btn{padding:5px 10px;border:1.5px solid #e4e9f4;border-radius:7px;cursor:pointer;background:#fafbfd;font-size:10px;font-weight:700;color:#7a8299;transition:all .12s;white-space:nowrap}
-.mrow-std-btn:hover{border-color:#93b4f0;background:#f0f5ff;color:#2563eb}
-.mrow-std-btn.active{border-color:#2563eb;background:#eef3ff;color:#2563eb;box-shadow:0 0 0 2px rgba(37,99,235,.12)}
-.mrow-result{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:7px;margin-top:8px}
-.mrow-ri{background:#f8faff;border:1px solid #e4e9f4;border-radius:8px;padding:8px 10px;text-align:center}
-.mrow-ri.hl{border-color:#6ee7b7;background:#f0fdf8}
-.mrow-ri-lbl{font-size:8px;color:#9aa3b8;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
-.mrow-ri-val{font-size:16px;font-weight:800;color:#0d1f3c}
-.mrow-ri.hl .mrow-ri-val{color:#059669}
-.mrow-ri-u{font-size:9px;color:#9aa3b8}
-.mrow-parsed-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
-.mrow-tag{font-size:9.5px;background:#f0fdf8;border:1px solid #6ee7b7;border-radius:5px;padding:2px 7px;color:#065f46;font-weight:600}
-.mrow-tag.warn{background:#fffbeb;border-color:#fcd34d;color:#92400e}
-.mrow-err{font-size:11px;color:#f87171;padding:8px;background:#fef2f2;border-radius:7px;margin-top:6px}
-.mrow-calc-btn{width:100%;padding:10px;background:linear-gradient(135deg,#2563eb,#1a4db5);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;margin-top:6px}
-.mrow-calc-btn:hover:not(:disabled){opacity:.9}
-.mrow-calc-btn:disabled{background:#b0bfd8;cursor:not-allowed}
-/* inline custom conditions per row */
-.mrow-custom{display:none;background:#f8faff;border:1.5px dashed #93b4f0;border-radius:9px;padding:10px 12px;margin:6px 0 4px}
-.mrow-custom.visible{display:block}
-.mrow-custom-title{font-size:9px;font-weight:700;color:#2563eb;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px}
-.mrow-custom .g5{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
-.mrow-custom label{font-size:9px;color:#7a8299;font-weight:700;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:3px}
-.mrow-custom input{width:100%;padding:6px 8px;border:1.5px solid #e4e9f4;border-radius:7px;font-size:11.5px;font-family:'Inter',sans-serif;background:#fff;color:#1e2433}
-.mrow-custom input:focus{outline:none;border-color:#2563eb}
-/* Set values strip */
-.mrow-setvals{display:flex;flex-wrap:wrap;gap:5px;margin:4px 0 8px;padding:8px 10px;background:#fffbeb;border:1.5px solid #fcd34d;border-radius:8px}
-.mrow-setvals-title{font-size:8.5px;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:1px;width:100%;margin-bottom:4px}
-.sv-tag{font-size:10.5px;background:#fff;border:1px solid #fde68a;border-radius:5px;padding:3px 8px;color:#78350f;font-weight:600}
-.sv-tag span{font-size:8.5px;color:#b45309;font-weight:700;text-transform:uppercase;margin-right:3px}
-/* Measured values strip — teal */
-.mrow-measvals{display:flex;flex-wrap:wrap;gap:5px;margin:4px 0 8px;padding:8px 10px;background:#ecfdf5;border:1.5px solid #6ee7b7;border-radius:8px}
-.mrow-measvals-title{font-size:8.5px;font-weight:700;color:#065f46;text-transform:uppercase;letter-spacing:1px;width:100%;margin-bottom:4px}
-.mv-tag{font-size:10.5px;background:#fff;border:1px solid #a7f3d0;border-radius:5px;padding:3px 8px;color:#065f46;font-weight:600}
-.mv-tag span{font-size:8.5px;color:#059669;font-weight:700;text-transform:uppercase;margin-right:3px}
-.meas-count-badge{font-size:10px;font-weight:700;padding:3px 9px;background:#eef3ff;border:1px solid #93c5fd;border-radius:6px;color:#2563eb}
-
-/* ── LANGUAGE SWITCHER ── */
-.lang-bar{display:flex;align-items:center;justify-content:flex-end;gap:6px;margin-bottom:12px}
-.lang-label{font-size:9px;font-weight:700;color:#94a3b8;letter-spacing:1.5px;text-transform:uppercase;margin-right:4px}
-.lang-btn{display:flex;align-items:center;gap:5px;padding:5px 12px;border:1.5px solid #e4e9f4;border-radius:8px;background:#fafbfd;cursor:pointer;font-size:11px;font-weight:700;color:#7a8299;font-family:'Inter',sans-serif;transition:all .15s;white-space:nowrap}
-.lang-btn:hover{border-color:#93b4f0;background:#f0f5ff;color:#2563eb}
-.lang-btn.active{border-color:#2563eb;background:#eef3ff;color:#2563eb;box-shadow:0 0 0 2px rgba(37,99,235,.12)}
-.lang-flag{font-size:14px;line-height:1}
+/* ── COMPACT RESULT TABLE ── */
+.res-table{width:100%;border-collapse:collapse;font-size:11.5px;margin-bottom:10px}
+.res-table th{background:#f0f3f9;color:#7a8299;font-weight:700;font-size:9px;text-transform:uppercase;letter-spacing:.5px;padding:6px 10px;text-align:left}
+.res-table td{padding:6px 10px;border-bottom:1px solid #f8faff;vertical-align:middle}
+.res-table tr:last-child td{border-bottom:none}
+.res-table tr:hover td{background:#fafbfd}
+.res-table .num{text-align:right;font-weight:700;color:#0d1f3c;font-variant-numeric:tabular-nums}
+.res-table .unit{text-align:left;color:#9aa3b8;font-size:10px;padding-left:4px}
+.res-table .row-ok td{background:#f0fdf8}
+.res-table .row-warn td{background:#fffbeb}
+.res-table .row-crit td{background:#fff1f2}
 </style>
 </head>
 <body>
 
-<!-- PIN -->
+<!-- ═══ PIN SCREEN ═══ -->
 <div id="pinScreen">
   <div class="pin-box">
-    <div class="pin-logo">❄️</div>
-    <div class="pin-title">AES Cooling Calculator</div>
-    <div class="pin-sub" data-i18n="pin_sub">Enter PIN to access · v3.1</div>
+    <div class="pin-logo">🔬</div>
+    <div class="pin-title">AES Circuit Analyzer</div>
+    <div class="pin-sub" id="pinSubTxt">Zadajte PIN pre prístup · v1.0</div>
     <div class="pin-dots" id="pinDots">
       <div class="pin-dot" id="d0"></div><div class="pin-dot" id="d1"></div>
       <div class="pin-dot" id="d2"></div><div class="pin-dot" id="d3"></div>
@@ -283,1577 +227,1501 @@ body{font-family:'Inter',Arial,sans-serif;font-size:13px;color:#1e2433;backgroun
       <button class="pin-btn" onclick="pinPress('8')">8</button>
       <button class="pin-btn" onclick="pinPress('9')">9</button>
       <button class="pin-btn" style="grid-column:1" onclick="pinPress('0')">0</button>
-      <button class="pin-btn wide" onclick="pinBack()" data-i18n="pin_del">⌫ Delete</button>
+      <button class="pin-btn wide" onclick="pinBack()">⌫ Vymazať</button>
     </div>
     <div class="pin-err" id="pinErr"></div>
   </div>
 </div>
 
-<!-- APP -->
+<!-- ═══ APP ═══ -->
 <div class="app" id="appMain" style="display:none">
 
-  <!-- Language bar + Standards editor button -->
+  <!-- Language bar -->
   <div class="lang-bar">
-    <button class="edit-stds-btn" onclick="openStdEditor()">⚙️ <span data-i18n="edit_stds_btn">Edit Standards</span></button>
-    <span class="lang-label" style="margin-left:8px">Language</span>
-    <button class="lang-btn active" id="lb_en" onclick="setLang('en')"><span class="lang-flag">🇬🇧</span> English</button>
-    <button class="lang-btn" id="lb_de" onclick="setLang('de')"><span class="lang-flag">🇩🇪</span> Deutsch</button>
-    <button class="lang-btn" id="lb_sk" onclick="setLang('sk')"><span class="lang-flag">🇸🇰</span> Slovensky</button>
+    <span class="lang-label">Language</span>
+    <button class="lang-btn active" id="lb_sk" onclick="setLang('sk')"><span>🇸🇰</span> Slovensky</button>
+    <button class="lang-btn" id="lb_en" onclick="setLang('en')"><span>🇬🇧</span> English</button>
   </div>
 
-  <!-- Standards Editor Modal -->
-  <div class="modal-overlay" id="stdModal" style="display:none" onclick="if(event.target===this)closeStdEditor()">
-    <div class="modal-box">
-      <div class="modal-head">
-        <div class="modal-head-icon">⚙️</div>
-        <div class="modal-title" data-i18n="modal_title">Standards Editor</div>
-        <button class="modal-close" onclick="closeStdEditor()">✕</button>
-      </div>
-      <div class="modal-body">
-        <div style="font-size:11px;color:#9aa3b8;margin-bottom:12px;line-height:1.6" data-i18n="modal_desc">
-          Edit existing standard conditions or add new ones. Changes apply immediately to the calculator. The standard list is saved for this session.
-        </div>
-        <div style="overflow-x:auto">
-          <table class="std-editor-table" id="stdEditorTable">
-            <thead><tr>
-              <th data-i18n="th_std">Standard</th>
-              <th data-i18n="th_range">Range</th>
-              <th>Te [°C]</th><th>Tc [°C]</th>
-              <th>Tsuc [°C]</th><th>Tliq [°C]</th>
-              <th data-i18n="th_del">Del</th>
-            </tr></thead>
-            <tbody id="stdEditorBody"></tbody>
-          </table>
-        </div>
-      </div>
-      <div class="modal-foot">
-        <button class="add-std-btn" onclick="addStdRow()">+ <span data-i18n="add_std">Add standard</span></button>
-        <button class="cancel-std-btn" onclick="closeStdEditor()" data-i18n="modal_cancel">Cancel</button>
-        <button class="save-std-btn" onclick="saveStds()">✓ <span data-i18n="modal_save">Save & apply</span></button>
-      </div>
-    </div>
-  </div>
+  <!-- Topbar -->
   <div class="topbar">
-    <div class="tb-logo"><div class="tb-logo-inner">❄</div></div>
-    <div class="tb-info">
-      <div class="tb-title" data-i18n="tb_title">AES — Compressor Cooling Capacity</div>
-      <div class="tb-sub" data-i18n="tb_sub">EN 12900 · CECOMAF · ARI 520 · ASHRAE · Custom conditions | AES s.r.o. — Advanced Energy Systems</div>
+    <div class="tb-logo" onclick="openHeaderEditor()" title="Kliknite pre úpravu hlavičky" style="cursor:pointer">
+      <div class="tb-logo-inner" id="tbLogoInner">🔬</div>
     </div>
-    <div class="tb-right" id="tbRight">
-      <div class="status-badge st-ok">
-        <div class="st-dot"></div>
-        <span>PR EOS · Offline</span>
-      </div>
-      <div class="status-badge st-warn">
-        <div class="st-dot"></div>
-        <span data-i18n="acc_pct">±1% accuracy</span>
-      </div>
+    <div class="tb-info" onclick="openHeaderEditor()" style="cursor:pointer">
+      <div class="tb-title" id="tbTitleEl">AES — Chladiaci Okruh Analyzátor</div>
+      <div class="tb-sub" id="tbSubEl">Diagnostika reálneho chladiaceho okruhu · P-H diagram · CoolProp | AES s.r.o. — Advanced Energy Systems</div>
+    </div>
+    <div class="tb-right">
+      <div class="status-badge st-warn" id="cpBadge"><span class="st-dot"></span>CoolProp načítava...</div>
+      <span class="admin-badge" id="adminBadge" style="display:none">⚡ ADMIN</span>
+      <button class="tb-edit-btn" id="tbEditBtn" onclick="openHeaderEditor()">✏️ Upraviť hlavičku</button>
     </div>
   </div>
 
-  <div class="info-bar" id="infoBar">
-    🔬 <span><strong data-i18n="info_lib">Built-in thermodynamic library</strong> <span data-i18n="info_desc">(Peng-Robinson EOS) — no CoolProp.js or internet required. Accuracy of Qo: <strong>~1%</strong> vs REFPROP/ASERP (CF factor errors partially cancel). For production measurements add <code>coolprop.js</code> to repository → used automatically instead of PR EOS.</span></span>
+  <!-- CoolProp info bar -->
+  <div class="info-bar" id="cpInfoBar">
+    <span style="font-size:16px">⏳</span>
+    <span id="cpInfoTxt"><strong>CoolProp WASM</strong> sa načítava z lokálneho súboru <strong>coolprop.wasm</strong>. Kalkulácia bude dostupná po dokončení načítania.</span>
   </div>
 
+  <!-- Main layout -->
   <div class="main-layout">
+
+    <!-- ── LEFT COLUMN ── -->
     <div>
 
-      <!-- hidden global refs needed by setStd() -->
-      <div style="display:none">
-        <input type="number" id="req_Te" value="-35">
-        <input type="number" id="req_Tc" value="40">
-        <input type="number" id="req_Tamb" value="32">
-        <input type="number" id="req_Tsuc" value="20">
-        <input type="number" id="req_Tliq" value="40">
-        <div id="stdButtonsPanel"></div>
-        <select id="refrigerant"><option value="R290">R290</option><option value="R134a">R134a</option><option value="R404A">R404A</option><option value="R407C">R407C</option><option value="R410A">R410A</option><option value="R22">R22</option><option value="R507A">R507A</option><option value="R600a">R600a</option><option value="R32">R32</option><option value="R1234yf">R1234yf</option><option value="R744">R744</option></select>
-        <input type="text" id="refrigerantCustom">
-      </div>
-
-      <!-- MEASUREMENTS TOOLBAR -->
-      <div class="meas-toolbar">
-        <span class="meas-count-badge" id="measCountBadge">0 measurements</span>
-        <button class="add-meas-btn" onclick="addMeasRow()">＋ <span data-i18n="add_meas">Add measurement</span></button>
-        <button class="calc-all-meas-btn" id="calcAllMeasBtn" onclick="calcAllMeas()" disabled>
-          🧮 <span data-i18n="calc_all_meas">Calculate all</span>
-        </button>
-        <button class="export-word-btn" id="exportWordBtn" onclick="exportToWord()" disabled title="Export all calculated results to Word (.docx)">
-          📄 Export .docx
-        </button>
-        <button class="clear-all-btn" onclick="clearAllMeas()" data-i18n="c1_clear">✕ Clear all</button>
-      </div>
-
-      <!-- Dynamic measurement rows -->
-      <div id="measRowsContainer"></div>
-
-    </div><!-- end left -->
-
-    <!-- RIGHT: DEBUG (sticky) -->
-    <div>
-      <div class="card debug-card" style="position:sticky;top:16px">
+      <!-- Card 1: Refrigerant setup -->
+      <div class="card">
         <div class="card-header">
-          <div class="card-title" style="color:#e2e8f0" data-i18n="dbg_title">🔧 Debug — intermediate calculations</div>
+          <div class="card-num">1</div>
+          <div class="card-title" data-i18n="card1_title">Chladivo a nastavenie</div>
+          <div class="card-hint" data-i18n="card1_hint">Povinné nastavenie</div>
         </div>
-        <!-- Row selector dropdown -->
-        <div style="margin-bottom:10px">
-          <select id="debugRowSelect" onchange="debugSelectRow(this.value)"
-            style="width:100%;padding:7px 10px;border:1.5px solid #1e3a5f;border-radius:8px;background:#0a1628;color:#94a3b8;font-size:11px;font-family:'Inter',sans-serif;cursor:pointer">
-            <option value="">— select measurement row —</option>
-          </select>
+        <div class="g2">
+          <div class="f">
+            <label data-i18n="lbl_refrigerant">Chladivo</label>
+            <select id="refrigerantSel" onchange="onRefrigChange()">
+              <option value="R134a">R134a (HFC)</option>
+              <option value="R404A">R404A (HFC blend)</option>
+              <option value="R410A" selected>R410A (HFC)</option>
+              <option value="R407C">R407C (HFC blend)</option>
+              <option value="R22">R22 (HCFC)</option>
+              <option value="R290">R290 – Propán</option>
+              <option value="R600a">R600a – Izobután</option>
+              <option value="R32">R32 (HFC)</option>
+              <option value="R448A">R448A (HFO blend)</option>
+              <option value="R449A">R449A (HFO blend)</option>
+              <option value="R717">R717 – Amoniak (NH3)</option>
+            </select>
+          </div>
+          <div class="f">
+            <label data-i18n="lbl_apptype">Typ aplikácie</label>
+            <select id="appType">
+              <option value="ac" data-i18n="app_ac">Klimatizácia (AC)</option>
+              <option value="ref_med" data-i18n="app_ref_med">Chladenie stredné (+5 až -15°C)</option>
+              <option value="ref_low" data-i18n="app_ref_low">Chladenie nízke (-15 až -40°C)</option>
+              <option value="hp" data-i18n="app_hp">Tepelné čerpadlo</option>
+            </select>
+          </div>
         </div>
-        <div class="dtab-row" id="debugTabs" style="display:none">
-          <div class="dtab active" onclick="showTab('measured')" data-i18n="dbg_meas">Measurement</div>
-          <div class="dtab" onclick="showTab('requested')" data-i18n="dbg_req">Ref. conditions</div>
-          <div class="dtab" onclick="showTab('factors')" data-i18n="dbg_fact">Corrections</div>
-          <div class="dtab" onclick="showTab('result')" data-i18n="dbg_res">Result</div>
+        <div class="sec-label gray" data-i18n="sec_pressure_unit">Jednotka tlaku</div>
+        <div style="display:flex;gap:8px">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:11.5px;font-weight:600;color:#0d1f3c">
+            <input type="radio" name="punit" value="bara" checked onchange="updatePressureLabels()"> bar(a) – absolútny
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:11.5px;font-weight:600;color:#0d1f3c;margin-left:14px">
+            <input type="radio" name="punit" value="barg" onchange="updatePressureLabels()"> bar(g) – manometrický
+          </label>
         </div>
-        <div id="dc_measured" class="dcontent active"><div id="dm"><div class="dph">Add a measurement,<br>paste data and press<br><strong style="color:#7dd3fc">Calculate</strong><br><br>Debug values appear here.</div></div></div>
-        <div id="dc_requested" class="dcontent"><div id="dr"><div class="dph">—</div></div></div>
-        <div id="dc_factors" class="dcontent"><div id="df"><div class="dph">—</div></div></div>
-        <div id="dc_result" class="dcontent"><div id="dres"><div class="dph">—</div></div></div>
+      </div>
+
+      <!-- Card 2: Block diagram + measured values -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-num" style="background:linear-gradient(135deg,#0d9488,#0f766e)">2</div>
+          <div class="card-title" data-i18n="card2_title">Bloková schéma — namerané hodnoty</div>
+        </div>
+
+        <!-- SVG Circuit Diagram -->
+        <div class="circuit-svg-wrap">
+          <svg viewBox="0 0 620 280" xmlns="http://www.w3.org/2000/svg" style="background:linear-gradient(135deg,#f8faff,#f0f4ff)">
+            <!-- LP label left -->
+            <text x="16" y="140" font-family="Inter,sans-serif" font-size="9" font-weight="700" fill="#2563eb" letter-spacing="1">LP</text>
+            <text x="16" y="152" font-family="Inter,sans-serif" font-size="8" fill="#93b4f0">níz. tlak</text>
+            <!-- HP label right -->
+            <text x="582" y="140" font-family="Inter,sans-serif" font-size="9" font-weight="700" fill="#dc2626" text-anchor="end" letter-spacing="1">HP</text>
+            <text x="582" y="152" font-family="Inter,sans-serif" font-size="8" fill="#f87171" text-anchor="end">vys. tlak</text>
+
+            <!-- ── PIPES ── -->
+            <!-- Left vertical pipe (LP, vapor going up) -->
+            <line x1="105" y1="80" x2="105" y2="195" stroke="#93c5fd" stroke-width="5" stroke-linecap="round"/>
+            <!-- Top horizontal pipe (HP, hot gas going right) -->
+            <line x1="195" y1="60" x2="420" y2="60" stroke="#fca5a5" stroke-width="5" stroke-linecap="round"/>
+            <!-- Right vertical pipe (HP, liquid going down) -->
+            <line x1="515" y1="80" x2="515" y2="195" stroke="#6ee7b7" stroke-width="5" stroke-linecap="round"/>
+            <!-- Bottom horizontal pipe (LP, mixture going left) -->
+            <line x1="195" y1="215" x2="420" y2="215" stroke="#c4b5fd" stroke-width="5" stroke-linecap="round"/>
+
+            <!-- ── ARROWS on pipes ── -->
+            <!-- Up arrow on left pipe -->
+            <polygon points="105,75 100,87 110,87" fill="#2563eb"/>
+            <!-- Right arrow on top pipe -->
+            <polygon points="350,60 338,54.5 338,65.5" fill="#dc2626"/>
+            <!-- Down arrow on right pipe -->
+            <polygon points="515,205 509,193 521,193" fill="#059669"/>
+            <!-- Left arrow on bottom pipe -->
+            <polygon points="270,215 282,209.5 282,220.5" fill="#7c3aed"/>
+
+            <!-- ── COMPRESSOR ── -->
+            <rect x="40" y="30" width="130" height="55" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="2"/>
+            <text x="105" y="53" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="700" fill="#1e3a5f">🔧 KOMPRESOR</text>
+            <text x="105" y="68" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#3b82f6">Compressor</text>
+
+            <!-- ── CONDENSER ── -->
+            <rect x="420" y="30" width="130" height="55" rx="10" fill="#fff1f2" stroke="#fca5a5" stroke-width="2"/>
+            <text x="485" y="50" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#7f1d1d">☀ KONDENZÁTOR</text>
+            <text x="485" y="65" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#dc2626">Condenser</text>
+            <!-- Fan symbol -->
+            <circle cx="485" cy="57" r="0" fill="none"/>
+
+            <!-- ── EXPANSION VALVE ── -->
+            <rect x="420" y="193" width="130" height="55" rx="10" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="2"/>
+            <text x="485" y="213" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" font-weight="700" fill="#4c1d95">🔩 EXP. VENTIL</text>
+            <text x="485" y="228" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#7c3aed">Expansion Valve</text>
+            <text x="485" y="241" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#a78bfa">h₃=h₄ (izentalp)</text>
+
+            <!-- ── EVAPORATOR ── -->
+            <rect x="40" y="193" width="130" height="55" rx="10" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="2"/>
+            <text x="105" y="213" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#064e3b">❄ VÝPARNÍK</text>
+            <text x="105" y="228" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#059669">Evaporator</text>
+
+            <!-- ── MEASUREMENT POINTS ── -->
+            <!-- Point 1: between evap top and comp bottom (left pipe, ~140) -->
+            <circle cx="105" cy="155" r="13" fill="#2563eb" stroke="#fff" stroke-width="3"/>
+            <text x="105" y="160" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="800" fill="#fff">1</text>
+            <text x="125" y="152" font-family="Inter,sans-serif" font-size="9" font-weight="600" fill="#2563eb">T₁, P₁</text>
+            <text x="125" y="163" font-family="Inter,sans-serif" font-size="8" fill="#3b82f6">sanie</text>
+
+            <!-- Point 2: top pipe, between comp and cond -->
+            <circle cx="310" cy="60" r="13" fill="#dc2626" stroke="#fff" stroke-width="3"/>
+            <text x="310" y="65" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="800" fill="#fff">2</text>
+            <text x="328" y="55" font-family="Inter,sans-serif" font-size="9" font-weight="600" fill="#dc2626">T₂, P₂</text>
+            <text x="328" y="66" font-family="Inter,sans-serif" font-size="8" fill="#ef4444">výtlak</text>
+
+            <!-- Point 3: right pipe, between cond and exp (liquid) -->
+            <circle cx="515" cy="150" r="13" fill="#059669" stroke="#fff" stroke-width="3"/>
+            <text x="515" y="155" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="800" fill="#fff">3</text>
+            <text x="534" y="147" font-family="Inter,sans-serif" font-size="9" font-weight="600" fill="#059669">T₃</text>
+            <text x="534" y="158" font-family="Inter,sans-serif" font-size="8" fill="#10b981">kvapalina</text>
+
+            <!-- Point 4: bottom pipe, between exp and evap -->
+            <circle cx="310" cy="215" r="13" fill="#7c3aed" stroke="#fff" stroke-width="3"/>
+            <text x="310" y="220" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="800" fill="#fff">4</text>
+            <text x="328" y="210" font-family="Inter,sans-serif" font-size="9" font-weight="600" fill="#7c3aed">T₄ (opt.)</text>
+            <text x="328" y="221" font-family="Inter,sans-serif" font-size="8" fill="#8b5cf6">2-fáza</text>
+
+            <!-- ── LEGEND TOP ── -->
+            <text x="310" y="270" text-anchor="middle" font-family="Inter,sans-serif" font-size="8.5" fill="#9aa3b8">Body 1–4 = merané miesta · Šípky = smer prúdenia chladiva</text>
+          </svg>
+        </div>
+
+        <!-- Point input panels -->
+        <div class="pt-grid">
+          <!-- POINT 1 -->
+          <div class="pt-panel pt1">
+            <div class="pt-header">
+              <div class="pt-circle c1">1</div>
+              <div>
+                <div class="pt-name" data-i18n="pt1_name">Sanie kompresora</div>
+                <div class="pt-sub" data-i18n="pt1_sub">Výstup výparníka → vst. kompresora</div>
+              </div>
+            </div>
+            <div class="g2">
+              <div class="f">
+                <label id="lbl_T_suc">T₁ — Teplota sania [°C]</label>
+                <input type="number" id="T_suc" value="-5" step="0.5" placeholder="napr. -5">
+              </div>
+              <div class="f">
+                <label id="lbl_P_suc">P₁ — Tlak sania <span id="punit_lbl_suc">[bar(a)]</span></label>
+                <input type="number" id="P_suc" value="4.5" step="0.1" min="0.1" placeholder="napr. 4.5">
+              </div>
+            </div>
+          </div>
+
+          <!-- POINT 2 -->
+          <div class="pt-panel pt2">
+            <div class="pt-header">
+              <div class="pt-circle c2">2</div>
+              <div>
+                <div class="pt-name" data-i18n="pt2_name">Výtlak kompresora</div>
+                <div class="pt-sub" data-i18n="pt2_sub">Výstup kompresora → vstup kondenzátora</div>
+              </div>
+            </div>
+            <div class="g2">
+              <div class="f">
+                <label>T₂ — <span data-i18n="lbl_Tdisch">Teplota výtlaku</span> [°C]</label>
+                <input type="number" id="T_disch" value="75" step="0.5" placeholder="napr. 75">
+              </div>
+              <div class="f">
+                <label>P₂ — <span data-i18n="lbl_Pdisch">Tlak výtlaku</span> <span id="punit_lbl_disch">[bar(a)]</span></label>
+                <input type="number" id="P_disch" value="24.0" step="0.1" min="0.1" placeholder="napr. 24">
+              </div>
+            </div>
+          </div>
+
+          <!-- POINT 3 -->
+          <div class="pt-panel pt3">
+            <div class="pt-header">
+              <div class="pt-circle c3">3</div>
+              <div>
+                <div class="pt-name" data-i18n="pt3_name">Kvapalinová vetva</div>
+                <div class="pt-sub" data-i18n="pt3_sub">Výstup kondenzátora / pred exp. ventilom</div>
+              </div>
+            </div>
+            <div class="g2">
+              <div class="f">
+                <label>T₃ — <span data-i18n="lbl_Tliq">Teplota kvapaliny</span> [°C]</label>
+                <input type="number" id="T_liq" value="40" step="0.5" placeholder="napr. 40">
+              </div>
+              <div class="f">
+                <label style="color:#9aa3b8">P₃ ≈ P₂ (voliteľné) <span id="punit_lbl_3">[bar(a)]</span></label>
+                <input type="number" id="P_liq" value="" step="0.1" min="0.1" placeholder="ak iné ako P₂">
+              </div>
+            </div>
+          </div>
+
+          <!-- POINT 4 -->
+          <div class="pt-panel pt4">
+            <div class="pt-header">
+              <div class="pt-circle c4">4</div>
+              <div>
+                <div class="pt-name" data-i18n="pt4_name">Za expanzným ventilom</div>
+                <div class="pt-sub" data-i18n="pt4_sub">Vstup do výparníka (2-fázová oblasť)</div>
+              </div>
+            </div>
+            <div class="g2">
+              <div class="f">
+                <label>T₄ — <span data-i18n="lbl_T_evap_in">Teplota vstupu výparníka</span> [°C]</label>
+                <input type="number" id="T_evap_in" value="" step="0.5" placeholder="nepovinné">
+              </div>
+              <div class="f">
+                <label style="color:#9aa3b8">ΔT <span data-i18n="lbl_dt_check">kontrola</span> [°C]</label>
+                <input type="number" id="dt_check" value="" step="0.5" placeholder="nepovinné">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Additional measured values -->
+        <div class="sec-label gray" data-i18n="sec_additional">Ďalšie namerané hodnoty</div>
+        <div class="g3">
+          <div class="f">
+            <label data-i18n="lbl_Tamb">T amb — Okolitá teplota [°C]</label>
+            <input type="number" id="T_amb" value="25" step="0.5" placeholder="napr. 25">
+          </div>
+          <div class="f">
+            <label data-i18n="lbl_Pcomp">P₁ — Príkon kompresora [W]</label>
+            <input type="number" id="P_comp" value="" step="10" min="0" placeholder="nepovinné">
+          </div>
+          <div class="f">
+            <label data-i18n="lbl_current">I — Prúd [A]</label>
+            <input type="number" id="I_meas" value="" step="0.1" min="0" placeholder="nepovinné">
+          </div>
+        </div>
+        <div class="g3" style="margin-top:8px">
+          <div class="f">
+            <label data-i18n="lbl_voltage">U — Napätie [V]</label>
+            <input type="number" id="U_meas" value="" step="1" min="0" placeholder="nepovinné">
+          </div>
+          <div class="f">
+            <label data-i18n="lbl_T_evap_surf">T povrch výparníka [°C]</label>
+            <input type="number" id="T_evap_surf" value="" step="0.5" placeholder="nepovinné">
+          </div>
+          <div class="f">
+            <label data-i18n="lbl_note">Poznámka</label>
+            <input type="text" id="note_field" placeholder="Stroj, zákazník, dátum...">
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3: Calculate -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-num orange">3</div>
+          <div class="card-title" data-i18n="card3_title">Výpočet a diagnostika</div>
+        </div>
+        <button class="calc-btn" id="calcBtn" onclick="calculateCycle()" disabled>
+          🧮 <span data-i18n="btn_calc">Vypočítať cyklus + diagnostika</span>
+        </button>
+        <button class="reset-btn" onclick="resetAll()" data-i18n="btn_reset">↺ Vymazať výsledky</button>
+      </div>
+
+    </div><!-- /LEFT -->
+
+    <!-- ── RIGHT COLUMN ── -->
+    <div>
+
+      <!-- Results card -->
+      <div class="card" id="resultsCard" style="display:none">
+        <div class="card-header">
+          <div class="card-num green">✓</div>
+          <div class="card-title" data-i18n="card_res_title">Výsledky — Stavové body</div>
+        </div>
+
+        <!-- KPI row -->
+        <div class="kpi-grid" id="kpiGrid"></div>
+
+        <!-- State points -->
+        <div class="sec-label" data-i18n="sec_statepoints">Stavové body cyklu</div>
+        <div class="res-state-grid" id="statePointsGrid"></div>
+
+        <!-- Derived values table -->
+        <div class="sec-label" data-i18n="sec_derived">Odvodené veličiny</div>
+        <table class="res-table" id="derivedTable">
+          <thead><tr>
+            <th data-i18n="th_param">Parameter</th>
+            <th data-i18n="th_value" style="text-align:right">Hodnota</th>
+            <th data-i18n="th_unit">Jedn.</th>
+            <th data-i18n="th_eval">Hodnotenie</th>
+          </tr></thead>
+          <tbody id="derivedBody"></tbody>
+        </table>
+
+        <!-- Mass flow / capacity (if P_comp provided) -->
+        <div id="massFlowSection" style="display:none">
+          <div class="sec-label green" data-i18n="sec_massflow">Prietok a výkony (príkon zadaný)</div>
+          <div class="extra-row" id="massFlowGrid"></div>
+        </div>
+      </div>
+
+      <!-- P-H Diagram card -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-num purple">P-H</div>
+          <div class="card-title" data-i18n="card_ph_title">P-H Diagram</div>
+          <div class="card-hint" id="phRefrigBadge" style="display:none"></div>
+        </div>
+        <div class="ph-wrap" id="phWrap">
+          <div class="ph-placeholder">
+            <div class="ph-icon">📊</div>
+            <p data-i18n="ph_placeholder">Zadajte namerané hodnoty a kliknite Vypočítať.<br>P-H diagram sa vygeneruje cez CoolProp.</p>
+          </div>
+        </div>
+        <div class="ph-legend" id="phLegend" style="display:none">
+          <div class="ph-leg-item"><div class="ph-leg-line" style="background:#f97316"></div> <span data-i18n="leg_compression">1→2 Kompresia</span></div>
+          <div class="ph-leg-item"><div class="ph-leg-line" style="background:#dc2626"></div> <span data-i18n="leg_condensation">2→3 Kondenzácia</span></div>
+          <div class="ph-leg-item"><div class="ph-leg-line" style="background:#7c3aed"></div> <span data-i18n="leg_expansion">3→4 Expanzia</span></div>
+          <div class="ph-leg-item"><div class="ph-leg-line" style="background:#2563eb"></div> <span data-i18n="leg_evaporation">4→1 Odparovanie</span></div>
+          <div class="ph-leg-item"><div class="ph-leg-line" style="background:#93b4f0;border-top:1px dashed #2563eb;height:0"></div> <span data-i18n="leg_sat_dome">Sýtostná krivka</span></div>
+        </div>
+      </div>
+
+      <!-- Diagnostics card -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-num" style="background:linear-gradient(135deg,#ea580c,#c2410c)">🔍</div>
+          <div class="card-title" data-i18n="card_diag_title">Diagnostika — Pravdepodobné závady</div>
+          <div id="diagBadge" style="margin-left:auto;font-size:10px;font-weight:700;padding:3px 10px;border-radius:6px;display:none"></div>
+        </div>
+        <div id="diagOutput">
+          <div class="diag-empty">
+            <span>🔍</span>
+            <p data-i18n="diag_placeholder">Diagnostika sa zobrazí po výpočte cyklu.</p>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /RIGHT -->
+  </div><!-- /main-layout -->
+</div><!-- /app -->
+
+<!-- ═══ HEADER EDITOR MODAL ═══ -->
+<div class="modal-overlay" id="headerModal" style="display:none" onclick="if(event.target===this)closeHeaderEditor()">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-head-icon">✏️</div>
+      <div class="modal-title" data-i18n="modal_hdr_title">Úprava hlavičky (Admin)</div>
+      <button class="modal-close" onclick="closeHeaderEditor()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:11px;color:#9aa3b8;margin-bottom:14px" data-i18n="modal_hdr_desc">Zmeny sa uplatnia okamžite v hlavičke aplikácie.</div>
+      <div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:12px">
+        <div id="logoPreview" class="logo-upload-area" onclick="document.getElementById('logoFileInput').click()">
+          <div class="lu-hint">📷<br>Kliknite pre<br>nahranie loga</div>
+        </div>
+        <input type="file" id="logoFileInput" accept="image/*" style="display:none" onchange="handleLogoUpload(event)">
+        <div style="flex:1">
+          <div class="f" style="margin-bottom:8px">
+            <label data-i18n="lbl_hdr_title">Názov aplikácie</label>
+            <input type="text" id="hdr_title">
+          </div>
+          <div class="f">
+            <label data-i18n="lbl_hdr_sub">Podnadpis</label>
+            <input type="text" id="hdr_sub">
+          </div>
+        </div>
+      </div>
+      <div class="f" style="margin-bottom:8px">
+        <label data-i18n="lbl_hdr_footer">Päta / Firma</label>
+        <input type="text" id="hdr_footer">
+      </div>
+      <div style="font-size:10px;color:#9aa3b8;margin-top:6px" data-i18n="lbl_logo_hint">Logo: PNG/JPG, min. 100×100 px odporúčané.</div>
+      <div style="margin-top:12px;display:flex;justify-content:flex-end">
+        <button onclick="clearLogo()" style="font-size:11px;padding:5px 12px;border:1.5px solid #e4e9f4;background:#fff;color:#7a8299;border-radius:6px;cursor:pointer;font-family:'Inter',sans-serif" data-i18n="btn_clear_logo">🗑 Odstrániť logo</button>
       </div>
     </div>
-
+    <div class="modal-foot">
+      <button class="cancel-btn" onclick="closeHeaderEditor()" data-i18n="btn_cancel">Zrušiť</button>
+      <button class="save-btn" onclick="saveHeader()" data-i18n="btn_save">✓ Uložiť</button>
+    </div>
   </div>
-</div><!-- end app -->
+</div>
 
-<script src="https://unpkg.com/docx@7.8.2/build/index.js"></script>
+<!-- ═══ COOLPROP LOADER ═══ -->
+<script>
+// ── CoolProp WASM loader (same pattern as original) ──────────────────
+var cpReady = false;
+var Module = {};
+
+(function loadCoolProp(){
+  Module['locateFile'] = function(f){ return f; };
+  Module['onRuntimeInitialized'] = function(){
+    cpReady = true;
+    onCoolPropReady();
+  };
+  var s = document.createElement('script');
+  s.src = 'coolprop.js';
+  s.onerror = function(){ cpFallback('Script load error'); };
+  s.onload = function(){
+    if (typeof Module !== 'undefined') {
+      var _orig = Module.onRuntimeInitialized;
+      Module.onRuntimeInitialized = function(){
+        if (_orig) _orig();
+        if (!cpReady){ cpReady=true; onCoolPropReady(); }
+      };
+    }
+    setTimeout(function(){
+      if (!cpReady) cpFallback('WASM timeout (30s)');
+    }, 30000);
+  };
+  document.head.appendChild(s);
+})();
+
+function onCoolPropReady(){
+  document.getElementById('cpBadge').className='status-badge st-ok';
+  document.getElementById('cpBadge').innerHTML='<span class="st-dot"></span>CoolProp ✓';
+  const bar = document.getElementById('cpInfoBar');
+  bar.className='info-ok';
+  bar.innerHTML='<span>✅</span><span><strong>CoolProp WASM</strong> je načítaný a pripravený. Výpočty sú teraz k dispozícii.</span>';
+  document.getElementById('calcBtn').disabled = false;
+}
+
+function cpFallback(reason){
+  document.getElementById('cpBadge').className='status-badge st-warn';
+  document.getElementById('cpBadge').innerHTML='<span class="st-dot"></span>CoolProp chyba';
+  const bar = document.getElementById('cpInfoBar');
+  bar.style.background='rgba(220,38,38,.08)';
+  bar.style.borderColor='rgba(220,38,38,.25)';
+  bar.innerHTML='<span>❌</span><span><strong>CoolProp WASM sa nepodarilo načítať</strong> ('+reason+'). Uistite sa, že súbory <strong>coolprop.js</strong> a <strong>coolprop.wasm</strong> sú v rovnakom priečinku ako tento súbor.</span>';
+}
+</script>
+
+<!-- ═══ MAIN JAVASCRIPT ═══ -->
 <script>
 // ═══════════════════════════════════════════════════════════════════
-//  INTERNATIONALISATION (i18n)
-//  Default: English · Available: EN / DE / SK
+//  CONFIG & PINS
 // ═══════════════════════════════════════════════════════════════════
-const LANG = {
-  en: {
-    pin_sub:      'Enter PIN to access · v3.1',
-    pin_del:      '⌫ Delete',
-    pin_wrong:    'Wrong PIN — please try again',
-    tb_title:     'AES — Compressor Cooling Capacity',
-    tb_sub:       'EN 12900 · CECOMAF · ARI 520 · ASHRAE · Custom conditions | AES s.r.o. — Advanced Energy Systems',
-    acc_pct:      '±1% accuracy',
-    info_lib:     'Built-in thermodynamic library',
-    info_desc:    '(Peng-Robinson EOS) — no coolprop.js or internet required. Accuracy of Qo: ~1% vs REFPROP/ASERP (CF factor errors partially cancel). For production measurements add <code>coolprop.js</code> to repository → used automatically instead of PR EOS.',
-    cp_ok:        'CoolProp v7.0.0',
-    cp_acc:       'Accuracy <0.01%',
-    cp_ready_msg: 'CoolProp v7.0.0 loaded (WASM) — accuracy identical to REFPROP / ASERP. All calculations run at reference accuracy.',
-    cp_miss:      'coolprop.js not found. Download both files and upload to GitHub:',
-    cp_pr:        'PR EOS ±1%',
-    cp_missing:   'coolprop.js missing',
-    c1_title:     'Measured data — row from Excel',
-    c1_hint:      'Ctrl+C row A3–AT3 → Ctrl+V here',
-    c1_label:     'Paste entire row A3–AT3 (tab-separated Excel)',
-    c1_ph:        'Copy row 3 from Excel (Ctrl+C) and paste here (Ctrl+V)...\n\nParser recognises: Factory · Calo · Kit# · Compressor · Refrigerant · P1[W] · Te_meas · Tc_meas · Qvessel · Tsuc · Tliq',
-    c1_parse:     '⚡ Process data',
-    c1_clear:     '✕ Clear',
-    c1_recog:     'Recognised values',
-    pv_comp:      'Compressor',
-    pv_ref:       'Refrigerant',
-    pv_cols:      'Columns',
-    c2_title:     'Standard and reference conditions',
-    c2_hint:      'Click standard or enter manually',
-    std_custom_lbl: 'Custom',
-    std_custom_name:'Custom',
-    std_custom_sub: 'Manual input',
-    c2_cond:      'Conditions (K4–O4)',
-    c2_paste_lbl: 'Or paste K4–O4 directly (5 values, Ctrl+V)',
-    c2_paste_ph:  'Paste from Excel here…',
-    c3_title:     'Refrigerant',
-    c3_hint:      'Auto-detected from data · editable',
-    c3_ref_lbl:   'Refrigerant',
-    c3_custom_lbl:'Custom (CoolProp.js only)',
-    c3_note:      '<strong>Built-in PR EOS</strong> covers: R290, R134a, R404A, R407C, R410A, R22, R507A, R600a, R32, R1234yf, R744. For custom blends add <code>coolprop.js</code> to GitHub repository.',
-    btn_single:   '🧮 Calculate — selected standard',
-    btn_all:      '⚡ Calculate ALL standards at once',
-    btn_wait_cp:  '⏳ Waiting for CoolProp…',
-    btn_need_data:'📋 Insert measured data first',
-    res_title:    'Result —',
-    res_qo_lbl:   'Cooling capacity Qo',
-    res_p1:       'Power input P1',
-    res_mdot:     'Mass flow ṁ',
-    comp_title:   'Comparison of all standards',
-    comp_hint:    'Highlighted = selected standard',
-    th_std:       'Standard',
-    th_range:     'Range',
-    th_vs:        'vs. selected',
-    comp_sel:     '← selected',
-    dbg_title:    '🔧 Debug — intermediate calculations',
-    dbg_meas:     'Measurement',
-    dbg_req:      'Ref. conditions',
-    dbg_fact:     'Corrections',
-    dbg_res:      'Result',
-    dbg_ph:       'Insert data and press<br><strong style="color:#7dd3fc">Calculate</strong><br><br>All intermediate<br>results appear here.',
-    ds_meas:      'MEASURED CONDITIONS',
-    ds_thermo_m:  'THERMODYNAMICS — MEASUREMENT',
-    ds_req:       'REFERENCE CONDITIONS',
-    ds_thermo_r:  'THERMODYNAMICS — REFERENCE',
-    ds_cf:        'CORRECTION FACTORS',
-    ds_breakdown: 'BREAKDOWN',
-    ds_result:    'RESULT',
-    dk_fluid:     'Refrigerant',
-    dk_te_m:      'Te measured',
-    dk_tc_m:      'Tc measured',
-    dk_tsuc_m:    'Tsuc measured',
-    dk_tliq_m:    'Tliq measured (vessel inlet)',
-    dk_qvessel:   'Q calorimeter (Qvessel)',
-    dk_p1:        'Compressor power input P1',
-    dk_pe_m:      'pe (sat. pressure Te_meas)',
-    dk_pc_m:      'pc (sat. pressure Tc_meas)',
-    dk_ha_m:      'hA = H(pc, Tliq_meas) — liquid',
-    dk_hb_m:      'hB = H(pe, Tsuc_meas) — vapour',
-    dk_dh_m:      'Δh = hB − hA',
-    dk_mdot:      'ṁ = Qvessel / (Δh×1000)',
-    dk_rho_m:     'ρ_meas = ρ(pe, Tsuc_meas)',
-    dk_te_r:      'Te reference',
-    dk_tc_r:      'Tc reference',
-    dk_tsuc_r:    'Tsuc reference',
-    dk_tliq_r:    'Tliq reference',
-    dk_pe_r:      'pe_r (sat. pressure Te_ref)',
-    dk_pc_r:      'pc_r (sat. pressure Tc_ref)',
-    dk_ha_r:      'hA_r = H(pc_r, Tliq_r) — liquid',
-    dk_hb_r:      'hB_r = H(pe_r, Tsuc_r) — vapour',
-    dk_dh_r:      'Δh_r = hB_r − hA_r',
-    dk_rho_r:     'ρ_req = ρ(pe_r, Tsuc_r)',
-    dk_cf_rho:    'CF_ρ = ρ_req / ρ_meas',
-    dk_cf_dh:     'CF_Δh = Δh_req / Δh_meas',
-    dk_qvessel2:  'Qvessel',
-    dres_lbl:     'Cooling capacity Qo',
-    eos_note:     'EOS: Peng-Robinson · ±1% vs REFPROP\nCF factor errors partially cancel in ratio',
-    err_calc:     '❌ Calculation error:',
-    err_check:    'Check: correct refrigerant name · valid temperatures · not above critical point',
-    fluid_lbl:    'Refrigerant: ',
-    meta_formula: 'Qo = Qvessel × CF_ρ × CF_Δh = ',
-    edit_stds_btn:'Edit Standards',
-    modal_title:  'Standards Editor',
-    modal_desc:   'Edit existing standard conditions or add new ones. Changes apply immediately to the calculator.',
-    th_del:       'Del',
-    add_std:      'Add standard',
-    modal_cancel: 'Cancel',
-    modal_save:   'Save & apply',
-  },
-  de: {
-    pin_sub:      'PIN eingeben · v3.1',
-    pin_del:      '⌫ Löschen',
-    pin_wrong:    'Falscher PIN — bitte erneut versuchen',
-    tb_title:     'AES — Kälteleistung des Kompressors',
-    tb_sub:       'EN 12900 · CECOMAF · ARI 520 · ASHRAE · Benutzerdefiniert | AES s.r.o. — Advanced Energy Systems',
-    acc_pct:      '±1% Genauigkeit',
-    info_lib:     'Eingebettete Thermodynamikbibliothek',
-    info_desc:    '(Peng-Robinson ZGL) — kein coolprop.js oder Internet erforderlich. Genauigkeit Qo: ~1% ggü. REFPROP/ASERP (CF-Fehler heben sich teilweise auf). Für Produktionsmessungen <code>coolprop.js</code> ins Repository laden → wird automatisch verwendet.',
-    cp_ok:        'CoolProp v7.0.0',
-    cp_acc:       'Genauigkeit <0,01%',
-    cp_ready_msg: 'CoolProp v7.0.0 geladen (WASM) — Genauigkeit identisch mit REFPROP / ASERP.',
-    cp_miss:      'coolprop.js nicht gefunden. Beide Dateien herunterladen und zu GitHub hochladen:',
-    cp_pr:        'PR ZGL ±1%',
-    cp_missing:   'coolprop.js fehlt',
-    c1_title:     'Messdaten — Zeile aus Excel',
-    c1_hint:      'Strg+C Zeile A3–AT3 → Strg+V hier',
-    c1_label:     'Gesamte Zeile A3–AT3 einfügen (Tab-getrennt aus Excel)',
-    c1_ph:        'Zeile 3 aus Excel kopieren (Strg+C) und hier einfügen (Strg+V)...\n\nParser erkennt: Factory · Calo · Kit# · Kompressor · Kältemittel · P1[W] · Te_meas · Tc_meas · Qvessel · Tsuc · Tliq',
-    c1_parse:     '⚡ Daten verarbeiten',
-    c1_clear:     '✕ Löschen',
-    c1_recog:     'Erkannte Werte',
-    pv_comp:      'Kompressor',
-    pv_ref:       'Kältemittel',
-    pv_cols:      'Spalten',
-    c2_title:     'Norm und Referenzbedingungen',
-    c2_hint:      'Norm klicken oder manuell eingeben',
-    std_custom_lbl: 'Benutzerdefiniert',
-    std_custom_name:'Benutzerd.',
-    std_custom_sub: 'Manuelle Eingabe',
-    c2_cond:      'Bedingungen (K4–O4)',
-    c2_paste_lbl: 'Oder K4–O4 direkt einfügen (5 Werte, Strg+V)',
-    c2_paste_ph:  'Aus Excel hier einfügen…',
-    c3_title:     'Kältemittel',
-    c3_hint:      'Automatisch erkannt · änderbar',
-    c3_ref_lbl:   'Kältemittel',
-    c3_custom_lbl:'Benutzerdefiniert (nur CoolProp.js)',
-    c3_note:      '<strong>Eingebettete PR ZGL</strong> unterstützt: R290, R134a, R404A, R407C, R410A, R22, R507A, R600a, R32, R1234yf, R744. Für eigene Gemische <code>coolprop.js</code> ins GitHub-Repository laden.',
-    btn_single:   '🧮 Berechnen — gewählte Norm',
-    btn_all:      '⚡ ALLE Normen auf einmal berechnen',
-    btn_wait_cp:  '⏳ Warte auf CoolProp…',
-    btn_need_data:'📋 Zuerst Messdaten einfügen',
-    res_title:    'Ergebnis —',
-    res_qo_lbl:   'Kälteleistung Qo',
-    res_p1:       'Leistungsaufnahme P1',
-    res_mdot:     'Massenstrom ṁ',
-    comp_title:   'Vergleich aller Normen',
-    comp_hint:    'Markiert = gewählte Norm',
-    th_std:       'Norm',
-    th_range:     'Bereich',
-    th_vs:        'ggü. gewählt',
-    comp_sel:     '← gewählt',
-    dbg_title:    '🔧 Debug — Zwischenergebnisse',
-    dbg_meas:     'Messung',
-    dbg_req:      'Ref.-Bedingungen',
-    dbg_fact:     'Korrekturen',
-    dbg_res:      'Ergebnis',
-    dbg_ph:       'Daten einfügen und<br><strong style="color:#7dd3fc">Berechnen</strong> drücken<br><br>Alle Zwischenwerte<br>erscheinen hier.',
-    ds_meas:      'MESSBEDINGUNGEN',
-    ds_thermo_m:  'THERMODYNAMIK — MESSUNG',
-    ds_req:       'REFERENZBEDINGUNGEN',
-    ds_thermo_r:  'THERMODYNAMIK — REFERENZ',
-    ds_cf:        'KORREKTURFAKTOREN',
-    ds_breakdown: 'AUFSCHLÜSSELUNG',
-    ds_result:    'ERGEBNIS',
-    dk_fluid:     'Kältemittel',
-    dk_te_m:      'Te gemessen',
-    dk_tc_m:      'Tc gemessen',
-    dk_tsuc_m:    'Tsuc gemessen',
-    dk_tliq_m:    'Tliq gemessen (Behältereingang)',
-    dk_qvessel:   'Q Kalorimeter (Qvessel)',
-    dk_p1:        'Leistungsaufnahme Kompressor P1',
-    dk_pe_m:      'pe (Sättigungsdruck Te_meas)',
-    dk_pc_m:      'pc (Sättigungsdruck Tc_meas)',
-    dk_ha_m:      'hA = H(pc, Tliq_meas) — flüssig',
-    dk_hb_m:      'hB = H(pe, Tsuc_meas) — Dampf',
-    dk_dh_m:      'Δh = hB − hA',
-    dk_mdot:      'ṁ = Qvessel / (Δh×1000)',
-    dk_rho_m:     'ρ_meas = ρ(pe, Tsuc_meas)',
-    dk_te_r:      'Te Referenz',
-    dk_tc_r:      'Tc Referenz',
-    dk_tsuc_r:    'Tsuc Referenz',
-    dk_tliq_r:    'Tliq Referenz',
-    dk_pe_r:      'pe_r (Sättigungsdruck Te_ref)',
-    dk_pc_r:      'pc_r (Sättigungsdruck Tc_ref)',
-    dk_ha_r:      'hA_r = H(pc_r, Tliq_r) — flüssig',
-    dk_hb_r:      'hB_r = H(pe_r, Tsuc_r) — Dampf',
-    dk_dh_r:      'Δh_r = hB_r − hA_r',
-    dk_rho_r:     'ρ_req = ρ(pe_r, Tsuc_r)',
-    dk_cf_rho:    'CF_ρ = ρ_req / ρ_meas',
-    dk_cf_dh:     'CF_Δh = Δh_req / Δh_meas',
-    dk_qvessel2:  'Qvessel',
-    dres_lbl:     'Kälteleistung Qo',
-    eos_note:     'ZGL: Peng-Robinson · ±1% ggü. REFPROP\nCF-Fehler heben sich teilweise auf',
-    err_calc:     '❌ Berechnungsfehler:',
-    err_check:    'Prüfen: korrekter Kältemittelname · gültige Temperaturen · nicht über kritischem Punkt',
-    fluid_lbl:    'Kältemittel: ',
-    meta_formula: 'Qo = Qvessel × CF_ρ × CF_Δh = ',
-    edit_stds_btn:'Normen bearbeiten',
-    modal_title:  'Normen-Editor',
-    modal_desc:   'Vorhandene Normbedingungen bearbeiten oder neue hinzufügen. Änderungen gelten sofort.',
-    th_del:       'Löschen',
-    add_std:      'Norm hinzufügen',
-    modal_cancel: 'Abbrechen',
-    modal_save:   'Speichern & anwenden',
-  },
+const PIN_USER  = '2468';
+const PIN_ADMIN = '1357';
+let isAdmin = false;
+let activeLang = 'sk';
+
+// ═══════════════════════════════════════════════════════════════════
+//  TRANSLATIONS
+// ═══════════════════════════════════════════════════════════════════
+const TRANS = {
   sk: {
-    pin_sub:      'Zadajte PIN pre prístup · v3.1',
-    pin_del:      '⌫ Vymazať',
-    pin_wrong:    'Nesprávny PIN — skúste znova',
-    tb_title:     'AES — Chladiaci výkon kompresora',
-    tb_sub:       'EN 12900 · CECOMAF · ARI 520 · ASHRAE · Vlastné podmienky | AES s.r.o. — Advanced Energy Systems',
-    acc_pct:      '±1% presnosť',
-    info_lib:     'Vstavaná termodynamická knižnica',
-    info_desc:    '(Peng-Robinson EOS) — nevyžaduje coolprop.js ani internet. Presnosť Qo: ~1% vs REFPROP/ASERP (chyba CF faktorov sa čiastočne ruší). Pre produkčné merania pridajte <code>coolprop.js</code> do repozitára → použije sa automaticky.',
-    cp_ok:        'CoolProp v7.0.0',
-    cp_acc:       'Presnosť <0,01%',
-    cp_ready_msg: 'CoolProp v7.0.0 načítaný (WASM) — presnosť identická s REFPROP / ASERP. Všetky výpočty prebiehajú s referenčnou presnosťou.',
-    cp_miss:      'coolprop.js nenájdený. Stiahni oba súbory a nahraj na GitHub:',
-    cp_pr:        'PR EOS ±1%',
-    cp_missing:   'coolprop.js chýba',
-    c1_title:     'Namerané údaje — riadok z Excelu',
-    c1_hint:      'Ctrl+C riadok A3–AT3 → Ctrl+V sem',
-    c1_label:     'Vložiť celý riadok A3–AT3 (tab-separated Excel)',
-    c1_ph:        'Skopíruj riadok 3 z Excelu (Ctrl+C) a vlož sem (Ctrl+V)...\n\nParser rozpozná: Factory · Calo · Kit# · Compressor · Refrigerant · P1[W] · Te_meas · Tc_meas · Qvessel · Tsuc · Tliq',
-    c1_parse:     '⚡ Spracovať dáta',
-    c1_clear:     '✕ Vymazať',
-    c1_recog:     'Rozpoznané hodnoty',
-    pv_comp:      'Kompressor',
-    pv_ref:       'Chladivo',
-    pv_cols:      'Stĺpce',
-    c2_title:     'Norma a referenčné podmienky',
-    c2_hint:      'Klik na normu alebo zadaj manuálne',
-    std_custom_lbl: 'Vlastné',
-    std_custom_name:'Vlastné',
-    std_custom_sub: 'Manuálny vstup',
-    c2_cond:      'Podmienky (K4–O4)',
-    c2_paste_lbl: 'Alebo vlož K4–O4 priamo (5 hodnôt, Ctrl+V)',
-    c2_paste_ph:  'Vlož z Excelu sem…',
-    c3_title:     'Chladivo',
-    c3_hint:      'Auto z dát · možnosť zmeny',
-    c3_ref_lbl:   'Chladivo',
-    c3_custom_lbl:'Vlastné (len pre CoolProp.js)',
-    c3_note:      '<strong>Vstavaná PR EOS</strong> pokrýva: R290, R134a, R404A, R407C, R410A, R22, R507A, R600a, R32, R1234yf, R744. Pre vlastné zmesi pridajte <code>coolprop.js</code> do GitHub repozitára.',
-    btn_single:   '🧮 Vypočítať — vybraná norma',
-    btn_all:      '⚡ Vypočítať VŠETKY normy naraz',
-    btn_wait_cp:  '⏳ Čakám na CoolProp…',
-    btn_need_data:'📋 Najskôr vlož namerané dáta',
-    res_title:    'Výsledok —',
-    res_qo_lbl:   'Chladiaci výkon Qo',
-    res_p1:       'Príkon P1',
-    res_mdot:     'Hm. prietok ṁ',
-    comp_title:   'Porovnanie všetkých noriem',
-    comp_hint:    'Zvýraznená = vybraná norma',
-    th_std:       'Norma',
-    th_range:     'Rozsah',
-    th_vs:        'vs. vybraná',
-    comp_sel:     '← vybraná',
-    dbg_title:    '🔧 Debug — medzivýpočty',
-    dbg_meas:     'Meranie',
-    dbg_req:      'Ref. podmienky',
-    dbg_fact:     'Korekcie',
-    dbg_res:      'Výsledok',
-    dbg_ph:       'Vlož dáta a stlač<br><strong style="color:#7dd3fc">Vypočítať</strong><br><br>Tu uvidíš všetky<br>medzivýsledky.',
-    ds_meas:      'NAMERANÉ PODMIENKY',
-    ds_thermo_m:  'TERMODYNAMIKA — MERANIE',
-    ds_req:       'REFERENČNÉ PODMIENKY',
-    ds_thermo_r:  'TERMODYNAMIKA — REFERENCIA',
-    ds_cf:        'KOREKČNÉ FAKTORY',
-    ds_breakdown: 'ROZKLAD',
-    ds_result:    'VÝSLEDOK',
-    dk_fluid:     'Chladivo',
-    dk_te_m:      'Te namerané',
-    dk_tc_m:      'Tc namerané',
-    dk_tsuc_m:    'Tsuc namerané',
-    dk_tliq_m:    'Tliq namerané (vstup nádoby)',
-    dk_qvessel:   'Q kalorimeter (Qvessel)',
-    dk_p1:        'Príkon kompresora P1',
-    dk_pe_m:      'pe (sat. tlak Te_meas)',
-    dk_pc_m:      'pc (sat. tlak Tc_meas)',
-    dk_ha_m:      'hA = H(pc, Tliq_meas) — kvapalina',
-    dk_hb_m:      'hB = H(pe, Tsuc_meas) — para',
-    dk_dh_m:      'Δh = hB − hA',
-    dk_mdot:      'ṁ = Qvessel / (Δh×1000)',
-    dk_rho_m:     'ρ_meas = ρ(pe, Tsuc_meas)',
-    dk_te_r:      'Te ref.',
-    dk_tc_r:      'Tc ref.',
-    dk_tsuc_r:    'Tsuc ref.',
-    dk_tliq_r:    'Tliq ref.',
-    dk_pe_r:      'pe_r (sat. tlak Te_ref)',
-    dk_pc_r:      'pc_r (sat. tlak Tc_ref)',
-    dk_ha_r:      'hA_r = H(pc_r, Tliq_r) — kvapalina',
-    dk_hb_r:      'hB_r = H(pe_r, Tsuc_r) — para',
-    dk_dh_r:      'Δh_r = hB_r − hA_r',
-    dk_rho_r:     'ρ_req = ρ(pe_r, Tsuc_r)',
-    dk_cf_rho:    'CF_ρ = ρ_req / ρ_meas',
-    dk_cf_dh:     'CF_Δh = Δh_req / Δh_meas',
-    dk_qvessel2:  'Qvessel',
-    dres_lbl:     'Chladiaci výkon Qo',
-    eos_note:     'EOS: Peng-Robinson · ±1% vs REFPROP\nChyba CF faktorov sa čiastočne ruší v pomere',
-    err_calc:     '❌ Chyba výpočtu:',
-    err_check:    'Skontroluj: správny názov chladiva · platné teploty · nie nad kritický bod',
-    fluid_lbl:    'Chladivo: ',
-    meta_formula: 'Qo = Qvessel × CF_ρ × CF_Δh = ',
-    edit_stds_btn:'Upraviť normy',
-    modal_title:  'Editor noriem',
-    modal_desc:   'Uprav existujúce podmienky noriem alebo pridaj nové. Zmeny sa prejavia okamžite.',
-    th_del:       'Zmaž',
-    add_std:      'Pridať normu',
-    modal_cancel: 'Zrušiť',
-    modal_save:   'Uložiť a použiť',
+    pin_sub: 'Zadajte PIN pre prístup · v1.0',
+    card1_title: 'Chladivo a nastavenie',
+    card1_hint: 'Povinné nastavenie',
+    card2_title: 'Bloková schéma — namerané hodnoty',
+    card3_title: 'Výpočet a diagnostika',
+    card_res_title: 'Výsledky — Stavové body',
+    card_ph_title: 'P-H Diagram',
+    card_diag_title: 'Diagnostika — Pravdepodobné závady',
+    btn_calc: 'Vypočítať cyklus + diagnostika',
+    btn_reset: '↺ Vymazať výsledky',
+    lbl_refrigerant: 'Chladivo',
+    lbl_apptype: 'Typ aplikácie',
+    app_ac: 'Klimatizácia (AC)',
+    app_ref_med: 'Chladenie stredné (+5 až -15°C)',
+    app_ref_low: 'Chladenie nízke (-15 až -40°C)',
+    app_hp: 'Tepelné čerpadlo',
+    sec_pressure_unit: 'Jednotka tlaku',
+    pt1_name: 'Sanie kompresora',
+    pt1_sub: 'Výstup výparníka → vstup kompresora',
+    pt2_name: 'Výtlak kompresora',
+    pt2_sub: 'Výstup kompresora → vstup kondenzátora',
+    pt3_name: 'Kvapalinová vetva',
+    pt3_sub: 'Výstup kondenzátora / pred exp. ventilom',
+    pt4_name: 'Za expanzným ventilom',
+    pt4_sub: 'Vstup do výparníka (2-fázová oblasť)',
+    lbl_Tdisch: 'Teplota výtlaku',
+    lbl_Pdisch: 'Tlak výtlaku',
+    lbl_Tliq: 'Teplota kvapaliny',
+    sec_additional: 'Ďalšie namerané hodnoty',
+    lbl_Tamb: 'T amb — Okolitá teplota [°C]',
+    lbl_Pcomp: 'P₁ — Príkon kompresora [W]',
+    lbl_current: 'I — Prúd [A]',
+    lbl_voltage: 'U — Napätie [V]',
+    lbl_T_evap_surf: 'T povrch výparníka [°C]',
+    lbl_note: 'Poznámka',
+    lbl_T_evap_in: 'Teplota vstupu výparníka',
+    lbl_dt_check: 'kontrola',
+    sec_statepoints: 'Stavové body cyklu',
+    sec_derived: 'Odvodené veličiny',
+    sec_massflow: 'Prietok a výkony (príkon zadaný)',
+    th_param: 'Parameter',
+    th_value: 'Hodnota',
+    th_unit: 'Jedn.',
+    th_eval: 'Hodnotenie',
+    ph_placeholder: 'Zadajte namerané hodnoty a kliknite Vypočítať.\nP-H diagram sa vygeneruje cez CoolProp.',
+    diag_placeholder: 'Diagnostika sa zobrazí po výpočte cyklu.',
+    leg_compression: '1→2 Kompresia',
+    leg_condensation: '2→3 Kondenzácia',
+    leg_expansion: '3→4 Expanzia',
+    leg_evaporation: '4→1 Odparovanie',
+    leg_sat_dome: 'Sýtostná krivka',
+    modal_hdr_title: 'Úprava hlavičky (Admin)',
+    modal_hdr_desc: 'Zmeny sa uplatnia okamžite v hlavičke aplikácie.',
+    lbl_hdr_title: 'Názov aplikácie',
+    lbl_hdr_sub: 'Podnadpis',
+    lbl_hdr_footer: 'Päta / Firma',
+    lbl_logo_hint: 'Logo: PNG/JPG, min. 100×100 px odporúčané.',
+    btn_clear_logo: '🗑 Odstrániť logo',
+    btn_cancel: 'Zrušiť',
+    btn_save: '✓ Uložiť',
+    // Diagnostic messages
+    d_flood_name: 'Záplava kompresora (flood-back)',
+    d_flood_desc: 'Záporný alebo veľmi nízky prehriat — kvapalné chladivo vstupuje do kompresora. Hrozí mechanické poškodenie!',
+    d_lowsh_name: 'Veľmi nízky prehriat',
+    d_lowsh_desc: 'Prehriat pod 3 °C — riziko záplavy. Skontrolujte expanzný ventil.',
+    d_highsh_name: 'Vysoký prehriat',
+    d_highsh_desc: 'Prehriat nad 25 °C — nízky prietok chladiva, znížený výkon.',
+    d_flashgas_name: 'Flash-gas v kvapalinovej vetve',
+    d_flashgas_desc: 'Záporné podchladzenie — para v kvapalinovom potrubí. Expanzný ventil nefunguje správne.',
+    d_lowsc_name: 'Nízke podchladzenie',
+    d_lowsc_desc: 'Podchladzenie pod 2 °C naznačuje nedostatok chladiva alebo slabý výkon kondenzátora.',
+    d_highsc_name: 'Vysoké podchladzenie',
+    d_highsc_desc: 'Podchladzenie nad 15 °C — možné preplnenie chladivom.',
+    d_highdisch_name: 'Kriticky vysoká teplota výtlaku',
+    d_highdisch_desc: 'Teplota výtlaku nad 120 °C — nebezpečenstvo poškodenia kompresora a karbonizácia oleja!',
+    d_warndisch_name: 'Zvýšená teplota výtlaku',
+    d_warndisch_desc: 'Teplota výtlaku nad 100 °C — zvýšená teplota kompresorového oleja.',
+    d_highcr_name: 'Vysoký kompresný pomer',
+    d_highcr_desc: 'Kompresný pomer nad 8 — nízka objemová účinnosť, vysoká teplota výtlaku.',
+    d_lowcr_name: 'Nízky kompresný pomer',
+    d_lowcr_desc: 'Kompresný pomer pod 1,5 — možná porucha ventilov kompresora alebo chyba merania.',
+    d_loweta_name: 'Nízka izentropická účinnosť kompresora',
+    d_loweta_desc: 'Izentropická účinnosť pod 50 % — kompresor môže byť opotrebovaný.',
+    d_higheta_name: 'Chyba merania (η > 100 %)',
+    d_higheta_desc: 'Izentropická účinnosť nad 100 % — chyba v meraní teplôt alebo tlakov.',
+    d_highcond_name: 'Vysoká kondenzačná teplota',
+    d_highcond_desc: 'Kondenzačná teplota je príliš vysoko nad okolitou teplotou — znečistený kondenzátor alebo nedostatočný prietok vzduchu.',
+    d_pswap_name: 'Chyba merania — vymenené tlakomery',
+    d_pswap_desc: 'Tlak sania nesmie byť väčší alebo rovný tlaku výtlaku. Skontrolujte zapojenie tlakomerov!',
+    d_lowcop_name: 'Nízky COP',
+    d_lowcop_desc: 'Energetická účinnosť systému je nízka. Systém spotrebuje viac elektriny ako je potrebné.',
+    d_highx4_name: 'Vysoký podiel pary za expanziou',
+    d_highx4_desc: 'Veľký podiel pary za expanzným ventilom znižuje využiteľnosť výparníka.',
+    d_noncond_name: 'Možné nekondenzovateľné plyny',
+    d_noncond_desc: 'Kondenzačná teplota je výrazne vyššia ako by zodpovedala tlaku — možné vzduchové plyny v systéme.',
+    d_ok: 'Žiadne závažné závady nenájdené',
+    d_ok_desc: 'Systém pracuje v normálnych parametroch. Pokračujte v pravidelnom monitoringu.',
+    cause_lbl: 'Príčiny:',
+    action_lbl: 'Opatrenia:',
+  },
+  en: {
+    pin_sub: 'Enter PIN to access · v1.0',
+    card1_title: 'Refrigerant & Setup',
+    card1_hint: 'Required setup',
+    card2_title: 'Block Diagram — Measured Values',
+    card3_title: 'Calculation & Diagnostics',
+    card_res_title: 'Results — State Points',
+    card_ph_title: 'P-H Diagram',
+    card_diag_title: 'Diagnostics — Probable Faults',
+    btn_calc: 'Calculate Cycle + Diagnostics',
+    btn_reset: '↺ Clear Results',
+    lbl_refrigerant: 'Refrigerant',
+    lbl_apptype: 'Application Type',
+    app_ac: 'Air Conditioning (AC)',
+    app_ref_med: 'Medium refrigeration (+5 to -15°C)',
+    app_ref_low: 'Low refrigeration (-15 to -40°C)',
+    app_hp: 'Heat Pump',
+    sec_pressure_unit: 'Pressure Unit',
+    pt1_name: 'Compressor suction',
+    pt1_sub: 'Evaporator outlet → Compressor inlet',
+    pt2_name: 'Compressor discharge',
+    pt2_sub: 'Compressor outlet → Condenser inlet',
+    pt3_name: 'Liquid line',
+    pt3_sub: 'Condenser outlet / before expansion valve',
+    pt4_name: 'After expansion valve',
+    pt4_sub: 'Evaporator inlet (two-phase region)',
+    lbl_Tdisch: 'Discharge temperature',
+    lbl_Pdisch: 'Discharge pressure',
+    lbl_Tliq: 'Liquid temperature',
+    sec_additional: 'Additional measured values',
+    lbl_Tamb: 'T amb — Ambient temperature [°C]',
+    lbl_Pcomp: 'P₁ — Compressor power input [W]',
+    lbl_current: 'I — Current [A]',
+    lbl_voltage: 'U — Voltage [V]',
+    lbl_T_evap_surf: 'Evaporator surface temperature [°C]',
+    lbl_note: 'Note',
+    lbl_T_evap_in: 'Evaporator inlet temperature',
+    lbl_dt_check: 'check',
+    sec_statepoints: 'Cycle state points',
+    sec_derived: 'Derived values',
+    sec_massflow: 'Mass flow & capacities (power input provided)',
+    th_param: 'Parameter',
+    th_value: 'Value',
+    th_unit: 'Unit',
+    th_eval: 'Assessment',
+    ph_placeholder: 'Enter measured values and click Calculate.\nP-H diagram will be generated via CoolProp.',
+    diag_placeholder: 'Diagnostics will appear after cycle calculation.',
+    leg_compression: '1→2 Compression',
+    leg_condensation: '2→3 Condensation',
+    leg_expansion: '3→4 Expansion',
+    leg_evaporation: '4→1 Evaporation',
+    leg_sat_dome: 'Saturation curve',
+    modal_hdr_title: 'Edit Header (Admin)',
+    modal_hdr_desc: 'Changes apply immediately to the app header.',
+    lbl_hdr_title: 'Application title',
+    lbl_hdr_sub: 'Subtitle',
+    lbl_hdr_footer: 'Footer / Company',
+    lbl_logo_hint: 'Logo: PNG/JPG, min. 100×100 px recommended.',
+    btn_clear_logo: '🗑 Remove logo',
+    btn_cancel: 'Cancel',
+    btn_save: '✓ Save',
+    d_flood_name: 'Compressor flood-back',
+    d_flood_desc: 'Negative or very low superheat — liquid refrigerant entering compressor. Risk of mechanical damage!',
+    d_lowsh_name: 'Very low superheat',
+    d_lowsh_desc: 'Superheat below 3°C — flood-back risk. Check expansion valve.',
+    d_highsh_name: 'High superheat',
+    d_highsh_desc: 'Superheat above 25°C — low refrigerant flow, reduced capacity.',
+    d_flashgas_name: 'Flash gas in liquid line',
+    d_flashgas_desc: 'Negative subcooling — vapor in liquid line. Expansion valve will not work correctly.',
+    d_lowsc_name: 'Low subcooling',
+    d_lowsc_desc: 'Subcooling below 2°C indicates low refrigerant charge or poor condenser performance.',
+    d_highsc_name: 'High subcooling',
+    d_highsc_desc: 'Subcooling above 15°C — possible refrigerant overcharge.',
+    d_highdisch_name: 'Critically high discharge temperature',
+    d_highdisch_desc: 'Discharge temperature above 120°C — risk of compressor damage and oil carbonization!',
+    d_warndisch_name: 'Elevated discharge temperature',
+    d_warndisch_desc: 'Discharge temperature above 100°C — elevated compressor oil temperature.',
+    d_highcr_name: 'High compression ratio',
+    d_highcr_desc: 'Compression ratio above 8 — low volumetric efficiency, high discharge temperature.',
+    d_lowcr_name: 'Low compression ratio',
+    d_lowcr_desc: 'Compression ratio below 1.5 — possible compressor valve failure or measurement error.',
+    d_loweta_name: 'Low compressor isentropic efficiency',
+    d_loweta_desc: 'Isentropic efficiency below 50% — compressor may be worn.',
+    d_higheta_name: 'Measurement error (η > 100%)',
+    d_higheta_desc: 'Isentropic efficiency above 100% — error in temperature or pressure measurements.',
+    d_highcond_name: 'High condensing temperature',
+    d_highcond_desc: 'Condensing temperature is too far above ambient — dirty condenser or insufficient airflow.',
+    d_pswap_name: 'Measurement error — swapped pressure gauges',
+    d_pswap_desc: 'Suction pressure cannot be ≥ discharge pressure. Check pressure gauge connections!',
+    d_lowcop_name: 'Low COP',
+    d_lowcop_desc: 'System energy efficiency is low. More electricity consumed than necessary.',
+    d_highx4_name: 'High vapor quality after expansion',
+    d_highx4_desc: 'Large vapor fraction after expansion valve reduces evaporator utilization.',
+    d_noncond_name: 'Possible non-condensables',
+    d_noncond_desc: 'Condensing temperature significantly above what pressure would indicate — possible air/gas in system.',
+    d_ok: 'No serious faults found',
+    d_ok_desc: 'System is operating within normal parameters. Continue regular monitoring.',
+    cause_lbl: 'Causes:',
+    action_lbl: 'Actions:',
   }
 };
 
-let activeLang = 'en';
-
-function t(key){ return (LANG[activeLang]||LANG.en)[key] || LANG.en[key] || key; }
+function t(key){ return (TRANS[activeLang]||TRANS.sk)[key] || TRANS.sk[key] || key; }
 
 function setLang(lang){
   activeLang = lang;
-  // Update lang buttons
-  ['en','de','sk'].forEach(l=>{
-    document.getElementById('lb_'+l).classList.toggle('active', l===lang);
-  });
-  // Apply to all [data-i18n] elements
   document.querySelectorAll('[data-i18n]').forEach(el=>{
     const key = el.getAttribute('data-i18n');
     const val = t(key);
-    if(el.tagName==='INPUT'||el.tagName==='TEXTAREA') el.value = val;
-    else el.innerHTML = val;
+    if(val) el.textContent = val;
   });
-  // Apply to placeholders
-  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{
-    el.placeholder = t(el.getAttribute('data-i18n-ph'));
-  });
-  // Refresh dynamic button states
-  updateBtns();
-  // Refresh debug placeholder if no data yet
-  if(!measData){
-    const ph = document.getElementById('dm');
-    if(ph) ph.innerHTML = '<div class="dph">'+t('dbg_ph')+'</div>';
-  }
-  // Re-render debug if results exist
-  if(window._lastDebugArgs) renderDebug(...window._lastDebugArgs);
-  // Re-render standards buttons (custom label may change)
-  renderStdButtons();
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));
+  const lb = document.getElementById('lb_'+lang);
+  if(lb) lb.classList.add('active');
+  document.getElementById('pinSubTxt').textContent = t('pin_sub');
 }
-
-// ═══════════════════════════════════════════════════════════════════
-//  PENG-ROBINSON EOS THERMODYNAMICS LIBRARY
-//  Pure JavaScript · No dependencies · ASHRAE reference state
-//  Accuracy: ~1% for refrigerants vs REFPROP/CoolProp
-// ═══════════════════════════════════════════════════════════════════
-const THERMO = (function(){
-  'use strict';
-  const Ru = 8314.462;  // J/(kmol·K)
-  const S2 = Math.SQRT2;
-  const PI = Math.PI;
-
-  // Fluid database: Tc[K], Pc[Pa], ω, M[kg/mol], Cp0 poly coeffs
-  // Cp0 = Rm*(a + b*T + c*T²)  [J/(kg·K)], T in Kelvin
-  const DB = {
-    'R290':    { Tc:369.89, Pc:4.2512e6, w:0.1521, M:0.044097,  cpA:1.626, cpB:27.09e-3, cpC:-8.82e-6 },
-    'R134a':   { Tc:374.21, Pc:4.0593e6, w:0.3268, M:0.102032,  cpA:2.30,  cpB:22.54e-3, cpC:-7.02e-6 },
-    'R22':     { Tc:369.30, Pc:4.9880e6, w:0.2208, M:0.086468,  cpA:2.08,  cpB:15.08e-3, cpC:-5.51e-6 },
-    'R410A':   { Tc:344.49, Pc:4.7684e6, w:0.2961, M:0.072585,  cpA:2.12,  cpB:22.73e-3, cpC:-7.60e-6 },
-    'R32':     { Tc:351.26, Pc:5.7820e6, w:0.2769, M:0.052024,  cpA:1.96,  cpB:15.81e-3, cpC:-5.34e-6 },
-    'R404A':   { Tc:345.27, Pc:3.7350e6, w:0.2930, M:0.097600,  cpA:2.24,  cpB:22.50e-3, cpC:-7.30e-6 },
-    'R407C':   { Tc:359.35, Pc:4.6290e6, w:0.3630, M:0.086204,  cpA:2.30,  cpB:20.10e-3, cpC:-6.50e-6 },
-    'R600a':   { Tc:407.81, Pc:3.6290e6, w:0.1830, M:0.058122,  cpA:1.85,  cpB:35.30e-3, cpC:-11.0e-6 },
-    'R507A':   { Tc:343.77, Pc:3.7060e6, w:0.3010, M:0.098859,  cpA:2.25,  cpB:22.00e-3, cpC:-7.10e-6 },
-    'R1234yf': { Tc:367.85, Pc:3.3820e6, w:0.2760, M:0.114042,  cpA:2.80,  cpB:20.00e-3, cpC:-6.50e-6 },
-    'R744':    { Tc:304.13, Pc:7.3773e6, w:0.2240, M:0.044010,  cpA:3.51,  cpB: 0.00,    cpC: 0.00    },
-  };
-
-  function getF(name){ return DB[name] || DB['R290']; }
-  function Rm(f){ return Ru / (f.M * 1000); }
-
-  // PR parameters at temperature T
-  function prPar(f, T){
-    const R=Rm(f), k=0.37464+1.54226*f.w-0.26992*f.w*f.w;
-    const Tr=T/f.Tc, sqTr=Math.sqrt(Tr);
-    const al=Math.pow(1+k*(1-sqTr),2);
-    const ac=0.45724*R*R*f.Tc*f.Tc/f.Pc;
-    return {
-      R, k,
-      a:  ac*al,
-      b:  0.07780*R*f.Tc/f.Pc,
-      dadt: -ac*k*(1+k*(1-sqTr))/(f.Tc*sqTr)
-    };
-  }
-
-  // Solve cubic PR EOS: Z³ - (1-B)Z² + (A-3B²-2B)Z - (AB-B²-B³) = 0
-  function solveZ(A, B){
-    const p=-(1-B), q=A-3*B*B-2*B, r=-(A*B-B*B-B*B*B);
-    const p1=q-p*p/3, q1=2*p*p*p/27-p*q/3+r;
-    const D=q1*q1/4+p1*p1*p1/27;
-    const off=-p/3;
-    let roots=[];
-    if(D>1e-10){
-      const sq=Math.sqrt(D);
-      const u=Math.cbrt(-q1/2+sq), v=Math.cbrt(-q1/2-sq);
-      roots=[u+v+off];
-    } else {
-      const rr=Math.sqrt(Math.max(0,-p1*p1*p1/27));
-      const arg=rr<1e-15?0:Math.max(-1,Math.min(1,-q1/(2*rr)));
-      const th=Math.acos(arg), m=2*Math.cbrt(rr);
-      roots=[m*Math.cos(th/3)+off, m*Math.cos((th+2*PI)/3)+off, m*Math.cos((th+4*PI)/3)+off];
-    }
-    return roots.filter(z=>z>B+1e-10).sort((a,b)=>a-b);
-  }
-
-  // Fugacity coefficient ln(φ)
-  function lnPhi(A, B, Z){
-    const x=(Z+(1+S2)*B)/(Z+(1-S2)*B);
-    return (Z-1)-Math.log(Z-B)-A/(2*S2*B)*Math.log(Math.max(x,1e-15));
-  }
-
-  // Saturation pressure [Pa] at T [K]
-  function Psat(fname, T){
-    const f=getF(fname);
-    let P=f.Pc*Math.exp(5.373*(1+f.w)*(1-f.Tc/T));
-    if(P<100||P>f.Pc*1.5) P=f.Pc*0.01;
-    for(let i=0;i<150;i++){
-      const pp=prPar(f,T);
-      const A=pp.a*P/(pp.R*pp.R*T*T), B=pp.b*P/(pp.R*T);
-      const zs=solveZ(A,B);
-      if(zs.length<2){ P*=1.05; continue; }
-      const d=lnPhi(A,B,zs[0])-lnPhi(A,B,zs[zs.length-1]);
-      if(Math.abs(d)<1e-9) break;
-      P*=Math.exp(Math.max(-2,Math.min(2,d)));
-    }
-    return P;
-  }
-
-  // Ideal gas enthalpy [J/kg] from T0=273.15K
-  function Hig(f, T){
-    const R=Rm(f), T0=273.15;
-    const h=t=>R*(f.cpA*t+f.cpB*t*t/2+f.cpC*t*t*t/3);
-    return h(T)-h(T0);
-  }
-
-  // Enthalpy departure [J/kg]
-  function Hdep(f, T, P, Z){
-    const pp=prPar(f,T);
-    const B=pp.b*P/(pp.R*T);
-    const x=(Z+(1+S2)*B)/(Z+(1-S2)*B);
-    return pp.R*T*(Z-1)+(T*pp.dadt-pp.a)/(2*S2*pp.b)*Math.log(Math.max(x,1e-15));
-  }
-
-  // Reference offsets (ASHRAE: hL(0°C) = 200 kJ/kg)
-  const _ref={};
-  function refOff(fname){
-    if(_ref[fname]===undefined){
-      const f=getF(fname), T0=273.15;
-      const P0=Psat(fname,T0);
-      const pp=prPar(f,T0);
-      const A=pp.a*P0/(pp.R*pp.R*T0*T0), B=pp.b*P0/(pp.R*T0);
-      const zs=solveZ(A,B);
-      const Zl=zs[0]||zs[zs.length-1];
-      _ref[fname]=200000-(Hig(f,T0)+Hdep(f,T0,P0,Zl));
-    }
-    return _ref[fname];
-  }
-
-  function getZ(fname, T, P, phase){
-    const f=getF(fname), pp=prPar(f,T);
-    const A=pp.a*P/(pp.R*pp.R*T*T), B=pp.b*P/(pp.R*T);
-    const zs=solveZ(A,B);
-    return zs.length===1?zs[0]:(phase==='liquid'?zs[0]:zs[zs.length-1]);
-  }
-
-  return {
-    // Saturation pressure [bar] at T_C [°C]
-    satP: function(T_C, fname){
-      return Psat(fname, T_C+273.15)/1e5;
-    },
-    // Enthalpy [kJ/kg] at P [bar], T [°C]
-    H: function(P_bar, T_C, fname, phase){
-      const f=getF(fname), T=T_C+273.15, P=P_bar*1e5;
-      const Z=getZ(fname,T,P,phase||'vapor');
-      return (Hig(f,T)+Hdep(f,T,P,Z)+refOff(fname))/1000;
-    },
-    // Density [kg/m³] at P [bar], T [°C]
-    rho: function(P_bar, T_C, fname, phase){
-      const f=getF(fname), pp=prPar(f,T_C+273.15);
-      const T=T_C+273.15, P=P_bar*1e5;
-      const Z=getZ(fname,T,P,phase||'vapor');
-      return P/(Z*pp.R*T);
-    },
-    // Check if fluid is known
-    hasFluid: fname => !!DB[fname],
-  };
-})();
-
-// ═══════════════════════════════════════════════════════════════════
-//  CoolProp.js INTEGRATION
-//  CoolProp v7.0.0 is an ES Module — must use dynamic import(), NOT
-//  classic SCRIPT tag. The Module config is passed to the factory fn.
-// ═══════════════════════════════════════════════════════════════════
-let cpReady = false;
-var Module = {}; // populated after factory call
-
-function cpSuccess(instance) {
-  Module = instance;
-  cpReady = true;
-  const hasPropsSI = typeof Module.PropsSI === 'function';
-  console.log('[CoolProp] ✅ Ready | PropsSI:', hasPropsSI);
-  document.getElementById('tbRight').innerHTML =
-    '<div class="status-badge st-ok"><div class="st-dot"></div><span>' + t('cp_ok') + '</span></div>' +
-    '<div class="status-badge st-ok"><div class="st-dot"></div><span>' + t('cp_acc') + '</span></div>';
-  document.getElementById('infoBar').innerHTML =
-    '✅ <span>' + t('cp_ready_msg') + '</span>';
-  updateBtns();
-}
-
-function cpFallback(reason) {
-  console.warn('[CoolProp] Fallback to PR EOS. Reason:', reason);
-  document.getElementById('tbRight').innerHTML =
-    '<div class="status-badge st-warn"><div class="st-dot"></div><span>' + t('cp_pr') + '</span></div>' +
-    '<div class="status-badge st-warn"><div class="st-dot"></div><span>' + t('cp_missing') + '</span></div>';
-  document.getElementById('infoBar').innerHTML =
-    '⚠️ <span><strong>' + t('cp_missing') + '.</strong> ' + t('cp_miss') +
-    ' <a href="https://sourceforge.net/projects/coolprop/files/CoolProp/7.0.0/Javascript/coolprop.js/download" ' +
-    'style="color:#7dd3fc" target="_blank">coolprop.js</a> + ' +
-    '<a href="https://sourceforge.net/projects/coolprop/files/CoolProp/7.0.0/Javascript/coolprop.wasm/download" ' +
-    'style="color:#7dd3fc" target="_blank">coolprop.wasm</a>.</span>';
-}
-
-// Fetch WASM as ArrayBuffer — bypasses GitHub Pages MIME type issue
-function makeInstantiateWasm() {
-  return function(imports, successCb) {
-    fetch('coolprop.wasm')
-      .then(function(r) {
-        if (!r.ok) throw new Error('HTTP ' + r.status);
-        return r.arrayBuffer();
-      })
-      .then(function(buf) { return WebAssembly.instantiate(buf, imports); })
-      .then(function(res) {
-        console.log('[CoolProp] ✅ WASM compiled');
-        successCb(res.instance, res.module);
-      })
-      .catch(function(e) { console.error('[CoolProp] WASM error:', e); });
-    return {};
-  };
-}
-
-// CoolProp v7 = ES Module → must use dynamic import()
-(function() {
-  // Try ES module import first (v7.x)
-  import('./coolprop.js')
-    .then(function(mod) {
-      console.log('[CoolProp] ES module loaded');
-      var factory = (typeof mod.default === 'function') ? mod.default
-                  : (typeof mod === 'function') ? mod
-                  : null;
-
-      if (!factory) {
-        // v7 might export module object directly, not a factory
-        cpSuccess(mod.default || mod);
-        return;
-      }
-
-      // Pass config to factory — this is how Emscripten ES modules work
-      return factory({
-        instantiateWasm: makeInstantiateWasm(),
-        onRuntimeInitialized: function() {
-          // handled below via promise resolution
-        },
-        print:    function(m) { console.log('[CP]', m); },
-        printErr: function(m) { console.warn('[CP]', m); }
-      });
-    })
-    .then(function(instance) {
-      if (instance) cpSuccess(instance);
-    })
-    .catch(function(err) {
-      console.warn('[CoolProp] ES import failed:', err.message, '— trying classic script');
-      // Fallback: classic SCRIPT tag for older coolprop.js builds
-      var s = document.createElement('script');
-      s.src = 'coolprop.js';
-      s.onerror = function() { cpFallback('JS file not found'); };
-      s.onload = function() {
-        console.log('[CoolProp] Classic script loaded — waiting for Module init');
-        // For classic builds, Module global gets populated by the script itself
-        // Set onRuntimeInitialized on the global Module
-        if (typeof Module !== 'undefined') {
-          var _orig = Module.onRuntimeInitialized;
-          Module.onRuntimeInitialized = function() {
-            if (_orig) _orig();
-            cpSuccess(Module);
-          };
-        }
-        setTimeout(function() {
-          if (!cpReady) cpFallback('WASM timeout');
-        }, 30000);
-      };
-      document.head.appendChild(s);
-    });
-})();
-
-// ── Unified property functions ─────────────────────────────────────
-// KEY FIX: CoolProp's PropsSI('H','P',Psat(T),'T',T,fluid) is ambiguous
-// at the saturation curve (could be liquid OR vapor) → returns NaN/±Inf.
-// This happens when Tliq = Tc (all EN/CECOMAF/ARI reference conditions).
-// Solution: liquid enthalpy → use T+Q=0 (unambiguous saturated liquid).
-//           vapor enthalpy  → use P+T (superheated, always unambiguous).
-//           density         → use P+T (superheated vapor, always valid).
-
-function satP(T_C, fluid){
-  if(cpReady && typeof Module.PropsSI==='function')
-    return Module.PropsSI('P','T',T_C+273.15,'Q',0,fluid)/1e5;
-  return THERMO.satP(T_C, fluid);
-}
-
-function H(P_bar, T_C, fluid, phase){
-  if(cpReady && typeof Module.PropsSI==='function'){
-    if(phase === 'liquid'){
-      // Use T,Q=0 — saturated (or subcooled) liquid.
-      // Pressure correction for subcooling is <0.5 kJ/kg for refrigerants → negligible.
-      return Module.PropsSI('H','T',T_C+273.15,'Q',0,fluid)/1000;
-    } else {
-      // Superheated vapor: P,T is always unambiguous
-      return Module.PropsSI('H','P',P_bar*1e5,'T',T_C+273.15,fluid)/1000;
-    }
-  }
-  return THERMO.H(P_bar, T_C, fluid, phase||'vapor');
-}
-
-function RHO(P_bar, T_C, fluid){
-  if(cpReady && typeof Module.PropsSI==='function')
-    return Module.PropsSI('D','P',P_bar*1e5,'T',T_C+273.15,fluid);
-  return THERMO.rho(P_bar, T_C, fluid, 'vapor');
-}
-
-// ═══════════════════════════════════════════════════════════════════
-//  CONFIG
-// ═══════════════════════════════════════════════════════════════════
-const PIN = '1234'; // ← ZMENIŤ PIN TU
-
-// STANDARDS — corrected per official table (image)
-// Pe=Te evaporating temp, Pc=Tc condensing temp
-let STANDARDS = {
-  // ── EN 12900 ── each range has its own Tc
-  en_lbp:   { Te:-35,   Tc:40,   Tsuc:20,   Tliq:40,   label:'EN 12900', range:'LBP', badge:'nb-en' },
-  en_mbp:   { Te:-10,   Tc:45,   Tsuc:20,   Tliq:45,   label:'EN 12900', range:'MBP', badge:'nb-en' },
-  en_hbp:   { Te:  5,   Tc:50,   Tsuc:20,   Tliq:50,   label:'EN 12900', range:'HBP', badge:'nb-en' },
-  // ── CECOMAF ── Tc=55 for all, LBP Te=-25 (not -35)
-  cc_lbp:   { Te:-25,   Tc:55,   Tsuc:32,   Tliq:55,   label:'CECOMAF',  range:'LBP', badge:'nb-cc' },
-  cc_mbp:   { Te:-10,   Tc:55,   Tsuc:32,   Tliq:55,   label:'CECOMAF',  range:'MBP', badge:'nb-cc' },
-  cc_hbp:   { Te:  5,   Tc:55,   Tsuc:32,   Tliq:55,   label:'CECOMAF',  range:'HBP', badge:'nb-cc' },
-  // ── ASHRAE ── different Tsuc/Tliq per range
-  ash_lbp:  { Te:-23.3, Tc:54.4, Tsuc:32.2, Tliq:32.2, label:'ASHRAE',   range:'LBP', badge:'nb-ash' },
-  ash_mbp:  { Te: -6.7, Tc:54.4, Tsuc:35,   Tliq:46.1, label:'ASHRAE',   range:'MBP', badge:'nb-ash' },
-  ash_hbp:  { Te:  7.2, Tc:54.4, Tsuc:35,   Tliq:46.1, label:'ASHRAE',   range:'HBP', badge:'nb-ash' },
-  // ── ARI 540 ── Tc=49 for all, LBP Tsuc=4.4
-  ari_lbp:  { Te:-23.3, Tc:49,   Tsuc: 4.4, Tliq:49,   label:'ARI 540',  range:'LBP', badge:'nb-ari' },
-  ari_mbp:  { Te: -6.7, Tc:49,   Tsuc:18,   Tliq:49,   label:'ARI 540',  range:'MBP', badge:'nb-ari' },
-  ari_hbp:  { Te:  7.2, Tc:49,   Tsuc:18,   Tliq:49,   label:'ARI 540',  range:'HBP', badge:'nb-ari' },
-  custom:   { Te:-35,   Tc:40,   Tsuc:20,   Tliq:40,   label:'Custom',   range:'—',   badge:'' },
-};
-let ALL_STD_KEYS = ['en_lbp','en_mbp','en_hbp','cc_lbp','cc_mbp','cc_hbp','ash_lbp','ash_mbp','ash_hbp','ari_lbp','ari_mbp','ari_hbp'];
-
-let measData=null, activeStd='en_lbp';
 
 // ═══════════════════════════════════════════════════════════════════
 //  PIN
 // ═══════════════════════════════════════════════════════════════════
-let pinBuf='';
-function pinPress(d){ if(pinBuf.length>=4)return; pinBuf+=d; dots(); if(pinBuf.length===4)checkPin(); }
+let pinBuf = '';
+function pinPress(d){ if(pinBuf.length>=4) return; pinBuf+=d; dots(); if(pinBuf.length===4) checkPin(); }
 function pinBack(){ pinBuf=pinBuf.slice(0,-1); dots(); document.getElementById('pinErr').textContent=''; }
 function dots(){ for(let i=0;i<4;i++) document.getElementById('d'+i).classList.toggle('filled',i<pinBuf.length); }
 function checkPin(){
-  if(pinBuf===PIN){
-    document.getElementById('pinScreen').style.display='none';
-    document.getElementById('appMain').style.display='block';
-    setLang(activeLang); // apply language on unlock
-  } else {
-    document.getElementById('pinErr').textContent=t('pin_wrong');
-    pinBuf=''; dots();
-    setTimeout(()=>document.getElementById('pinErr').textContent='',2000);
+  if(pinBuf === PIN_ADMIN){ isAdmin=true; unlockApp(); }
+  else if(pinBuf === PIN_USER){ isAdmin=false; unlockApp(); }
+  else {
+    document.getElementById('pinErr').textContent = activeLang==='sk' ? 'Nesprávny PIN. Skúste znova.' : 'Wrong PIN. Try again.';
+    pinBuf=''; setTimeout(()=>{ dots(); },600);
   }
 }
-document.addEventListener('keydown',e=>{
-  if(document.getElementById('pinScreen').style.display==='none') return;
-  if(e.key>='0'&&e.key<='9') pinPress(e.key);
-  if(e.key==='Backspace') pinBack();
-});
+function unlockApp(){
+  document.getElementById('pinScreen').style.display='none';
+  document.getElementById('appMain').style.display='block';
+  if(isAdmin){
+    document.getElementById('adminBadge').style.display='inline-flex';
+  }
+}
 
 // ═══════════════════════════════════════════════════════════════════
-//  COLUMN MAP + MULTI-MEASUREMENT ENGINE
-// =================================================================
-const C={
-  // A-J: identification
-  factory:0,calo:1,order:2,kitNo:3,compType:4,
-  date:5,time:6,code:7,operator:8,remark:9,
-  // K-U: set values (conditions)
-  Te_set:10,Tc_set:11,Tamb_set:12,Tsuc_set:13,Tliq_set:14,
-  voltage:15,freq:16,cooling:17,rpm:18,refrigerant:19,capacitor:20,
-  // V(21): empty gap
-  // W-AK: measured values
-  P1:22,
-  Qo_ashrae:23,COP_ashrae:24,Qo_cecomaf:25,COP_cecomaf:26,
-  Te_meas:27,Tc_meas:28,Qvessel:29,
-  Tcomp_meas:30,Tsuc_meas:31,Tdisch_meas:32,Tamb_meas:33,
-  current_meas:34,voltage_meas:35,rpm_meas:36,
-  Pe_uncorr:38,Tliq_meas:39,Tvout_meas:40
-};
-const FLUID_MAP={'R-290':'R290','R-134a':'R134a','R-404A':'R404A','R-22':'R22',
-  'R-407C':'R407C','R-410A':'R410A','R-600a':'R600a','R-32':'R32'};
-
-function parseRowCols(raw){
-  const c=raw.split(/\t/);
-  const s=i=>(c[i]||'').trim(), n=i=>parseFloat(c[i])||0;
-  let fluid=s(C.refrigerant); fluid=FLUID_MAP[fluid]||fluid||'R290';
-  return {
-    factory:s(C.factory),calo:s(C.calo),order:s(C.order),
-    kitNo:s(C.kitNo),compType:s(C.compType),
-    date:s(C.date),time:s(C.time),code:s(C.code),
-    operator:s(C.operator),remark:s(C.remark),
-    refrigerant:fluid,
-    // Set values (K-U)
-    Te_set:n(C.Te_set),Tc_set:n(C.Tc_set),Tamb_set:n(C.Tamb_set),
-    Tsuc_set:n(C.Tsuc_set),Tliq_set:n(C.Tliq_set),
-    voltage:n(C.voltage),freq:n(C.freq),cooling:s(C.cooling),
-    rpm:n(C.rpm),capacitor:n(C.capacitor),
-    // Measured values (W-AK)
-    P1:n(C.P1),
-    Qo_ashrae:n(C.Qo_ashrae),COP_ashrae:n(C.COP_ashrae),
-    Qo_cecomaf:n(C.Qo_cecomaf),COP_cecomaf:n(C.COP_cecomaf),
-    Te_meas:n(C.Te_meas),Tc_meas:n(C.Tc_meas),Qvessel:n(C.Qvessel),
-    Tcomp_meas:n(C.Tcomp_meas),Tsuc_meas:n(C.Tsuc_meas),
-    Tdisch_meas:n(C.Tdisch_meas),Tamb_meas:n(C.Tamb_meas),
-    current_meas:n(C.current_meas),voltage_meas:n(C.voltage_meas),rpm_meas:n(C.rpm_meas),
-    Tliq_meas:n(C.Tliq_meas),Tvout_meas:n(C.Tvout_meas),Pe_uncorr:n(C.Pe_uncorr),
-    colCount:c.length};
+//  THERMO HELPERS (uses CoolProp Module)
+// ═══════════════════════════════════════════════════════════════════
+function cpProp(out, in1, v1, in2, v2, fluid){
+  return Module.PropsSI(out, in1, v1, in2, v2, fluid);
 }
 
-function getFluid(){
-  return document.getElementById('refrigerantCustom').value.trim()
-      || document.getElementById('refrigerant').value;
+function satP_from_T(T_C, fluid){
+  return cpProp('P','T',T_C+273.15,'Q',0,fluid) / 1e5; // bar(a)
 }
 
-// =================================================================
-//  CORE CALCULATION — EN 12900 correction factor method
-// =================================================================
-function computeQo(m, Te_r, Tc_r, Tsuc_r, Tliq_r, fluid){
-  const pe_m=satP(m.Te_meas,fluid), pc_m=satP(m.Tc_meas,fluid);
-  const hA_m=H(pc_m,m.Tliq_meas,fluid,'liquid'), hB_m=H(pe_m,m.Tsuc_meas,fluid,'vapor');
-  const dh_m=hB_m-hA_m, rho_m=RHO(pe_m,m.Tsuc_meas,fluid), mdot=m.Qvessel/(dh_m*1000);
-  const pe_r=satP(Te_r,fluid), pc_r=satP(Tc_r,fluid);
-  const hA_r=H(pc_r,Tliq_r,fluid,'liquid'), hB_r=H(pe_r,Tsuc_r,fluid,'vapor');
-  const dh_r=hB_r-hA_r, rho_r=RHO(pe_r,Tsuc_r,fluid);
-  const CF_rho=rho_r/rho_m, CF_dh=dh_r/dh_m;
-  const Qo=m.Qvessel*CF_rho*CF_dh, COP=Qo/m.P1;
-  return {pe_m,pc_m,hA_m,hB_m,dh_m,rho_m,mdot,pe_r,pc_r,hA_r,hB_r,dh_r,rho_r,CF_rho,CF_dh,Qo,COP};
+function T_from_satP(P_bar, fluid){
+  return cpProp('T','P',P_bar*1e5,'Q',0,fluid) - 273.15; // °C
 }
 
-function updateBtns(){
-  const btn=document.getElementById('calcAllMeasBtn');
-  if(btn) btn.disabled=measRows.length===0;
-  const exp=document.getElementById('exportWordBtn');
-  if(exp) exp.disabled=!measRows.some(r=>r.result);
-}
-
-// =================================================================
-//  STANDARDS
-// =================================================================
-function renderStdButtons(){
-  const panel=document.getElementById('stdButtonsPanel');
-  if(!panel) return;
-  const groups={};
-  ALL_STD_KEYS.forEach(k=>{
-    const p=STANDARDS[k]; if(!p) return;
-    if(!groups[p.label]) groups[p.label]=[];
-    groups[p.label].push({key:k,p});
-  });
-  groups['__custom__']=[{key:'custom',p:STANDARDS['custom']}];
-  let html='';
-  Object.entries(groups).forEach(([label,entries])=>{
-    const isCustom=label==='__custom__';
-    html+=`<div class="std-family"><div class="std-family-label">${isCustom?t('std_custom_lbl'):label}</div><div class="std-row">`;
-    entries.forEach(({key,p})=>{
-      const isA=key===activeStd;
-      const Te=p.Te>=0?'+'+p.Te:String(p.Te);
-      if(isCustom){
-        html+=`<div class="std-btn${isA?' active':''}" id="std_custom" onclick="setStd('custom')">
-          <div class="std-name">${t('std_custom_name')}</div><div class="std-sub">${t('std_custom_sub')}</div></div>`;
-      } else {
-        html+=`<div class="std-btn${isA?' active':''}" id="std_${key}" onclick="setStd('${key}')">
-          <div class="std-name">${p.range}</div><div class="std-sub">Te ${Te}/Tc ${p.Tc}°C</div></div>`;
-      }
-    });
-    html+='</div></div>';
-  });
-  panel.innerHTML=html;
-}
-
-function setStd(key,silent){
-  if(!silent){activeStd=key;} else {activeStd='custom';key='custom';}
-  document.querySelectorAll('[id^="std_"]').forEach(el=>el.classList.remove('active'));
-  const el=document.getElementById('std_'+key); if(el) el.classList.add('active');
-  const p=STANDARDS[key];
-  if(p&&key!=='custom'){
-    document.getElementById('req_Te').value=p.Te;
-    document.getElementById('req_Tc').value=p.Tc;
-    document.getElementById('req_Tamb').value=p.Tc;
-    document.getElementById('req_Tsuc').value=p.Tsuc;
-    document.getElementById('req_Tliq').value=p.Tliq;
+function enthalpy(P_bar, T_C, fluid, phase){
+  // Returns kJ/kg
+  if(phase === 'liquid'){
+    return cpProp('H','T',T_C+273.15,'Q',0,fluid)/1000;
+  } else {
+    return cpProp('H','P',P_bar*1e5,'T',T_C+273.15,fluid)/1000;
   }
 }
 
-// ── STANDARDS EDITOR ─────────────────────────────────────────────
-let _editorRows=[];
-function openStdEditor(){
-  _editorRows=ALL_STD_KEYS.map(k=>({
-    key:k,label:STANDARDS[k]?.label||'',range:STANDARDS[k]?.range||'',
-    Te:STANDARDS[k]?.Te??0,Tc:STANDARDS[k]?.Tc??0,
-    Tsuc:STANDARDS[k]?.Tsuc??0,Tliq:STANDARDS[k]?.Tliq??0,
-    badge:STANDARDS[k]?.badge||'nb-en',isNew:false}));
-  renderEditorTable();
-  document.getElementById('stdModal').style.display='flex';
+function entropy(P_bar, T_C, fluid){
+  return cpProp('S','P',P_bar*1e5,'T',T_C+273.15,fluid)/1000; // kJ/(kg·K)
 }
-function closeStdEditor(){document.getElementById('stdModal').style.display='none';}
-function renderEditorTable(){
-  let rows='';
-  _editorRows.forEach((r,i)=>{
-    const canDel=_editorRows.length>1;
-    rows+=`<tr class="${r.isNew?'new-row':''}">
-      <td><input type="text" value="${r.label}" oninput="_editorRows[${i}].label=this.value" style="min-width:90px"></td>
-      <td><input type="text" value="${r.range}" oninput="_editorRows[${i}].range=this.value" class="narrow"></td>
-      <td><input type="number" value="${r.Te}" oninput="_editorRows[${i}].Te=parseFloat(this.value)||0" class="narrow" step="0.1"></td>
-      <td><input type="number" value="${r.Tc}" oninput="_editorRows[${i}].Tc=parseFloat(this.value)||0" class="narrow" step="0.1"></td>
-      <td><input type="number" value="${r.Tsuc}" oninput="_editorRows[${i}].Tsuc=parseFloat(this.value)||0" class="narrow" step="0.1"></td>
-      <td><input type="number" value="${r.Tliq}" oninput="_editorRows[${i}].Tliq=parseFloat(this.value)||0" class="narrow" step="0.1"></td>
-      <td><button class="ed-del" onclick="delStdRow(${i})" ${canDel?'':'disabled'}>🗑</button></td>
-    </tr>`;
+
+function enthalpy_from_PS(P_bar, S_kJkgK, fluid){
+  return cpProp('H','P',P_bar*1e5,'S',S_kJkgK*1000,fluid)/1000;
+}
+
+function density(P_bar, T_C, fluid){
+  return cpProp('D','P',P_bar*1e5,'T',T_C+273.15,fluid); // kg/m³
+}
+
+function gaugeToAbs(val){ return val + 1.01325; }
+
+// ═══════════════════════════════════════════════════════════════════
+//  PRESSURE UNIT HANDLING
+// ═══════════════════════════════════════════════════════════════════
+function getPUnit(){ return document.querySelector('input[name="punit"]:checked').value; }
+
+function getAbsP(inputId){
+  const val = parseFloat(document.getElementById(inputId).value);
+  if(isNaN(val)) return NaN;
+  return getPUnit() === 'barg' ? gaugeToAbs(val) : val;
+}
+
+function updatePressureLabels(){
+  const u = getPUnit() === 'bara' ? 'bar(a)' : 'bar(g)';
+  ['suc','disch','3'].forEach(id=>{
+    const el = document.getElementById('punit_lbl_'+id);
+    if(el) el.textContent = '['+u+']';
   });
-  document.getElementById('stdEditorBody').innerHTML=rows;
-}
-function addStdRow(){
-  const lastLabel=_editorRows[_editorRows.length-1]?.label||'Custom';
-  _editorRows.push({key:'custom_'+Date.now(),label:lastLabel,range:'NEW',
-    Te:0,Tc:40,Tsuc:20,Tliq:40,badge:'nb-en',isNew:true});
-  renderEditorTable();
-  const body=document.querySelector('.modal-body');if(body)body.scrollTop=body.scrollHeight;
-}
-function delStdRow(i){if(_editorRows.length<=1)return;_editorRows.splice(i,1);renderEditorTable();}
-function saveStds(){
-  for(const r of _editorRows){if(!r.label.trim()||!r.range.trim()){alert('Label and range required');return;}}
-  ALL_STD_KEYS=[];
-  _editorRows.forEach((r,i)=>{
-    const key=r.isNew?('std_'+i+'_'+r.range.toLowerCase().replace(/\s+/g,'_')):r.key;
-    STANDARDS[key]={Te:r.Te,Tc:r.Tc,Tsuc:r.Tsuc,Tliq:r.Tliq,
-      label:r.label.trim(),range:r.range.trim(),badge:r.badge||'nb-en'};
-    ALL_STD_KEYS.push(key);
-  });
-  if(!ALL_STD_KEYS.includes(activeStd)) activeStd=ALL_STD_KEYS[0]||'custom';
-  closeStdEditor(); renderStdButtons(); setStd(activeStd); renderAllRows();
 }
 
-// =================================================================
-//  MULTI-MEASUREMENT ROWS
-// =================================================================
-let measRows=[], rowCounter=0;
+function onRefrigChange(){ satDomeCache = {}; }
 
-function addMeasRow(){
-  const id=++rowCounter;
-  measRows.push({id,data:null,stdKey:activeStd,result:null});
-  renderAllRows(); updateBtns();
-  setTimeout(()=>{const el=document.getElementById('mrow_'+id);if(el)el.scrollIntoView({behavior:'smooth',block:'nearest'});},80);
-}
+// ═══════════════════════════════════════════════════════════════════
+//  MAIN CALCULATION
+// ═══════════════════════════════════════════════════════════════════
+let lastResult = null;
+let satDomeCache = {};
 
-function deleteMeasRow(id){
-  measRows=measRows.filter(r=>r.id!==id);
-  renderAllRows(); updateBtns();
-}
+function calculateCycle(){
+  if(!cpReady){ alert(activeLang==='sk'?'CoolProp sa ešte načítava, čakajte...':'CoolProp is still loading, please wait...'); return; }
 
-function clearAllMeas(){
-  measRows=[]; rowCounter=0; renderAllRows(); updateBtns();
-  document.getElementById('dm').innerHTML='<div class="dph">Add a measurement,<br>paste data and press<br><strong style="color:#7dd3fc">Calculate</strong></div>';
-  document.getElementById('debugTabs').style.display='none';
-  document.getElementById('debugRowLabel').textContent='';
-}
+  const fluid = document.getElementById('refrigerantSel').value;
 
-function renderAllRows(){
-  const container=document.getElementById('measRowsContainer');
-  const badge=document.getElementById('measCountBadge');
-  if(badge) badge.textContent=measRows.length+' measurement'+(measRows.length!==1?'s':'');
-  if(measRows.length===0){
-    container.innerHTML='<div style="text-align:center;padding:40px;color:#9aa3b8;font-size:13px;border:2px dashed #e4e9f4;border-radius:12px"><div style="font-size:28px;margin-bottom:10px">📋</div><strong style="color:#7a8299">No measurements yet</strong><br><span style="font-size:11px">Click + Add measurement to start</span></div>';
+  // Get inputs
+  const T1  = parseFloat(document.getElementById('T_suc').value);
+  const P1  = getAbsP('P_suc');
+  const T2  = parseFloat(document.getElementById('T_disch').value);
+  const P2  = getAbsP('P_disch');
+  const T3  = parseFloat(document.getElementById('T_liq').value);
+  const P3v = document.getElementById('P_liq').value.trim();
+  const P3  = P3v ? (getPUnit()==='barg' ? gaugeToAbs(parseFloat(P3v)) : parseFloat(P3v)) : P2;
+  const T_amb = parseFloat(document.getElementById('T_amb').value);
+  const P_comp = parseFloat(document.getElementById('P_comp').value) || null;
+  const I_meas = parseFloat(document.getElementById('I_meas').value) || null;
+  const U_meas = parseFloat(document.getElementById('U_meas').value) || null;
+
+  if([T1,P1,T2,P2,T3].some(isNaN)){
+    alert(activeLang==='sk'?'Vyplňte body 1, 2 a 3 (T a P).':'Fill in points 1, 2 and 3 (T and P).');
     return;
   }
-  container.innerHTML=measRows.map((row,idx)=>buildRowHTML(row,idx+1)).join('');
-  measRows.forEach(row=>{
-    const ta=document.getElementById('mrow_ta_'+row.id);
-    if(ta){
-      ta.addEventListener('paste',()=>setTimeout(()=>parseRowPaste(row.id),30));
-      ta.addEventListener('input',()=>{ if(!ta.value.trim()) { const r=measRows.find(x=>x.id===row.id); if(r){r.rawPaste='';} } });
-    }
-  });
-}
-
-function buildRowHTML(row,num){
-  const d=row.data, r=row.result;
-  const compId=d?(d.kitNo||d.compType||'—'):'—';
-  const stdLabel=STANDARDS[row.stdKey]?STANDARDS[row.stdKey].label+' '+STANDARDS[row.stdKey].range:row.stdKey;
-  const qoStr=r?r.Qo.toFixed(2)+' W':'';
-  const isCustom=row.stdKey==='custom';
-
-  // Standard buttons including Custom — use single quotes inside onclick attr
-  const stdBtns=ALL_STD_KEYS.concat(['custom']).map(k=>{
-    const p=STANDARDS[k]; if(!p) return '';
-    const isA=k===row.stdKey;
-    const cls='mrow-std-btn'+(isA?' active':'');
-    return '<button class="'+cls+'" data-key="'+k+'" onclick="setRowStd('+row.id+',\''+k+'\')">'+p.label+' '+p.range+'</button>';
-  }).join('');
-
-  // Custom condition inputs (shown only when Custom is selected)
-  const cust=row.custom||{Te:-35,Tc:40,Tsuc:20,Tliq:40};
-  const customBlock='<div class="mrow-custom'+(isCustom?' visible':'')+'" id="mrow_cust_'+row.id+'">'
-    +'<div class="mrow-custom-title">Custom conditions</div>'
-    +'<div class="g5">'
-    +'<div><label>Te [°C]</label><input type="number" value="'+cust.Te+'" step="0.5" id="mrow_Te_'+row.id+'" oninput="updateRowCustom('+row.id+')"></div>'
-    +'<div><label>Tc [°C]</label><input type="number" value="'+cust.Tc+'" step="0.5" id="mrow_Tc_'+row.id+'" oninput="updateRowCustom('+row.id+')"></div>'
-    +'<div><label>Tsuc [°C]</label><input type="number" value="'+cust.Tsuc+'" step="0.5" id="mrow_Tsuc_'+row.id+'" oninput="updateRowCustom('+row.id+')"></div>'
-    +'<div><label>Tliq [°C]</label><input type="number" value="'+cust.Tliq+'" step="0.5" id="mrow_Tliq_'+row.id+'" oninput="updateRowCustom('+row.id+')"></div>'
-    +'</div></div>';
-
-  let tags='';
-  let setVals='';
-  if(d){
-    tags='<div class="mrow-parsed-tags">'
-      +'<span class="mrow-tag">'+d.refrigerant+'</span>'
-      +'<span class="mrow-tag">Te_meas '+d.Te_meas.toFixed(2)+'°C</span>'
-      +'<span class="mrow-tag">Tc_meas '+d.Tc_meas.toFixed(2)+'°C</span>'
-      +'<span class="mrow-tag">Qv '+d.Qvessel.toFixed(1)+' W</span>'
-      +'<span class="mrow-tag">P1 '+d.P1.toFixed(1)+' W</span>'
-      +(d.colCount<41?'<span class="mrow-tag warn">⚠ '+d.colCount+' cols</span>':'')
-      +'</div>';
-    setVals='<div class="mrow-setvals">'
-      +'<div class="mrow-setvals-title">Set values (B–U)</div>'
-      // B-J: identification
-      +(d.calo?'<span class="sv-tag"><span>Calo</span>'+d.calo+'</span>':'')
-      +(d.order?'<span class="sv-tag"><span>Order</span>'+d.order+'</span>':'')
-      +(d.code?'<span class="sv-tag"><span>Code</span>'+d.code+'</span>':'')
-      +(d.operator?'<span class="sv-tag"><span>Operator</span>'+d.operator+'</span>':'')
-      +(d.date?'<span class="sv-tag"><span>Date</span>'+d.date+'</span>':'')
-      +(d.time?'<span class="sv-tag"><span>Time</span>'+d.time+'</span>':'')
-      +(d.remark?'<span class="sv-tag"><span>Remark</span>'+d.remark+'</span>':'')
-      // K-U: conditions
-      +'<span class="sv-tag"><span>Te</span>'+d.Te_set+'°C</span>'
-      +'<span class="sv-tag"><span>Tc</span>'+d.Tc_set+'°C</span>'
-      +'<span class="sv-tag"><span>Tamb</span>'+d.Tamb_set+'°C</span>'
-      +'<span class="sv-tag"><span>Tsuc</span>'+d.Tsuc_set+'°C</span>'
-      +'<span class="sv-tag"><span>Tliq</span>'+d.Tliq_set+'°C</span>'
-      +'<span class="sv-tag"><span>V</span>'+d.voltage+' V</span>'
-      +'<span class="sv-tag"><span>Hz</span>'+d.freq+' Hz</span>'
-      +(d.cooling?'<span class="sv-tag"><span>Cooling</span>'+d.cooling+'</span>':'')
-      +(d.rpm?'<span class="sv-tag"><span>RPM</span>'+d.rpm+'</span>':'')
-      +'<span class="sv-tag"><span>Ref.</span>'+d.refrigerant+'</span>'
-      +(d.capacitor?'<span class="sv-tag"><span>Cap</span>'+d.capacitor+' µF</span>':'')
-      +'</div>'
-      // Measured values (W-AK) — same strip style, teal colour
-      +'<div class="mrow-measvals">'
-      +'<div class="mrow-measvals-title">Measured values (W–AK)</div>'
-      +'<span class="mv-tag"><span>P1</span>'+d.P1.toFixed(2)+' W</span>'
-      +'<span class="mv-tag"><span>Te</span>'+d.Te_meas.toFixed(4)+'°C</span>'
-      +'<span class="mv-tag"><span>Tc</span>'+d.Tc_meas.toFixed(4)+'°C</span>'
-      +'<span class="mv-tag"><span>Qvessel</span>'+d.Qvessel.toFixed(2)+' W</span>'
-      +'<span class="mv-tag"><span>Tsuc</span>'+d.Tsuc_meas.toFixed(4)+'°C</span>'
-      +'<span class="mv-tag"><span>Tliq</span>'+d.Tliq_meas.toFixed(4)+'°C</span>'
-      +(d.Tcomp_meas?'<span class="mv-tag"><span>T comp</span>'+d.Tcomp_meas.toFixed(3)+'°C</span>':'')
-      +(d.Tdisch_meas?'<span class="mv-tag"><span>T disch</span>'+d.Tdisch_meas.toFixed(3)+'°C</span>':'')
-      +(d.Tamb_meas?'<span class="mv-tag"><span>T amb</span>'+d.Tamb_meas.toFixed(3)+'°C</span>':'')
-      +(d.current_meas?'<span class="mv-tag"><span>I</span>'+d.current_meas.toFixed(4)+' A</span>':'')
-      +(d.voltage_meas?'<span class="mv-tag"><span>V</span>'+d.voltage_meas.toFixed(3)+' V</span>':'')
-      +(d.rpm_meas?'<span class="mv-tag"><span>RPM</span>'+d.rpm_meas.toFixed(0)+'</span>':'')
-      +(d.Qo_ashrae?'<span class="mv-tag"><span>Qo ASHRAE</span>'+d.Qo_ashrae.toFixed(2)+' W</span>':'')
-      +(d.Qo_cecomaf?'<span class="mv-tag"><span>Qo CECOMAF</span>'+d.Qo_cecomaf.toFixed(2)+' W</span>':'')
-      +'</div>';
-  }
-  let resultHtml='';
-  if(r){
-    resultHtml='<div class="mrow-result">'
-      +'<div class="mrow-ri hl"><div class="mrow-ri-lbl">Cooling Qo</div><div class="mrow-ri-val">'+r.Qo.toFixed(2)+'</div><div class="mrow-ri-u">W</div></div>'
-      +'<div class="mrow-ri hl"><div class="mrow-ri-lbl">COP</div><div class="mrow-ri-val">'+r.COP.toFixed(4)+'</div><div class="mrow-ri-u">W/W</div></div>'
-      +'<div class="mrow-ri"><div class="mrow-ri-lbl">Power P1</div><div class="mrow-ri-val">'+d.P1.toFixed(2)+'</div><div class="mrow-ri-u">W</div></div>'
-      +'<div class="mrow-ri"><div class="mrow-ri-lbl">Mass flow</div><div class="mrow-ri-val">'+(r.mdot*1000).toFixed(3)+'</div><div class="mrow-ri-u">g/s</div></div>'
-      +'</div>'
-      +'<div style="margin-top:6px;font-size:9.5px;color:#9aa3b8;text-align:center">'
-      +d.refrigerant+' | Qo='+d.Qvessel.toFixed(2)+'×'+r.CF_rho.toFixed(5)+'×'+r.CF_dh.toFixed(5)
-      +' <span style="margin-left:8px;cursor:pointer;color:#7dd3fc;text-decoration:underline" onclick="showDebugForRow('+row.id+')">debug →</span>'
-      +'</div>';
-  }
-  return '<div class="mrow-card'+(r?' has-result':'')+'" id="mrow_'+row.id+'">'
-    +'<div class="mrow-head" onclick="toggleRowBody('+row.id+')">'
-    +'<div class="mrow-num">'+num+'</div>'
-    +'<div class="mrow-id">'+compId+'</div>'
-    +'<div class="mrow-std-badge">'+stdLabel+'</div>'
-    +'<div class="mrow-qo">'+qoStr+'</div>'
-    +'<button class="mrow-del" onclick="event.stopPropagation();deleteMeasRow('+row.id+')" title="Delete">🗑</button>'
-    +'</div>'
-    +'<div class="mrow-body" id="mrow_body_'+row.id+'">'
-    +'<div class="mrow-paste-row">'
-    +'<textarea class="mrow-paste" id="mrow_ta_'+row.id+'" placeholder="Paste row A3-AT3 from Excel (Ctrl+V)...">'+(row.rawPaste||'')+'</textarea>'
-    +'<button class="mrow-parse-btn" onclick="parseRowPaste('+row.id+')">⚡ Parse</button>'
-    +'</div>'
-    +tags
-    +setVals
-    +'<div class="mrow-std-sel"><span class="mrow-std-lbl">Standard:</span>'+stdBtns+'</div>'
-    +customBlock
-    +'<button class="mrow-calc-btn" onclick="calcRow('+row.id+')"'+(d?'':' disabled')+'>🧮 Calculate — '+stdLabel+'</button>'
-    +resultHtml
-    +'</div>'
-    +'</div>';
-}
-
-function toggleRowBody(id){
-  const b=document.getElementById('mrow_body_'+id);
-  if(b) b.style.display=b.style.display==='none'?'':'none';
-}
-
-function updateRowCustom(id){
-  const row=measRows.find(r=>r.id===id);if(!row)return;
-  row.custom={
-    Te: parseFloat(document.getElementById('mrow_Te_'+id)?.value)||0,
-    Tc: parseFloat(document.getElementById('mrow_Tc_'+id)?.value)||0,
-    Tsuc: parseFloat(document.getElementById('mrow_Tsuc_'+id)?.value)||0,
-    Tliq: parseFloat(document.getElementById('mrow_Tliq_'+id)?.value)||0
-  };
-}
-
-function setRowStd(id,stdKey){
-  const row=measRows.find(r=>r.id===id);if(!row)return;
-  row.stdKey=stdKey;row.result=null;
-
-  // Update standard buttons active state using data-key
-  const body=document.getElementById('mrow_body_'+id);
-  if(body){
-    body.querySelectorAll('.mrow-std-btn').forEach(btn=>{
-      btn.classList.toggle('active', btn.getAttribute('data-key')===stdKey);
-    });
-  }
-
-  // Show/hide custom block
-  const custBlock=document.getElementById('mrow_cust_'+id);
-  if(custBlock) custBlock.className='mrow-custom'+(stdKey==='custom'?' visible':'');
-
-  // Update calculate button label
-  const calcBtn=document.querySelector('#mrow_body_'+id+' .mrow-calc-btn');
-  if(calcBtn){
-    const stdLabel=STANDARDS[stdKey]?STANDARDS[stdKey].label+' '+STANDARDS[stdKey].range:stdKey;
-    calcBtn.textContent='🧮 Calculate — '+stdLabel;
-    calcBtn.disabled=!row.data;
-  }
-
-  // Update header badge
-  const badge=document.querySelector('#mrow_'+id+' .mrow-std-badge');
-  if(badge) badge.textContent=STANDARDS[stdKey]?STANDARDS[stdKey].label+' '+STANDARDS[stdKey].range:stdKey;
-
-  // Clear result display if present
-  const existing=body?body.querySelector('.mrow-result'):null;
-  if(existing) existing.remove();
-}
-function parseRowPaste(id){
-  const ta=document.getElementById('mrow_ta_'+id);if(!ta)return;
-  const raw=ta.value.trim();if(!raw)return;
-  const row=measRows.find(r=>r.id===id);if(!row)return;
-  row.rawPaste=raw;  // save so textarea keeps its value after re-render
-  row.data=parseRowCols(raw);row.result=null;renderAllRows();
-}
-
-function calcRow(id){
-  const row=measRows.find(r=>r.id===id);if(!row||!row.data)return;
-  const fluid=document.getElementById('refrigerantCustom').value.trim()||row.data.refrigerant||document.getElementById('refrigerant').value;
-  let p;
-  if(row.stdKey==='custom'){
-    // Use per-row custom values (read live from inputs)
-    updateRowCustom(id);
-    const c=row.custom||{Te:-35,Tc:40,Tsuc:20,Tliq:40};
-    p={Te:c.Te,Tc:c.Tc,Tsuc:c.Tsuc,Tliq:c.Tliq,label:'Custom',range:'—'};
-  } else {
-    p=STANDARDS[row.stdKey];
-    if(!p){alert('Unknown standard: '+row.stdKey);return;}
-  }
-  try{
-    const result=computeQo(row.data,p.Te,p.Tc,p.Tsuc,p.Tliq,fluid);
-    row.result=result;row.result._fluid=fluid;row.result._stdKey=row.stdKey;
-    renderAllRows();updateDebugDropdown();updateBtns();showDebugForRow(id);
-    setTimeout(()=>{const el=document.getElementById('mrow_'+id);if(el)el.scrollIntoView({behavior:'smooth',block:'nearest'});},80);
-  }catch(e){showErrForRow(id,e);}
-}
-function calcAllMeas(){
-  measRows.forEach(row=>{if(row.data)calcRow(row.id);});
-}
-function updateDebugDropdown(){
-  const sel=document.getElementById('debugRowSelect');
-  if(!sel) return;
-  const cur=sel.value;
-  const opts=measRows.filter(r=>r.result);
-  sel.innerHTML='<option value="">— select measurement row —</option>'
-    +opts.map(r=>{
-      const compId=r.data?(r.data.kitNo||r.data.compType||'Row #'+r.id):'Row #'+r.id;
-      const p=r.stdKey==='custom'?{label:'Custom',range:'—'}:(STANDARDS[r.stdKey]||{label:r.stdKey,range:''});
-      const qo=r.result?r.result.Qo.toFixed(2)+' W':'';
-      return '<option value="'+r.id+'"'+(String(r.id)===String(cur)?' selected':'')+'>'
-        +'#'+r.id+' '+compId+' · '+p.label+' '+p.range+(qo?' · '+qo:'')+'</option>';
-    }).join('');
-}
-
-function debugSelectRow(idStr){
-  if(!idStr) return;
-  showDebugForRow(parseInt(idStr,10));
-}
-
-function showDebugForRow(id){
-  const row=measRows.find(r=>r.id===id);if(!row||!row.result||!row.data)return;
-  const fluid=row.result._fluid||row.data.refrigerant;
-  let p;
-  if(row.stdKey==='custom'){
-    const c=row.custom||{Te:-35,Tc:40,Tsuc:20,Tliq:40};
-    p={Te:c.Te,Tc:c.Tc,Tsuc:c.Tsuc,Tliq:c.Tliq,label:'Custom',range:'—'};
-  } else {
-    p=STANDARDS[row.stdKey]||{Te:0,Tc:0,Tsuc:0,Tliq:0,label:row.stdKey,range:''};
-  }
-  // Sync dropdown
-  const sel=document.getElementById('debugRowSelect');
-  if(sel) sel.value=String(id);
-  renderDebug(row.result,fluid,p.Te,p.Tc,p.Tsuc,p.Tliq,row.data);
-}
-function showErrForRow(id,e){
-  document.getElementById('debugRowLabel').textContent='Row #'+id+' — error';
-  document.getElementById('debugTabs').style.display='flex';
-  document.getElementById('dm').innerHTML='<div style="color:#f87171;padding:16px;font-size:11.5px;line-height:1.7"><strong>'+t('err_calc')+'</strong><br>'+String(e)+'<br><br>'+t('err_check')+'</div>';
-  showTab('measured');
-}
-
-// =================================================================
-//  DEBUG PANEL
-// =================================================================
-function showTab(tab){
-  const tabs=['measured','requested','factors','result'];
-  document.querySelectorAll('.dtab').forEach((el,i)=>el.classList.toggle('active',tabs[i]===tab));
-  document.querySelectorAll('.dcontent').forEach(el=>el.classList.remove('active'));
-  document.getElementById('dc_'+tab).classList.add('active');
-}
-
-function renderDebug(r,fluid,Te_r,Tc_r,Tsuc_r,Tliq_r,m){
-  if(!m) return;
-  window._lastDebugArgs=[r,fluid,Te_r,Tc_r,Tsuc_r,Tliq_r,m];
-  document.getElementById('debugTabs').style.display='flex';
-  ['dbg_meas','dbg_req','dbg_fact','dbg_res'].forEach((k,i)=>{
-    const tabs=document.querySelectorAll('.dtab');if(tabs[i])tabs[i].textContent=t(k);
-  });
-  const row=(k,v,u,d=6)=>'<div class="drow"><span class="dk">'+k+'</span><span class="dv2">'+(typeof v==='number'?v.toFixed(d):v)+'</span><span class="du">'+(u||'')+'</span></div>';
-  const sect=s=>'<div class="dsect">'+s+'</div>';
-  const eos=cpReady?'(CoolProp)':'(PR EOS ±1%)';
-  document.getElementById('dm').innerHTML=
-    sect(t('ds_meas'))+row(t('dk_fluid'),fluid,'')+
-    row(t('dk_te_m'),m.Te_meas,'°C',5)+row(t('dk_tc_m'),m.Tc_meas,'°C',5)+
-    row(t('dk_tsuc_m'),m.Tsuc_meas,'°C',5)+row(t('dk_tliq_m'),m.Tliq_meas,'°C',5)+
-    row(t('dk_qvessel'),m.Qvessel,'W',4)+row(t('dk_p1'),m.P1,'W',4)+
-    sect(t('ds_thermo_m')+' '+eos)+
-    row(t('dk_pe_m'),r.pe_m,'bar',6)+row(t('dk_pc_m'),r.pc_m,'bar',5)+
-    row(t('dk_ha_m'),r.hA_m,'kJ/kg',4)+row(t('dk_hb_m'),r.hB_m,'kJ/kg',4)+
-    row(t('dk_dh_m'),r.dh_m,'kJ/kg',4)+row(t('dk_mdot'),r.mdot,'kg/s',8)+
-    row(t('dk_rho_m'),r.rho_m,'kg/m3',5);
-  document.getElementById('dr').innerHTML=
-    sect(t('ds_req'))+
-    row(t('dk_te_r'),Te_r,'°C',2)+row(t('dk_tc_r'),Tc_r,'°C',2)+
-    row(t('dk_tsuc_r'),Tsuc_r,'°C',2)+row(t('dk_tliq_r'),Tliq_r,'°C',2)+
-    sect(t('ds_thermo_r')+' '+eos)+
-    row(t('dk_pe_r'),r.pe_r,'bar',6)+row(t('dk_pc_r'),r.pc_r,'bar',5)+
-    row(t('dk_ha_r'),r.hA_r,'kJ/kg',4)+row(t('dk_hb_r'),r.hB_r,'kJ/kg',4)+
-    row(t('dk_dh_r'),r.dh_r,'kJ/kg',4)+row(t('dk_rho_r'),r.rho_r,'kg/m3',5);
-  document.getElementById('df').innerHTML=
-    sect(t('ds_cf'))+
-    '<div class="cf-box"><span class="cf-key">'+t('dk_cf_rho')+'</span><span style="color:#3b82f6;font-size:14px">→</span><span class="cf-val">'+r.CF_rho.toFixed(8)+'</span></div>'+
-    '<div class="cf-box"><span class="cf-key">'+t('dk_cf_dh')+'</span><span style="color:#3b82f6;font-size:14px">→</span><span class="cf-val">'+r.CF_dh.toFixed(8)+'</span></div>'+
-    sect(t('ds_breakdown'))+
-    row(t('dk_qvessel2'),m.Qvessel,'W',4)+row('× CF_ρ',r.CF_rho,'',8)+row('× CF_Δh',r.CF_dh,'',8);
-  document.getElementById('dres').innerHTML=
-    '<div class="dres"><div class="dres-lbl">'+t('dres_lbl')+'</div>'
-    +'<div class="dres-val">'+r.Qo.toFixed(4)+' W</div>'
-    +'<div style="font-size:10px;color:#475569;margin-top:6px">COP='+r.Qo.toFixed(4)+'/'+m.P1.toFixed(4)+'=<strong style="color:#a78bfa">'+r.COP.toFixed(5)+'</strong></div>'
-    +'<div style="font-size:10px;color:#475569;margin-top:3px">m\u0307='+(r.mdot*1000).toFixed(5)+' g/s</div>'
-    +(!cpReady?'<div style="font-size:9px;color:#64748b;margin-top:6px;border-top:1px solid #1e3a5f;padding-top:6px">'+t('eos_note')+'</div>':'')
-    +'</div>';
-  showTab('measured');
-}
-
-// =================================================================
-//  EXPORT TO WORD (.docx)
-// =================================================================
-async function exportToWord(){
-  const btn=document.getElementById('exportWordBtn');
-  if(btn){ btn.disabled=true; btn.textContent='⏳ Generating...'; }
+  if(P1 <= 0 || P2 <= 0){ alert('Tlaky musia byť kladné!'); return; }
 
   try {
-    const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
-            AlignmentType, BorderStyle, WidthType, ShadingType, HeadingLevel } = docx;
+    // Saturation temperatures
+    const Te_sat = T_from_satP(P1, fluid); // evaporating temp
+    const Tc_sat = T_from_satP(P2, fluid); // condensing temp
 
-    const rows=measRows.filter(r=>r.result&&r.data);
-    if(!rows.length){ alert('No calculated results to export.'); return; }
+    // State point 1: superheated vapor at suction
+    const h1 = enthalpy(P1, T1, fluid, 'vapor');
+    const s1 = entropy(P1, T1, fluid);
+    const rho1 = density(P1, T1, fluid);
 
-    // ── helpers ──────────────────────────────────────────────────
-    const brd={style:BorderStyle.SINGLE,size:4,color:'E4E9F4'};
-    const brdAll={top:brd,bottom:brd,left:brd,right:brd};
-    const brdTeal={style:BorderStyle.SINGLE,size:4,color:'6EE7B7'};
-    const brdAllTeal={top:brdTeal,bottom:brdTeal,left:brdTeal,right:brdTeal};
-    const brdYellow={style:BorderStyle.SINGLE,size:4,color:'FCD34D'};
-    const brdAllYellow={top:brdYellow,bottom:brdYellow,left:brdYellow,right:brdYellow};
-    const brdBlue={style:BorderStyle.SINGLE,size:4,color:'93C5FD'};
-    const brdAllBlue={top:brdBlue,bottom:brdBlue,left:brdBlue,right:brdBlue};
-    const m=(top,bottom,left,right)=>({top,bottom,left,right});
+    // State point 2: superheated vapor at discharge
+    const h2 = enthalpy(P2, T2, fluid, 'vapor');
 
-    // Horizontal wide table helper
-    function WideTable(headers, values, hdrFill, hdrColor, valFill, valColor, borders){
-      const w=Math.floor(9360/headers.length);
-      const widths=headers.map(()=>w);
-      return new Table({
-        width:{size:9360,type:WidthType.DXA}, columnWidths:widths,
-        rows:[
-          new TableRow({children:headers.map(h=>new TableCell({
-            borders,margins:m(80,80,100,100),
-            shading:{fill:hdrFill,type:ShadingType.CLEAR},
-            children:[new Paragraph({children:[new TextRun({text:h,bold:true,size:17,color:hdrColor,font:'Calibri'})]})]
-          }))}),
-          new TableRow({children:values.map(v=>new TableCell({
-            borders,margins:m(80,80,100,100),
-            shading:{fill:valFill,type:ShadingType.CLEAR},
-            children:[new Paragraph({children:[new TextRun({text:String(v),size:18,font:'Calibri',color:valColor})]})]
-          }))})
-        ]
-      });
+    // State point 2s: isentropic discharge
+    const h2s = enthalpy_from_PS(P2, s1, fluid);
+
+    // State point 3: subcooled liquid
+    const h3 = enthalpy(P3, T3, fluid, 'liquid');
+
+    // State point 4: isenthalpic expansion
+    const h4 = h3;
+
+    // Vapor quality at point 4
+    const h4L = cpProp('H','P',P1*1e5,'Q',0,fluid)/1000;
+    const h4V = cpProp('H','P',P1*1e5,'Q',1,fluid)/1000;
+    const x4  = Math.max(0, Math.min(1, (h4 - h4L)/(h4V - h4L)));
+
+    // Derived cycle parameters
+    const SH  = T1 - Te_sat;       // superheat at compressor inlet [K]
+    const SC  = Tc_sat - T3;       // subcooling [K]
+    const CR  = P2 / P1;           // compression ratio
+    const q0  = h1 - h4;          // specific cooling effect [kJ/kg]
+    const w   = h2 - h1;          // specific compressor work [kJ/kg]
+    const qc  = h2 - h3;          // specific condenser heat rejection [kJ/kg]
+    const COP = q0 / w;
+    const eta_is = (h2s - h1) / (h2 - h1);
+
+    // Capacities if power is known
+    let mdot=null, Q_evap=null, Q_cond=null, COP_real=null;
+    if(P_comp && P_comp > 0 && w > 0){
+      mdot   = P_comp / (w * 1000);       // kg/s
+      Q_evap = mdot * q0 * 1000;          // W
+      Q_cond = mdot * qc * 1000;          // W
+      COP_real = Q_evap / P_comp;
+    } else if(I_meas && U_meas){
+      const P_elec = I_meas * U_meas;
+      mdot   = P_elec / (w * 1000);
+      Q_evap = mdot * q0 * 1000;
+      Q_cond = mdot * qc * 1000;
+      COP_real = Q_evap / P_elec;
     }
 
-    // Result box table (Qo, COP, P1, mass flow)
-    function ResultTable(r, d, fluid, stdLabel){
-      const cols=[
-        {h:'Standard',v:stdLabel,hl:false},
-        {h:'Refrigerant',v:fluid,hl:false},
-        {h:'Cooling capacity Qo',v:r.Qo.toFixed(2)+' W',hl:true},
-        {h:'COP',v:r.COP.toFixed(4)+' W/W',hl:true},
-        {h:'Power input P1',v:d.P1.toFixed(2)+' W',hl:false},
-        {h:'Mass flow ṁ',v:(r.mdot*1000).toFixed(4)+' g/s',hl:false},
-      ];
-      const w=Math.floor(9360/cols.length);
-      return new Table({
-        width:{size:9360,type:WidthType.DXA},columnWidths:cols.map(()=>w),
-        rows:[
-          new TableRow({children:cols.map(c=>new TableCell({
-            borders:brdAllBlue,margins:m(80,80,100,100),
-            shading:{fill:'0D1F3C',type:ShadingType.CLEAR},
-            children:[new Paragraph({children:[new TextRun({text:c.h,bold:true,size:17,color:'FFFFFF',font:'Calibri'})]})]
-          }))}),
-          new TableRow({children:cols.map(c=>new TableCell({
-            borders:brdAllBlue,margins:m(100,100,100,100),
-            shading:{fill:c.hl?'EFF6FF':'F8FAFF',type:ShadingType.CLEAR},
-            children:[new Paragraph({children:[new TextRun({text:c.v,bold:c.hl,size:c.hl?22:18,font:'Calibri',color:c.hl?'059669':'1E2433'})]})]
-          }))})
-        ]
-      });
-    }
+    lastResult = {
+      fluid, T1, P1, T2, P2, T3, P3, T_amb,
+      P_comp, I_meas, U_meas,
+      h1, s1, rho1, h2, h2s, h3, h4,
+      Te_sat, Tc_sat, x4,
+      SH, SC, CR, q0, w, qc, COP, eta_is,
+      mdot, Q_evap, Q_cond, COP_real
+    };
 
-    function sp(after=160){ return new Paragraph({spacing:{after},children:[new TextRun({text:'',font:'Calibri'})]}); }
-    function sectionTitle(text,color){
-      return new Paragraph({spacing:{before:160,after:80},
-        children:[new TextRun({text,bold:true,size:22,color,font:'Calibri'})]});
-    }
+    displayResults(lastResult);
+    drawPHDiagram(lastResult);
+    runDiagnostics(lastResult);
+    document.getElementById('resultsCard').style.display='block';
 
-    // ── build document ───────────────────────────────────────────
-    const children=[];
-
-    // ── Title ────────────────────────────────────────────────────
-    children.push(new Paragraph({
-      alignment:AlignmentType.CENTER, spacing:{after:100},
-      children:[new TextRun({text:'AES — Compressor Cooling Capacity Report',bold:true,size:36,color:'0D1F3C',font:'Calibri'})]
-    }));
-    children.push(new Paragraph({
-      alignment:AlignmentType.CENTER, spacing:{after:80},
-      children:[new TextRun({text:'EN 12900 · CECOMAF · ARI 540 · ASHRAE',size:20,color:'7A8299',font:'Calibri'})]
-    }));
-    children.push(new Paragraph({
-      alignment:AlignmentType.CENTER, spacing:{after:300},
-      children:[new TextRun({text:'Generated: '+new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'}),size:18,color:'9AA3B8',font:'Calibri',italics:true})]
-    }));
-
-    // ── Summary table ─────────────────────────────────────────────
-    children.push(new Paragraph({spacing:{after:100},
-      children:[new TextRun({text:'Summary',bold:true,size:28,color:'0D1F3C',font:'Calibri'})]}));
-    const sumHdrs=['#','Compressor','Standard','Refrigerant','Qo [W]','COP','P1 [W]'];
-    const sumWidths=[400,2200,1800,1400,1200,1200,1360];
-    children.push(new Table({
-      width:{size:9360,type:WidthType.DXA}, columnWidths:sumWidths,
-      rows:[
-        new TableRow({children:sumHdrs.map(h=>new TableCell({
-          borders:brdAll,margins:m(80,80,100,100),
-          shading:{fill:'0D1F3C',type:ShadingType.CLEAR},
-          children:[new Paragraph({children:[new TextRun({text:h,bold:true,size:18,color:'FFFFFF',font:'Calibri'})]})]
-        }))}),
-        ...rows.map((row,i)=>{
-          const p=row.stdKey==='custom'?{label:'Custom',range:'—'}:(STANDARDS[row.stdKey]||{label:row.stdKey,range:''});
-          return new TableRow({children:[
-            String(i+1),row.data.kitNo||row.data.compType||'—',p.label+' '+p.range,
-            row.result._fluid||row.data.refrigerant,
-            row.result.Qo.toFixed(2),row.result.COP.toFixed(4),row.data.P1.toFixed(2)
-          ].map((v,ci)=>new TableCell({
-            borders:brdAll,margins:m(80,80,100,100),
-            shading:{fill:i%2===0?'FFFFFF':'F8FAFF',type:ShadingType.CLEAR},
-            children:[new Paragraph({children:[new TextRun({
-              text:String(v),size:18,font:'Calibri',bold:ci===4,color:ci===4?'059669':'1E2433'
-            })]})]
-          }))});
-        })
-      ]
-    }));
-
-    // ── Detailed section per measurement ─────────────────────────
-    rows.forEach((row,i)=>{
-      const d=row.data, r=row.result;
-      const fluid=r._fluid||d.refrigerant;
-      const p=row.stdKey==='custom'
-        ?(row.custom||{Te:-35,Tc:40,Tsuc:20,Tliq:40,label:'Custom',range:'—'})
-        :(STANDARDS[row.stdKey]||{Te:0,Tc:0,Tsuc:0,Tliq:0,label:row.stdKey,range:''});
-      const stdLabel=(p.label||'')+(p.range&&p.range!=='—'?' '+p.range:'');
-
-      // Page break before each measurement (except first)
-      if(i>0) children.push(new Paragraph({pageBreakBefore:true,children:[new TextRun({text:'',font:'Calibri'})]}));
-      else children.push(sp(300));
-
-      // Measurement heading
-      children.push(new Paragraph({spacing:{after:120},
-        children:[
-          new TextRun({text:String(i+1)+'.  ',bold:true,size:30,color:'2563EB',font:'Calibri'}),
-          new TextRun({text:(d.kitNo||d.compType||'—'),bold:true,size:30,color:'0D1F3C',font:'Calibri'}),
-          new TextRun({text:'   ·  '+stdLabel,size:22,color:'7A8299',font:'Calibri'})
-        ]
-      }));
-
-      // ── SET VALUES ────────────────────────────────────────────
-      children.push(sectionTitle('Set values  (B – U)','92400E'));
-      // Row 1: identification (B-J)
-      const idHdrs=['Factory','Calo','Order','Kit #','Compressor','Date','Time','Code','Operator','Remark'];
-      const idVals=[d.factory||'—',d.calo||'—',d.order||'—',d.kitNo||'—',d.compType||'—',
-                    d.date||'—',d.time||'—',d.code||'—',d.operator||'—',d.remark||'—'];
-      children.push(WideTable(idHdrs,idVals,'FEF3C7','92400E','FFFBEB','78350F',brdAllYellow));
-      children.push(sp(60));
-      // Row 2: conditions (K-U)
-      children.push(WideTable(
-        ['Te set','Tc set','Tamb set','Tsuc set','Tliq set','Voltage','Frequency','Cooling','RPM','Refrigerant','Capacitor'],
-        [d.Te_set+'°C',d.Tc_set+'°C',d.Tamb_set+'°C',d.Tsuc_set+'°C',d.Tliq_set+'°C',
-         d.voltage+' V',d.freq+' Hz',d.cooling||'—',d.rpm||'—',d.refrigerant,d.capacitor?d.capacitor+' µF':'—'],
-        'FEF3C7','92400E','FFFBEB','78350F',brdAllYellow
-      ));
-      children.push(sp(160));
-
-      // ── MEASURED VALUES ───────────────────────────────────────
-      children.push(sectionTitle('Measured values  (W – AK)','065F46'));
-      children.push(WideTable(
-        ['Te meas','Tc meas','Tsuc meas','Tliq meas','Qvessel','P1','T comp','T disch','T amb','Current','Voltage','RPM'],
-        [d.Te_meas.toFixed(4)+'°C',d.Tc_meas.toFixed(4)+'°C',
-         d.Tsuc_meas.toFixed(4)+'°C',d.Tliq_meas.toFixed(4)+'°C',
-         d.Qvessel.toFixed(2)+' W',d.P1.toFixed(2)+' W',
-         d.Tcomp_meas.toFixed(3)+'°C',d.Tdisch_meas.toFixed(3)+'°C',
-         d.Tamb_meas.toFixed(3)+'°C',d.current_meas.toFixed(4)+' A',
-         d.voltage_meas.toFixed(3)+' V',d.rpm_meas.toFixed(0)],
-        'D1FAE5','065F46','ECFDF5','065F46',brdAllTeal
-      ));
-      // Second row if Qo ASHRAE/CECOMAF exist
-      if(d.Qo_ashrae||d.Qo_cecomaf){
-        children.push(sp(60));
-        const h2=[],v2=[];
-        if(d.Qo_ashrae){h2.push('Qo ASHRAE');v2.push(d.Qo_ashrae.toFixed(2)+' W');}
-        if(d.COP_ashrae){h2.push('COP ASHRAE');v2.push(d.COP_ashrae.toFixed(4));}
-        if(d.Qo_cecomaf){h2.push('Qo CECOMAF');v2.push(d.Qo_cecomaf.toFixed(2)+' W');}
-        if(d.COP_cecomaf){h2.push('COP CECOMAF');v2.push(d.COP_cecomaf.toFixed(4));}
-        if(h2.length){
-          children.push(WideTable(h2,v2,'D1FAE5','065F46','ECFDF5','065F46',brdAllTeal));
-        }
-      }
-      children.push(sp(200));
-
-      // ── CALCULATION RESULT ────────────────────────────────────
-      children.push(sectionTitle('Calculation result  —  '+stdLabel,'1A4DB5'));
-      children.push(ResultTable(r,d,fluid,stdLabel));
-    });
-
-    // Footer
-    children.push(sp(300));
-    children.push(new Paragraph({
-      alignment:AlignmentType.CENTER, spacing:{after:0},
-      children:[new TextRun({text:'AES s.r.o. — Advanced Energy Systems | www.aes-slovakia.eu | Farská 50, 949 01 Nitra, Slovakia',size:16,color:'AAAAAA',font:'Calibri',italics:true})]
-    }));
-
-    // ── generate & download ───────────────────────────────────────
-    const doc=new Document({sections:[{
-      properties:{page:{size:{width:11906,height:16838},margin:{top:1134,right:1134,bottom:1134,left:1134}}},
-      children
-    }]});
-    const blob=await Packer.toBlob(doc);
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');
-    a.href=url;
-    a.download='AES_Cooling_Report_'+new Date().toISOString().slice(0,10)+'.docx';
-    a.click(); URL.revokeObjectURL(url);
-
-  } catch(err){
-    console.error('Export error:',err);
-    alert('Export failed: '+err.message);
-  } finally {
-    if(btn){ btn.disabled=false; btn.textContent='📄 Export .docx'; updateBtns(); }
+  } catch(e){
+    console.error(e);
+    alert((activeLang==='sk'?'Chyba výpočtu: ':'Calculation error: ')+e.message);
   }
 }
 
-// Apply default language (EN) on load
-document.addEventListener('DOMContentLoaded',()=>{
-  setLang('en');
-  renderStdButtons();
-  setStd('en_lbp');
-  addMeasRow();
-});
+function resetAll(){
+  lastResult = null;
+  document.getElementById('resultsCard').style.display='none';
+  document.getElementById('phWrap').innerHTML=`<div class="ph-placeholder"><div class="ph-icon">📊</div><p>${t('ph_placeholder')}</p></div>`;
+  document.getElementById('phLegend').style.display='none';
+  document.getElementById('phRefrigBadge').style.display='none';
+  document.getElementById('diagOutput').innerHTML=`<div class="diag-empty"><span>🔍</span><p>${t('diag_placeholder')}</p></div>`;
+  document.getElementById('diagBadge').style.display='none';
+}
 
+// ═══════════════════════════════════════════════════════════════════
+//  DISPLAY RESULTS
+// ═══════════════════════════════════════════════════════════════════
+function displayResults(r){
+  // KPIs
+  const kpis = [
+    {lbl:'COP', val:r.COP.toFixed(2), u:'W/W', cls:'hl-green'},
+    {lbl:'Kompr. pomer', val:r.CR.toFixed(2), u:':1', cls:''},
+    {lbl:'η izentrop.', val:(r.eta_is*100).toFixed(1), u:'%', cls: r.eta_is>0.6?'hl-blue':'hl-orange'},
+    {lbl:'Prehriat SH', val:r.SH.toFixed(1), u:'K', cls: r.SH>=3&&r.SH<=20?'hl-green':'hl-orange'},
+    {lbl:'Podchladenie SC', val:r.SC.toFixed(1), u:'K', cls: r.SC>=2&&r.SC<=12?'hl-blue':'hl-orange'},
+    {lbl:'Podiel pary x₄', val:(r.x4*100).toFixed(1), u:'%', cls:''},
+  ];
+  document.getElementById('kpiGrid').innerHTML = kpis.map(k=>
+    `<div class="kpi ${k.cls}"><div class="kpi-lbl">${k.lbl}</div><div><span class="kpi-val">${k.val}</span><span class="kpi-u">${k.u}</span></div></div>`
+  ).join('');
+
+  // State points
+  const pts = [
+    {cls:'rs1', num:'1', name:'Sanie', rows:[
+      ['T₁', r.T1.toFixed(2), '°C'], ['P₁', r.P1.toFixed(3), 'bar(a)'],
+      ['h₁', r.h1.toFixed(2), 'kJ/kg'], ['s₁', r.s1.toFixed(4), 'kJ/(kg·K)'],
+      ['ρ₁', r.rho1.toFixed(2), 'kg/m³'], ['T_e,sat', r.Te_sat.toFixed(2), '°C'],
+    ]},
+    {cls:'rs2', num:'2', name:'Výtlak', rows:[
+      ['T₂', r.T2.toFixed(2), '°C'], ['P₂', r.P2.toFixed(3), 'bar(a)'],
+      ['h₂', r.h2.toFixed(2), 'kJ/kg'], ['h₂ₛ', r.h2s.toFixed(2), 'kJ/kg'],
+      ['T_c,sat', r.Tc_sat.toFixed(2), '°C'], ['', '', ''],
+    ]},
+    {cls:'rs3', num:'3', name:'Kvapalina', rows:[
+      ['T₃', r.T3.toFixed(2), '°C'], ['P₃', r.P3.toFixed(3), 'bar(a)'],
+      ['h₃', r.h3.toFixed(2), 'kJ/kg'], ['SC', r.SC.toFixed(2), 'K'],
+      ['', '', ''], ['', '', ''],
+    ]},
+    {cls:'rs4', num:'4', name:'Za exp.', rows:[
+      ['h₄', r.h4.toFixed(2), 'kJ/kg'], ['P₄≈P₁', r.P1.toFixed(3), 'bar(a)'],
+      ['x₄', (r.x4*100).toFixed(1), '%'], ['T₄,sat', r.Te_sat.toFixed(2), '°C'],
+      ['', '', ''], ['', '', ''],
+    ]},
+  ];
+  document.getElementById('statePointsGrid').innerHTML = pts.map(p=>
+    `<div class="res-state-pt ${p.cls}">
+      <div class="rs-ptnum">Bod ${p.num} — ${p.name}</div>
+      ${p.rows.filter(r=>r[0]).map(r=>`<div class="rs-row"><span>${r[0]}</span><span class="rs-val">${r[1]}<small style="font-size:9px;color:#9aa3b8;margin-left:3px">${r[2]}</small></span></div>`).join('')}
+    </div>`
+  ).join('');
+
+  // Derived table
+  function evTag(ok, warn, val){
+    if(ok) return `<span style="font-size:9px;background:#dcfce7;color:#14532d;padding:2px 6px;border-radius:4px;font-weight:700">✓ OK</span>`;
+    if(warn) return `<span style="font-size:9px;background:#fef3c7;color:#92400e;padding:2px 6px;border-radius:4px;font-weight:700">⚠ ${val}</span>`;
+    return `<span style="font-size:9px;background:#fee2e2;color:#991b1b;padding:2px 6px;border-radius:4px;font-weight:700">✗ ${val}</span>`;
+  }
+  const derived = [
+    {
+      name: activeLang==='sk'?'Prehriat (SH) na saní':'Superheat (SH) at suction',
+      val: r.SH.toFixed(2), unit: 'K',
+      ev: r.SH<0?evTag(0,0,'Záplava!'):r.SH<3?evTag(0,0,'Kriticky nízky'):r.SH>25?evTag(0,1,'Vysoký'):evTag(1,0,'')
+    },
+    {
+      name: activeLang==='sk'?'Podchladzenie (SC)':'Subcooling (SC)',
+      val: r.SC.toFixed(2), unit: 'K',
+      ev: r.SC<0?evTag(0,0,'Flash-gas!'):r.SC<2?evTag(0,1,'Nízke'):r.SC>15?evTag(0,1,'Vysoké'):evTag(1,0,'')
+    },
+    {
+      name: activeLang==='sk'?'Kompresný pomer (CR)':'Compression ratio (CR)',
+      val: r.CR.toFixed(3), unit: ':1',
+      ev: r.CR<1.5?evTag(0,0,'Podozrivo nízky'):r.CR>8?evTag(0,1,'Vysoký'):evTag(1,0,'')
+    },
+    {
+      name: activeLang==='sk'?'Špecifický chladiaci výkon q₀':'Specific cooling effect q₀',
+      val: r.q0.toFixed(2), unit: 'kJ/kg',
+      ev: evTag(r.q0>0,0,'')
+    },
+    {
+      name: activeLang==='sk'?'Špecifická práca kompresora w':'Specific compressor work w',
+      val: r.w.toFixed(2), unit: 'kJ/kg',
+      ev: evTag(r.w>0,0,'')
+    },
+    {
+      name: activeLang==='sk'?'Špecifické teplo kondenzátora q_c':'Specific condenser heat q_c',
+      val: r.qc.toFixed(2), unit: 'kJ/kg',
+      ev: evTag(r.qc>0,0,'')
+    },
+    {
+      name: 'COP (termodyn.)',
+      val: r.COP.toFixed(3), unit: 'W/W',
+      ev: r.COP<1?evTag(0,0,'Nízky'):r.COP<1.5?evTag(0,1,'Nízky'):evTag(1,0,'')
+    },
+    {
+      name: activeLang==='sk'?'Izentropická účinnosť η_is':'Isentropic efficiency η_is',
+      val: (r.eta_is*100).toFixed(1), unit: '%',
+      ev: r.eta_is<0?evTag(0,0,'Chyba mer.'):r.eta_is>1?evTag(0,0,'Chyba mer.'):r.eta_is<0.5?evTag(0,1,'Nízka'):evTag(1,0,'')
+    },
+    {
+      name: activeLang==='sk'?'Teplota kondenzácie T_c,sat':'Condensing temp. T_c,sat',
+      val: r.Tc_sat.toFixed(2), unit: '°C',
+      ev: (!isNaN(r.T_amb)&&r.Tc_sat>r.T_amb+30)?evTag(0,1,'Vysoká'):evTag(1,0,'')
+    },
+    {
+      name: activeLang==='sk'?'Teplota odparovania T_e,sat':'Evaporating temp. T_e,sat',
+      val: r.Te_sat.toFixed(2), unit: '°C',
+      ev: evTag(1,0,'')
+    },
+  ];
+  document.getElementById('derivedBody').innerHTML = derived.map(d=>
+    `<tr><td>${d.name}</td><td class="num">${d.val}</td><td class="unit">${d.unit}</td><td>${d.ev}</td></tr>`
+  ).join('');
+
+  // Mass flow section
+  const mfSection = document.getElementById('massFlowSection');
+  const mfGrid = document.getElementById('massFlowGrid');
+  if(r.mdot){
+    mfSection.style.display='block';
+    const P_used = r.P_comp || (r.I_meas*r.U_meas);
+    mfGrid.innerHTML=[
+      {l:activeLang==='sk'?'Prietok chladiva':'Mass flow', v:(r.mdot*1000).toFixed(3), u:'g/s'},
+      {l:activeLang==='sk'?'Chladiaci výkon Q₀':'Cooling capacity Q₀', v:(r.Q_evap/1000).toFixed(2), u:'kW'},
+      {l:activeLang==='sk'?'Výkon kondenzátora Q_c':'Condenser capacity Q_c', v:(r.Q_cond/1000).toFixed(2), u:'kW'},
+      {l:'COP (reálny)', v:r.COP_real.toFixed(3), u:'W/W'},
+    ].map(e=>`<div class="ev"><div><div class="ev-lbl">${e.l}</div></div><div><span class="ev-val">${e.v}</span> <span class="ev-u">${e.u}</span></div></div>`).join('');
+  } else {
+    mfSection.style.display='none';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  P-H DIAGRAM
+// ═══════════════════════════════════════════════════════════════════
+function generateSatDome(fluid){
+  if(satDomeCache[fluid]) return satDomeCache[fluid];
+  const critT = {
+    'R134a':100.5,'R404A':71.5,'R410A':71.5,'R407C':86.0,'R22':95.5,
+    'R290':96.0,'R600a':134.0,'R32':77.5,'R448A':85.5,'R449A':82.5,'R717':132.0
+  };
+  const Tmax = (critT[fluid]||85) - 0.8;
+  const Tmin = -90;
+  const liq=[], vap=[];
+  for(let T=Tmin; T<=Tmax; T+=3){
+    try{
+      const P  = cpProp('P','T',T+273.15,'Q',0,fluid)/1e5;
+      const hL = cpProp('H','T',T+273.15,'Q',0,fluid)/1000;
+      const hV = cpProp('H','T',T+273.15,'Q',1,fluid)/1000;
+      if(P>0 && isFinite(hL) && isFinite(hV)){
+        liq.push({h:hL,P}); vap.push({h:hV,P});
+      }
+    } catch(e){}
+  }
+  satDomeCache[fluid] = {liq,vap};
+  return {liq,vap};
+}
+
+function drawPHDiagram(r){
+  if(!cpReady) return;
+  const W=660, H=380;
+  const pad={top:28,right:22,bottom:46,left:52};
+  const pW=W-pad.left-pad.right, pH=H-pad.top-pad.bottom;
+
+  // Generate saturation dome
+  const dome = generateSatDome(r.fluid);
+
+  // Collect all h and P for axis bounds
+  const allH=[r.h1,r.h2,r.h3,r.h4];
+  const allP=[r.P1,r.P2];
+  dome.liq.forEach(p=>{allH.push(p.h);allP.push(p.P);});
+  dome.vap.forEach(p=>{allH.push(p.h);allP.push(p.P);});
+
+  const margin=30;
+  let hMin=Math.min(...allH)-margin, hMax=Math.max(...allH)+margin;
+  let PMin=Math.min(...allP)*0.6, PMax=Math.max(...allP)*1.5;
+  // Ensure PMin > 0
+  if(PMin<=0) PMin=0.05;
+
+  const tx = h => pad.left + (h-hMin)/(hMax-hMin)*pW;
+  const ty = P => pad.top + pH - Math.max(0,Math.min(1,(Math.log(P/PMin)/Math.log(PMax/PMin))))*pH;
+
+  let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="background:#fafbfd;border-radius:8px">`;
+
+  // Background bands
+  const yP1=ty(r.P1), yP2=ty(r.P2);
+  svg+=`<rect x="${pad.left}" y="${pad.top}" width="${pW}" height="${pH}" fill="#f0f6ff" rx="2"/>`;
+  svg+=`<rect x="${pad.left}" y="${yP2}" width="${pW}" height="${yP1-yP2}" fill="#fff7f0" rx="0"/>`;
+
+  // Grid lines - pressure
+  const pressMarks=[];
+  for(let e=-1;e<=3;e++) for(let m of[1,1.5,2,3,5,7]) {
+    const P=m*Math.pow(10,e);
+    if(P>=PMin*0.9&&P<=PMax*1.1) pressMarks.push(P);
+  }
+  svg+=`<g stroke="#e4e9f4" stroke-width="0.5">`;
+  pressMarks.forEach(P=>{
+    const y=ty(P);
+    if(y>=pad.top&&y<=pad.top+pH) svg+=`<line x1="${pad.left}" y1="${y}" x2="${pad.left+pW}" y2="${y}"/>`;
+  });
+  // Grid lines - enthalpy
+  const hStep=Math.max(20,Math.ceil((hMax-hMin)/8/10)*10);
+  for(let h=Math.ceil(hMin/hStep)*hStep;h<=hMax;h+=hStep){
+    svg+=`<line x1="${tx(h)}" y1="${pad.top}" x2="${tx(h)}" y2="${pad.top+pH}"/>`;
+  }
+  svg+=`</g>`;
+
+  // Saturation dome
+  if(dome.liq.length>2){
+    let liqPts=dome.liq.map(p=>`${tx(p.h).toFixed(1)},${ty(p.P).toFixed(1)}`).join(' ');
+    let vapPts=[...dome.vap].reverse().map(p=>`${tx(p.h).toFixed(1)},${ty(p.P).toFixed(1)}`).join(' ');
+    svg+=`<polygon points="${liqPts} ${vapPts}" fill="rgba(37,99,235,0.06)" stroke="none"/>`;
+    svg+=`<polyline points="${liqPts}" fill="none" stroke="#3b82f6" stroke-width="1.8"/>`;
+    svg+=`<polyline points="${dome.vap.map(p=>`${tx(p.h).toFixed(1)},${ty(p.P).toFixed(1)}`).join(' ')}" fill="none" stroke="#3b82f6" stroke-width="1.8" stroke-dasharray="5,3"/>`;
+  }
+
+  // Pressure lines (HP and LP horizontal dashes)
+  svg+=`<line x1="${pad.left}" y1="${ty(r.P2)}" x2="${pad.left+pW}" y2="${ty(r.P2)}" stroke="#dc2626" stroke-width="1" stroke-dasharray="6,3" opacity="0.5"/>`;
+  svg+=`<line x1="${pad.left}" y1="${ty(r.P1)}" x2="${pad.left+pW}" y2="${ty(r.P1)}" stroke="#2563eb" stroke-width="1" stroke-dasharray="6,3" opacity="0.5"/>`;
+
+  // Cycle lines
+  // 1→2: compression (curved-ish line)
+  svg+=`<line x1="${tx(r.h1)}" y1="${ty(r.P1)}" x2="${tx(r.h2)}" y2="${ty(r.P2)}" stroke="#f97316" stroke-width="2.5"/>`;
+  // Arrow on 1→2
+  {const dx=tx(r.h2)-tx(r.h1),dy=ty(r.P2)-ty(r.P1),len=Math.sqrt(dx*dx+dy*dy);
+   const mx=tx(r.h1)+dx*0.6,my=ty(r.P1)+dy*0.6,ux=dx/len,uy=dy/len;
+   svg+=`<polygon points="${mx+ux*7},${my+uy*7} ${mx-ux*5+uy*4},${my-uy*5-ux*4} ${mx-ux*5-uy*4},${my-uy*5+ux*4}" fill="#f97316"/>`;}
+  // 2→3: condensation (horizontal at P2)
+  svg+=`<line x1="${tx(r.h2)}" y1="${ty(r.P2)}" x2="${tx(r.h3)}" y2="${ty(r.P2)}" stroke="#dc2626" stroke-width="2.5"/>`;
+  {const mx=(tx(r.h2)+tx(r.h3))/2,my=ty(r.P2);
+   svg+=`<polygon points="${mx+8},${my} ${mx-5},${my-4} ${mx-5},${my+4}" fill="#dc2626"/>`;}
+  // 3→4: expansion (isenthalpic, vertical)
+  svg+=`<line x1="${tx(r.h3)}" y1="${ty(r.P2)}" x2="${tx(r.h4)}" y2="${ty(r.P1)}" stroke="#7c3aed" stroke-width="2.5"/>`;
+  {const mx=(tx(r.h3)+tx(r.h4))/2,my=(ty(r.P2)+ty(r.P1))/2;
+   svg+=`<polygon points="${mx},${my+8} ${mx-4},${my-5} ${mx+4},${my-5}" fill="#7c3aed"/>`;}
+  // 4→1: evaporation (horizontal at P1)
+  svg+=`<line x1="${tx(r.h4)}" y1="${ty(r.P1)}" x2="${tx(r.h1)}" y2="${ty(r.P1)}" stroke="#2563eb" stroke-width="2.5"/>`;
+  {const mx=(tx(r.h4)+tx(r.h1))/2,my=ty(r.P1);
+   svg+=`<polygon points="${mx+8},${my} ${mx-5},${my-4} ${mx-5},${my+4}" fill="#2563eb"/>`;}
+
+  // State point circles + labels
+  const pts2=[
+    {h:r.h1,P:r.P1,lbl:'1',c:'#2563eb',dx:8,dy:-8},
+    {h:r.h2,P:r.P2,lbl:'2',c:'#dc2626',dx:8,dy:-8},
+    {h:r.h3,P:r.P2,lbl:'3',c:'#059669',dx:8,dy:-8},
+    {h:r.h4,P:r.P1,lbl:'4',c:'#7c3aed',dx:8,dy:-8},
+  ];
+  pts2.forEach(p=>{
+    const x=tx(p.h),y=ty(p.P);
+    svg+=`<circle cx="${x}" cy="${y}" r="6" fill="${p.c}" stroke="#fff" stroke-width="2"/>`;
+    svg+=`<text x="${x+p.dx}" y="${y+p.dy}" font-family="Inter,sans-serif" font-size="11" font-weight="800" fill="${p.c}">${p.lbl}</text>`;
+  });
+
+  // HP / LP labels on right
+  svg+=`<text x="${pad.left+pW+4}" y="${ty(r.P2)+4}" font-family="Inter,sans-serif" font-size="9" font-weight="700" fill="#dc2626">HP</text>`;
+  svg+=`<text x="${pad.left+pW+4}" y="${ty(r.P1)+4}" font-family="Inter,sans-serif" font-size="9" font-weight="700" fill="#2563eb">LP</text>`;
+
+  // Axes
+  svg+=`<line x1="${pad.left}" y1="${pad.top}" x2="${pad.left}" y2="${pad.top+pH+1}" stroke="#0d1f3c" stroke-width="1.5"/>`;
+  svg+=`<line x1="${pad.left-1}" y1="${pad.top+pH}" x2="${pad.left+pW}" y2="${pad.top+pH}" stroke="#0d1f3c" stroke-width="1.5"/>`;
+
+  // Y axis ticks + labels
+  pressMarks.forEach(P=>{
+    const y=ty(P);
+    if(y>=pad.top&&y<=pad.top+pH){
+      svg+=`<line x1="${pad.left-4}" y1="${y}" x2="${pad.left}" y2="${y}" stroke="#0d1f3c" stroke-width="1"/>`;
+      const label = P>=1 ? P.toFixed(P%1===0?0:1) : P.toFixed(2);
+      svg+=`<text x="${pad.left-7}" y="${y+3.5}" text-anchor="end" font-family="Inter,sans-serif" font-size="8.5" fill="#7a8299">${label}</text>`;
+    }
+  });
+
+  // X axis ticks + labels
+  for(let h=Math.ceil(hMin/hStep)*hStep;h<=hMax;h+=hStep){
+    const x=tx(h);
+    svg+=`<line x1="${x}" y1="${pad.top+pH}" x2="${x}" y2="${pad.top+pH+4}" stroke="#0d1f3c" stroke-width="1"/>`;
+    svg+=`<text x="${x}" y="${pad.top+pH+14}" text-anchor="middle" font-family="Inter,sans-serif" font-size="8.5" fill="#7a8299">${h}</text>`;
+  }
+
+  // Axis labels
+  svg+=`<text x="${pad.left+pW/2}" y="${H-4}" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="#4b5563">h [kJ/kg]</text>`;
+  svg+=`<text x="11" y="${pad.top+pH/2}" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="#4b5563" transform="rotate(-90,11,${pad.top+pH/2})">P [bar(a)]</text>`;
+
+  // Title
+  svg+=`<text x="${pad.left+pW/2}" y="${pad.top-8}" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#9aa3b8">${r.fluid} — Parno-kompresný cyklus</text>`;
+
+  svg+=`</svg>`;
+
+  document.getElementById('phWrap').innerHTML = svg;
+  document.getElementById('phLegend').style.display='flex';
+  const rb = document.getElementById('phRefrigBadge');
+  rb.style.display='block'; rb.textContent=r.fluid;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  DIAGNOSTICS ENGINE
+// ═══════════════════════════════════════════════════════════════════
+function runDiagnostics(r){
+  const faults=[];
+
+  // Helper
+  const add=(severity,nameKey,descKey,confidence,causes,actions)=>{
+    faults.push({severity, name:t(nameKey), desc:t(descKey), confidence, causes, actions});
+  };
+
+  // ── SUCTION SUPERHEAT ──
+  if(r.SH < 0){
+    add('CRITICAL','d_flood_name','d_flood_desc', 95,
+      activeLang==='sk'
+        ? ['Expanzný ventil príliš otvorený','Nízke tepelné zaťaženie výparníka','Porucha TXV/EEV']
+        : ['Expansion valve too open','Low evaporator heat load','TXV/EEV fault'],
+      activeLang==='sk'
+        ? ['Uzatvorte expanzný ventil','Skontrolujte tepelné zaťaženie','Overte bulb TXV']
+        : ['Close expansion valve','Check heat load','Verify TXV bulb']
+    );
+  } else if(r.SH < 3){
+    add('CRITICAL','d_lowsh_name','d_lowsh_desc', 85,
+      activeLang==='sk'
+        ? ['Expanzný ventil príliš otvorený','Nesprávny kontakt snímača TXV']
+        : ['Expansion valve too open','Poor TXV bulb contact'],
+      activeLang==='sk'
+        ? ['Nastavte expanzný ventil','Skontrolujte upevnenie snímača TXV']
+        : ['Adjust expansion valve','Check TXV bulb mounting']
+    );
+  } else if(r.SH > 25){
+    add('WARNING','d_highsh_name','d_highsh_desc', 80,
+      activeLang==='sk'
+        ? ['Nedostatok chladiva (únik)','Zapchatý filter-sušič','TXV príliš zatvorený','Zlý kontakt bulb TXV']
+        : ['Low refrigerant charge (leak)','Blocked filter-drier','TXV too closed','Poor TXV bulb contact'],
+      activeLang==='sk'
+        ? ['Skontrolujte plnenie chladiva a úniky','Vymeňte filter-sušič','Nastavte TXV']
+        : ['Check refrigerant charge and leaks','Replace filter-drier','Adjust TXV']
+    );
+  }
+
+  // ── SUBCOOLING ──
+  if(r.SC < 0){
+    add('WARNING','d_flashgas_name','d_flashgas_desc', 90,
+      activeLang==='sk'
+        ? ['Nedostatok chladiva','Zapchatý filter-sušič','Vysoký tlakový spád v kvapalinovom potrubí']
+        : ['Low refrigerant charge','Blocked filter-drier','High pressure drop in liquid line'],
+      activeLang==='sk'
+        ? ['Skontrolujte plnenie chladiva','Vymeňte filter-sušič']
+        : ['Check refrigerant charge','Replace filter-drier']
+    );
+  } else if(r.SC < 2){
+    add('WARNING','d_lowsc_name','d_lowsc_desc', 75,
+      activeLang==='sk'
+        ? ['Nedostatok chladiva (únik)','Znečistený kondenzátor']
+        : ['Low refrigerant charge (leak)','Dirty condenser'],
+      activeLang==='sk'
+        ? ['Skontrolujte úniky a plnenie','Vyčistite kondenzátor']
+        : ['Check for leaks and charge','Clean condenser']
+    );
+  } else if(r.SC > 15){
+    add('INFO','d_highsc_name','d_highsc_desc', 60,
+      activeLang==='sk'
+        ? ['Možné preplnenie chladivom','Výborný výkon kondenzátora']
+        : ['Possible refrigerant overcharge','Excellent condenser performance'],
+      activeLang==='sk'
+        ? ['Skontrolujte celkové plnenie chladiva']
+        : ['Verify total refrigerant charge']
+    );
+  }
+
+  // ── DISCHARGE TEMPERATURE ──
+  if(r.T2 > 120){
+    add('CRITICAL','d_highdisch_name','d_highdisch_desc', 95,
+      activeLang==='sk'
+        ? ['Znečistený kondenzátor','Nedostatok chladiva','Vysoký kompresný pomer','Vysoký prehriat sania']
+        : ['Dirty condenser','Low refrigerant charge','High compression ratio','High suction superheat'],
+      activeLang==='sk'
+        ? ['OKAMŽITE zastavte systém','Vyčistite kondenzátor','Skontrolujte chladivo']
+        : ['IMMEDIATELY stop system','Clean condenser','Check refrigerant']
+    );
+  } else if(r.T2 > 100){
+    add('WARNING','d_warndisch_name','d_warndisch_desc', 80,
+      activeLang==='sk'
+        ? ['Znečistený kondenzátor','Nízky objem chladiva','Vysoký prehriat']
+        : ['Dirty condenser','Low refrigerant','High superheat'],
+      activeLang==='sk'
+        ? ['Vyčistite kondenzátor','Skontrolujte chladivo a tlaky']
+        : ['Clean condenser','Check refrigerant and pressures']
+    );
+  }
+
+  // ── COMPRESSION RATIO ──
+  if(r.P1 >= r.P2){
+    add('CRITICAL','d_pswap_name','d_pswap_desc', 99,
+      activeLang==='sk'
+        ? ['Vymenené tlakomery','Porucha snímačov tlaku']
+        : ['Swapped pressure gauges','Pressure sensor fault'],
+      activeLang==='sk'
+        ? ['Skontrolujte zapojenie tlakomerov','Overte funkčnosť snímačov']
+        : ['Check pressure gauge connections','Verify sensor function']
+    );
+  } else {
+    if(r.CR > 8){
+      add('WARNING','d_highcr_name','d_highcr_desc', 85,
+        activeLang==='sk'
+          ? ['Znečistený kondenzátor','Príliš nízka teplota odparovania']
+          : ['Dirty condenser','Too low evaporating temperature'],
+        activeLang==='sk'
+          ? ['Vyčistite kondenzátor','Overte nastavenie systému']
+          : ['Clean condenser','Verify system setup']
+      );
+    } else if(r.CR < 1.5){
+      add('WARNING','d_lowcr_name','d_lowcr_desc', 80,
+        activeLang==='sk'
+          ? ['Porucha ventilov kompresora','Chyba merania tlaku']
+          : ['Compressor valve failure','Pressure measurement error'],
+        activeLang==='sk'
+          ? ['Skontrolujte kompresor','Overte tlakomery']
+          : ['Check compressor','Verify pressure gauges']
+      );
+    }
+  }
+
+  // ── ISENTROPIC EFFICIENCY ──
+  if(r.P1 < r.P2){
+    if(r.eta_is < 0.5 && r.eta_is > 0){
+      add('WARNING','d_loweta_name','d_loweta_desc', 75,
+        activeLang==='sk'
+          ? ['Opotrebované ventily kompresora','Vnútorné úniky kompresora','Opotrebovanie piestov/skrutiek']
+          : ['Worn compressor valves','Internal compressor leaks','Piston/screw wear'],
+        activeLang==='sk'
+          ? ['Zmerajte kompresnú skúšku','Zvážte generálnu opravu']
+          : ['Perform compression test','Consider compressor overhaul']
+      );
+    } else if(r.eta_is > 1.0){
+      add('WARNING','d_higheta_name','d_higheta_desc', 90,
+        activeLang==='sk'
+          ? ['Nepresný teplomer výtlaku','Nepresný tlakomer sania','Chyba snímačov']
+          : ['Inaccurate discharge thermometer','Inaccurate suction pressure gauge','Sensor errors'],
+        activeLang==='sk'
+          ? ['Skontrolujte kalibráciu snímačov','Overte merania referenčným prístrojom']
+          : ['Check sensor calibration','Verify with reference instrument']
+      );
+    }
+  }
+
+  // ── CONDENSING TEMPERATURE VS AMBIENT ──
+  if(!isNaN(r.T_amb) && r.Tc_sat > r.T_amb + 30){
+    add('WARNING','d_highcond_name','d_highcond_desc', 70,
+      activeLang==='sk'
+        ? ['Znečistený kondenzátor','Nedostatočný prietok vzduchu','Nekondenzovateľné plyny v systéme']
+        : ['Dirty condenser','Insufficient airflow','Non-condensables in system'],
+      activeLang==='sk'
+        ? ['Vyčistite kondenzátor','Skontrolujte ventilátor','Odplyňte systém']
+        : ['Clean condenser','Check fan','Purge system of non-condensables']
+    );
+  }
+
+  // ── COP ──
+  if(r.COP < 1.5 && r.q0 > 0){
+    add('INFO','d_lowcop_name','d_lowcop_desc', 60,
+      activeLang==='sk'
+        ? ['Vysoký kompresný pomer','Nízka účinnosť kompresora','Neoptimálne podmienky']
+        : ['High compression ratio','Low compressor efficiency','Suboptimal conditions'],
+      activeLang==='sk'
+        ? ['Znižte kondenzačnú teplotu','Zvýšte teplotu odparovania ak je možné','Skontrolujte kompresor']
+        : ['Reduce condensing temperature','Raise evaporating temperature if possible','Check compressor']
+    );
+  }
+
+  // ── VAPOR QUALITY x4 ──
+  if(r.x4 > 0.35){
+    add('INFO','d_highx4_name','d_highx4_desc', 60,
+      activeLang==='sk'
+        ? ['Nízke podchladzenie pred expanziou','Nedostatok chladiva']
+        : ['Low subcooling before expansion','Low refrigerant charge'],
+      activeLang==='sk'
+        ? ['Zlepšite podchladzovanie','Skontrolujte plnenie chladiva']
+        : ['Improve subcooling','Check refrigerant charge']
+    );
+  }
+
+  displayDiagnostics(faults);
+}
+
+function displayDiagnostics(faults){
+  const out = document.getElementById('diagOutput');
+  const badge = document.getElementById('diagBadge');
+
+  if(faults.length===0){
+    out.innerHTML=`<div class="fault-item fault-ok">
+      <div class="fault-head">
+        <span class="fault-badge fb-info">✓ OK</span>
+        <span class="fault-name">${t('d_ok')}</span>
+      </div>
+      <div class="fault-desc">${t('d_ok_desc')}</div>
+    </div>`;
+    badge.style.display='block';
+    badge.style.background='#dcfce7'; badge.style.color='#14532d';
+    badge.textContent='✓ Systém OK';
+    return;
+  }
+
+  const critCount=faults.filter(f=>f.severity==='CRITICAL').length;
+  const warnCount=faults.filter(f=>f.severity==='WARNING').length;
+  badge.style.display='block';
+  if(critCount>0){badge.style.background='#fee2e2';badge.style.color='#991b1b';badge.textContent=`✗ ${critCount} KRITICKÁ`+(critCount>1?'+'+(warnCount+faults.filter(f=>f.severity==='INFO').length)+' ďalších':'');}
+  else if(warnCount>0){badge.style.background='#fef3c7';badge.style.color='#92400e';badge.textContent=`⚠ ${warnCount} upozornení`;}
+  else {badge.style.background='#eff6ff';badge.style.color='#1e40af';badge.textContent='ℹ Informácie';}
+
+  out.innerHTML = faults.map(f=>{
+    const sevClass=f.severity==='CRITICAL'?'fault-critical':f.severity==='WARNING'?'fault-warning':'fault-info';
+    const badgeClass=f.severity==='CRITICAL'?'fb-critical':f.severity==='WARNING'?'fb-warning':'fb-info';
+    const sevLabel=f.severity==='CRITICAL'?'KRITICKÁ':f.severity==='WARNING'?'VAROVANIE':'INFO';
+    return `<div class="fault-item ${sevClass}">
+      <div class="fault-head">
+        <span class="fault-badge ${badgeClass}">${sevLabel}</span>
+        <span class="fault-name">${f.name}</span>
+        <span class="fault-conf">${f.confidence}% istota</span>
+      </div>
+      <div class="fault-desc">${f.desc}</div>
+      <div class="fault-causes"><strong>${t('cause_lbl')}</strong> ${f.causes.join(' · ')}</div>
+      <div style="margin-top:5px">
+        <strong style="font-size:9.5px;color:#6b7280">${t('action_lbl')}</strong>
+        ${f.actions.map(a=>`<span class="fault-action">${a}</span>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  HEADER EDITOR
+// ═══════════════════════════════════════════════════════════════════
+let headerData = {
+  title: 'AES — Chladiaci Okruh Analyzátor',
+  sub: 'Diagnostika reálneho chladiaceho okruhu · P-H diagram · CoolProp | AES s.r.o. — Advanced Energy Systems',
+  footer: 'AES s.r.o. — Advanced Energy Systems | www.aes-slovakia.eu | Farská 50, 949 01 Nitra, Slovakia',
+  logoDataUrl: null
+};
+
+function openHeaderEditor(){
+  if(!isAdmin){
+    const btn = document.getElementById('tbEditBtn');
+    if(btn){ btn.textContent='🔒 Len Admin'; setTimeout(()=>btn.textContent='✏️ Upraviť hlavičku',2000); }
+    return;
+  }
+  document.getElementById('hdr_title').value  = headerData.title;
+  document.getElementById('hdr_sub').value    = headerData.sub;
+  document.getElementById('hdr_footer').value = headerData.footer;
+  updateLogoPreview();
+  document.getElementById('headerModal').style.display='flex';
+}
+function closeHeaderEditor(){ document.getElementById('headerModal').style.display='none'; }
+function saveHeader(){
+  headerData.title  = document.getElementById('hdr_title').value.trim() || headerData.title;
+  headerData.sub    = document.getElementById('hdr_sub').value.trim();
+  headerData.footer = document.getElementById('hdr_footer').value.trim();
+  applyHeader();
+  closeHeaderEditor();
+}
+function applyHeader(){
+  document.getElementById('tbTitleEl').textContent = headerData.title;
+  document.getElementById('tbSubEl').textContent   = headerData.sub;
+  const wrap = document.getElementById('tbLogoInner');
+  if(headerData.logoDataUrl){
+    wrap.innerHTML=`<img src="${headerData.logoDataUrl}" style="width:100%;height:100%;object-fit:contain;border-radius:8px">`;
+    wrap.style.background='#fff';
+  } else {
+    wrap.innerHTML='🔬';
+    wrap.style.background='';
+  }
+}
+function handleLogoUpload(e){
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=ev=>{ headerData.logoDataUrl=ev.target.result; updateLogoPreview(); };
+  reader.readAsDataURL(file);
+}
+function clearLogo(){
+  headerData.logoDataUrl=null;
+  document.getElementById('logoFileInput').value='';
+  updateLogoPreview();
+}
+function updateLogoPreview(){
+  const prev=document.getElementById('logoPreview');
+  if(headerData.logoDataUrl){
+    prev.innerHTML=`<img src="${headerData.logoDataUrl}" style="width:76px;height:76px;object-fit:contain;border-radius:8px">`;
+  } else {
+    prev.innerHTML='<div class="lu-hint">📷<br>Kliknite pre<br>nahranie loga</div>';
+  }
+}
+
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeHeaderEditor(); });
+
+// ═══════════════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded',()=>{
+  setLang('sk');
+  updatePressureLabels();
+});
 </script>
 </body>
 </html>
