@@ -1155,6 +1155,40 @@ function getFluid(){
       || document.getElementById('refrigerant').value;
 }
 
+// ═══════════════════════════════════════════════════════════════════
+//  CORE CALCULATION — EN 12900 correction factor method
+// ═══════════════════════════════════════════════════════════════════
+function computeQo(m, Te_r, Tc_r, Tsuc_r, Tliq_r, fluid){
+  // MEASURED conditions
+  const pe_m = satP(m.Te_meas, fluid);
+  const pc_m = satP(m.Tc_meas, fluid);
+  const hA_m = H(pc_m, m.Tliq_meas, fluid, 'liquid');  // saturated liquid
+  const hB_m = H(pe_m, m.Tsuc_meas, fluid, 'vapor');   // superheated vapor
+  const dh_m  = hB_m - hA_m;
+  const rho_m = RHO(pe_m, m.Tsuc_meas, fluid);
+  const mdot  = m.Qvessel / (dh_m * 1000);             // kg/s
+
+  // REQUESTED (reference) conditions
+  const pe_r  = satP(Te_r, fluid);
+  const pc_r  = satP(Tc_r, fluid);
+  const hA_r  = H(pc_r, Tliq_r, fluid, 'liquid');
+  const hB_r  = H(pe_r, Tsuc_r, fluid, 'vapor');
+  const dh_r  = hB_r - hA_r;
+  const rho_r = RHO(pe_r, Tsuc_r, fluid);
+
+  // CORRECTION FACTORS
+  const CF_rho = rho_r / rho_m;
+  const CF_dh  = dh_r  / dh_m;
+
+  // RESULT
+  const Qo  = m.Qvessel * CF_rho * CF_dh;
+  const COP = Qo / m.P1;
+
+  return { pe_m, pc_m, hA_m, hB_m, dh_m, rho_m, mdot,
+           pe_r, pc_r, hA_r, hB_r, dh_r, rho_r,
+           CF_rho, CF_dh, Qo, COP };
+}
+
 function updateBtns(){
   const btn = document.getElementById('calcAllMeasBtn');
   if(btn) btn.disabled = measRows.length === 0;
