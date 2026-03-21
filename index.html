@@ -1282,13 +1282,12 @@ function buildRowHTML(row,num){
   const qoStr=r?r.Qo.toFixed(2)+' W':'';
   const isCustom=row.stdKey==='custom';
 
-  // Standard buttons including Custom
+  // Standard buttons including Custom — use single quotes inside onclick attr
   const stdBtns=ALL_STD_KEYS.concat(['custom']).map(k=>{
     const p=STANDARDS[k]; if(!p) return '';
     const isA=k===row.stdKey;
     const cls='mrow-std-btn'+(isA?' active':'');
-    const onclick='setRowStd('+row.id+',"'+k+'")';
-    return '<button class="'+cls+'" onclick="'+onclick+'">'+p.label+' '+p.range+'</button>';
+    return '<button class="'+cls+'" data-key="'+k+'" onclick="setRowStd('+row.id+',\''+k+'\')">'+p.label+' '+p.range+'</button>';
   }).join('');
 
   // Custom condition inputs (shown only when Custom is selected)
@@ -1367,13 +1366,11 @@ function setRowStd(id,stdKey){
   const row=measRows.find(r=>r.id===id);if(!row)return;
   row.stdKey=stdKey;row.result=null;
 
-  // Update standard buttons active state
+  // Update standard buttons active state using data-key
   const body=document.getElementById('mrow_body_'+id);
   if(body){
     body.querySelectorAll('.mrow-std-btn').forEach(btn=>{
-      const p=STANDARDS[stdKey];
-      const match=p&&(btn.textContent.trim()===p.label+' '+p.range);
-      btn.classList.toggle('active',match);
+      btn.classList.toggle('active', btn.getAttribute('data-key')===stdKey);
     });
   }
 
