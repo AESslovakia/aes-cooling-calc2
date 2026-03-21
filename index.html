@@ -244,6 +244,11 @@ body{font-family:'Inter',Arial,sans-serif;font-size:13px;color:#1e2433;backgroun
 .mrow-setvals-title{font-size:8.5px;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:1px;width:100%;margin-bottom:4px}
 .sv-tag{font-size:10.5px;background:#fff;border:1px solid #fde68a;border-radius:5px;padding:3px 8px;color:#78350f;font-weight:600}
 .sv-tag span{font-size:8.5px;color:#b45309;font-weight:700;text-transform:uppercase;margin-right:3px}
+/* Measured values strip — teal */
+.mrow-measvals{display:flex;flex-wrap:wrap;gap:5px;margin:4px 0 8px;padding:8px 10px;background:#ecfdf5;border:1.5px solid #6ee7b7;border-radius:8px}
+.mrow-measvals-title{font-size:8.5px;font-weight:700;color:#065f46;text-transform:uppercase;letter-spacing:1px;width:100%;margin-bottom:4px}
+.mv-tag{font-size:10.5px;background:#fff;border:1px solid #a7f3d0;border-radius:5px;padding:3px 8px;color:#065f46;font-weight:600}
+.mv-tag span{font-size:8.5px;color:#059669;font-weight:700;text-transform:uppercase;margin-right:3px}
 .meas-count-badge{font-size:10px;font-weight:700;padding:3px 9px;background:#eef3ff;border:1px solid #93c5fd;border-radius:6px;color:#2563eb}
 
 /* ── LANGUAGE SWITCHER ── */
@@ -1122,9 +1127,13 @@ const C={factory:0,calo:1,order:2,kitNo:3,compType:4,
   Te_set:10,Tc_set:11,Tamb_set:12,Tsuc_set:13,Tliq_set:14,
   voltage:15,freq:16,cooling:17,rpm:18,
   refrigerant:19,capacitor:20,
-  // Power & measured
+  // Measured values W-AK
   P1:22,
-  Te_meas:27,Tc_meas:28,Qvessel:29,Tsuc_meas:31,Pe_uncorr:38,Tliq_meas:39,Tvout_meas:40};
+  Qo_ashrae:23,COP_ashrae:24,Qo_cecomaf:25,COP_cecomaf:26,
+  Te_meas:27,Tc_meas:28,Qvessel:29,
+  Tcomp_meas:30,Tsuc_meas:31,Tdisch_meas:32,Tamb_meas:33,
+  current_meas:34,voltage_meas:35,rpm_meas:36,
+  Pe_uncorr:38,Tliq_meas:39,Tvout_meas:40};
 const FLUID_MAP={'R-290':'R290','R-134a':'R134a','R-404A':'R404A','R-22':'R22',
   'R-407C':'R407C','R-410A':'R410A','R-600a':'R600a','R-32':'R32'};
 
@@ -1133,16 +1142,22 @@ function parseRowCols(raw){
   const s=i=>(c[i]||'').trim(), n=i=>parseFloat(c[i])||0;
   let fluid=s(C.refrigerant); fluid=FLUID_MAP[fluid]||fluid||'R290';
   return {factory:s(C.factory),calo:s(C.calo),order:s(C.order),
-    kitNo:s(C.kitNo),compType:s(C.compType),refrigerant:fluid,P1:n(C.P1),
+    kitNo:s(C.kitNo),compType:s(C.compType),refrigerant:fluid,
     // Set values (K-U)
     Te_set:n(C.Te_set),Tc_set:n(C.Tc_set),Tamb_set:n(C.Tamb_set),
     Tsuc_set:n(C.Tsuc_set),Tliq_set:n(C.Tliq_set),
     voltage:n(C.voltage),freq:n(C.freq),cooling:s(C.cooling),
     rpm:n(C.rpm),capacitor:n(C.capacitor),
-    // Measured values
+    // Measured values (W-AK)
+    P1:n(C.P1),
+    Qo_ashrae:n(C.Qo_ashrae),COP_ashrae:n(C.COP_ashrae),
+    Qo_cecomaf:n(C.Qo_cecomaf),COP_cecomaf:n(C.COP_cecomaf),
     Te_meas:n(C.Te_meas),Tc_meas:n(C.Tc_meas),Qvessel:n(C.Qvessel),
-    Tsuc_meas:n(C.Tsuc_meas),Tliq_meas:n(C.Tliq_meas),
-    Tvout_meas:n(C.Tvout_meas),Pe_uncorr:n(C.Pe_uncorr),colCount:c.length};
+    Tcomp_meas:n(C.Tcomp_meas),Tsuc_meas:n(C.Tsuc_meas),
+    Tdisch_meas:n(C.Tdisch_meas),Tamb_meas:n(C.Tamb_meas),
+    current_meas:n(C.current_meas),voltage_meas:n(C.voltage_meas),rpm_meas:n(C.rpm_meas),
+    Tliq_meas:n(C.Tliq_meas),Tvout_meas:n(C.Tvout_meas),Pe_uncorr:n(C.Pe_uncorr),
+    colCount:c.length};
 }
 
 function getFluid(){
@@ -1359,6 +1374,24 @@ function buildRowHTML(row,num){
       +(d.cooling?'<span class="sv-tag"><span>Cooling</span>'+d.cooling+'</span>':'')
       +(d.rpm?'<span class="sv-tag"><span>RPM</span>'+d.rpm+'</span>':'')
       +(d.capacitor?'<span class="sv-tag"><span>Cap</span>'+d.capacitor+' µF</span>':'')
+      +'</div>'
+      // Measured values (W-AK) — same strip style, teal colour
+      +'<div class="mrow-measvals">'
+      +'<div class="mrow-measvals-title">Measured values (W–AK)</div>'
+      +'<span class="mv-tag"><span>P1</span>'+d.P1.toFixed(2)+' W</span>'
+      +'<span class="mv-tag"><span>Te</span>'+d.Te_meas.toFixed(4)+'°C</span>'
+      +'<span class="mv-tag"><span>Tc</span>'+d.Tc_meas.toFixed(4)+'°C</span>'
+      +'<span class="mv-tag"><span>Qvessel</span>'+d.Qvessel.toFixed(2)+' W</span>'
+      +'<span class="mv-tag"><span>Tsuc</span>'+d.Tsuc_meas.toFixed(4)+'°C</span>'
+      +'<span class="mv-tag"><span>Tliq</span>'+d.Tliq_meas.toFixed(4)+'°C</span>'
+      +(d.Tcomp_meas?'<span class="mv-tag"><span>T comp</span>'+d.Tcomp_meas.toFixed(3)+'°C</span>':'')
+      +(d.Tdisch_meas?'<span class="mv-tag"><span>T disch</span>'+d.Tdisch_meas.toFixed(3)+'°C</span>':'')
+      +(d.Tamb_meas?'<span class="mv-tag"><span>T amb</span>'+d.Tamb_meas.toFixed(3)+'°C</span>':'')
+      +(d.current_meas?'<span class="mv-tag"><span>I</span>'+d.current_meas.toFixed(4)+' A</span>':'')
+      +(d.voltage_meas?'<span class="mv-tag"><span>V</span>'+d.voltage_meas.toFixed(3)+' V</span>':'')
+      +(d.rpm_meas?'<span class="mv-tag"><span>RPM</span>'+d.rpm_meas.toFixed(0)+'</span>':'')
+      +(d.Qo_ashrae?'<span class="mv-tag"><span>Qo ASHRAE</span>'+d.Qo_ashrae.toFixed(2)+' W</span>':'')
+      +(d.Qo_cecomaf?'<span class="mv-tag"><span>Qo CECOMAF</span>'+d.Qo_cecomaf.toFixed(2)+' W</span>':'')
       +'</div>';
   }
   let resultHtml='';
@@ -1720,14 +1753,24 @@ async function exportToWord(){
       }));
       children.push(P('',{after:120}));
 
-      children.push(new Paragraph({spacing:{after:60},children:[new TextRun({text:'Measured values',bold:true,size:20,color:'0D1F3C',font:'Calibri'})]}));
+      children.push(new Paragraph({spacing:{after:60},children:[new TextRun({text:'Measured values (W–AK)',bold:true,size:20,color:'065F46',font:'Calibri'})]}));
       children.push(KVTable([
         ['Te measured', d.Te_meas.toFixed(5)+' °C'],
         ['Tc measured', d.Tc_meas.toFixed(5)+' °C'],
-        ['Tsuc measured', d.Tsuc_meas.toFixed(5)+' °C'],
+        ['Tsuc measured (Return Gas)', d.Tsuc_meas.toFixed(5)+' °C'],
         ['Tliq measured (vessel inlet)', d.Tliq_meas.toFixed(5)+' °C'],
         ['Q calorimeter (Qvessel)', d.Qvessel.toFixed(4)+' W'],
         ['Compressor power input P1', d.P1.toFixed(4)+' W'],
+        ['Compressor temperature', d.Tcomp_meas.toFixed(4)+' °C'],
+        ['Discharge temperature', d.Tdisch_meas.toFixed(4)+' °C'],
+        ['Ambient temperature measured', d.Tamb_meas.toFixed(4)+' °C'],
+        ['Current measured', d.current_meas.toFixed(5)+' A'],
+        ['Voltage measured', d.voltage_meas.toFixed(4)+' V'],
+        ['RPM measured', d.rpm_meas.toFixed(1)],
+        ...(d.Qo_ashrae?[['Qo ASHRAE (from device)', d.Qo_ashrae.toFixed(4)+' W']]:[] ),
+        ...(d.COP_ashrae?[['COP ASHRAE (from device)', d.COP_ashrae.toFixed(5)]]:[] ),
+        ...(d.Qo_cecomaf?[['Qo CECOMAF (from device)', d.Qo_cecomaf.toFixed(4)+' W']]:[] ),
+        ...(d.COP_cecomaf?[['COP CECOMAF (from device)', d.COP_cecomaf.toFixed(5)]]:[] ),
       ]));
       children.push(P('',{after:160}));
 
