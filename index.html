@@ -1271,7 +1271,10 @@ function renderAllRows(){
   container.innerHTML=measRows.map((row,idx)=>buildRowHTML(row,idx+1)).join('');
   measRows.forEach(row=>{
     const ta=document.getElementById('mrow_ta_'+row.id);
-    if(ta) ta.addEventListener('paste',()=>setTimeout(()=>parseRowPaste(row.id),30));
+    if(ta){
+      ta.addEventListener('paste',()=>setTimeout(()=>parseRowPaste(row.id),30));
+      ta.addEventListener('input',()=>{ if(!ta.value.trim()) { const r=measRows.find(x=>x.id===row.id); if(r){r.rawPaste='';} } });
+    }
   });
 }
 
@@ -1335,7 +1338,7 @@ function buildRowHTML(row,num){
     +'</div>'
     +'<div class="mrow-body" id="mrow_body_'+row.id+'">'
     +'<div class="mrow-paste-row">'
-    +'<textarea class="mrow-paste" id="mrow_ta_'+row.id+'" placeholder="Paste row A3-AT3 from Excel (Ctrl+V)..."></textarea>'
+    +'<textarea class="mrow-paste" id="mrow_ta_'+row.id+'" placeholder="Paste row A3-AT3 from Excel (Ctrl+V)...">'+(row.rawPaste||'')+'</textarea>'
     +'<button class="mrow-parse-btn" onclick="parseRowPaste('+row.id+')">⚡ Parse</button>'
     +'</div>'
     +tags
@@ -1398,6 +1401,7 @@ function parseRowPaste(id){
   const ta=document.getElementById('mrow_ta_'+id);if(!ta)return;
   const raw=ta.value.trim();if(!raw)return;
   const row=measRows.find(r=>r.id===id);if(!row)return;
+  row.rawPaste=raw;  // save so textarea keeps its value after re-render
   row.data=parseRowCols(raw);row.result=null;renderAllRows();
 }
 
