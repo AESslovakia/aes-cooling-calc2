@@ -183,6 +183,53 @@ body{font-family:'Inter',Arial,sans-serif;font-size:13px;color:#1e2433;backgroun
 .acc-note{font-size:9.5px;color:#9aa3b8;background:#f8faff;border:1px solid #e4e9f4;border-radius:6px;padding:6px 10px;margin-top:6px;line-height:1.5}
 .acc-note strong{color:#2563eb}
 
+/* ── MULTI-MEASUREMENT ── */
+.meas-toolbar{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.add-meas-btn{display:flex;align-items:center;gap:6px;padding:9px 18px;background:linear-gradient(135deg,#2563eb,#1a4db5);color:#fff;border:none;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;box-shadow:0 2px 8px rgba(37,99,235,.25)}
+.add-meas-btn:hover{opacity:.9;transform:translateY(-1px)}
+.clear-all-btn{padding:9px 16px;background:#fff;border:1.5px solid #e4e9f4;color:#7a8299;border-radius:9px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s}
+.clear-all-btn:hover{border-color:#E24B4A;color:#E24B4A}
+.calc-all-meas-btn{display:flex;align-items:center;gap:6px;padding:9px 18px;background:linear-gradient(135deg,#059669,#047857);color:#fff;border:none;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;margin-left:auto;box-shadow:0 2px 8px rgba(5,150,105,.25)}
+.calc-all-meas-btn:hover{opacity:.9;transform:translateY(-1px)}
+.calc-all-meas-btn:disabled{background:#b0bfd8;cursor:not-allowed;transform:none;box-shadow:none}
+
+/* Measurement row card */
+.mrow-card{background:#fff;border:1.5px solid #e4e9f4;border-radius:12px;margin-bottom:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.04);transition:border-color .15s}
+.mrow-card.has-result{border-color:#6ee7b7}
+.mrow-card.has-error{border-color:#fca5a5}
+.mrow-head{display:flex;align-items:center;gap:10px;padding:11px 16px;background:#f8faff;border-bottom:1px solid #f0f3f9;cursor:pointer;user-select:none}
+.mrow-num{width:24px;height:24px;background:linear-gradient(135deg,#2563eb,#1a4db5);color:#fff;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.mrow-id{font-size:12px;font-weight:700;color:#0d1f3c;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mrow-std-badge{font-size:9px;font-weight:700;padding:2px 8px;border-radius:5px;background:#eef3ff;color:#2563eb;border:1px solid #93c5fd;white-space:nowrap;flex-shrink:0}
+.mrow-qo{font-size:12px;font-weight:800;color:#059669;white-space:nowrap;flex-shrink:0;min-width:70px;text-align:right}
+.mrow-del{background:none;border:none;color:#ccc;cursor:pointer;font-size:16px;padding:0 3px;transition:color .15s;flex-shrink:0}
+.mrow-del:hover{color:#E24B4A}
+.mrow-body{padding:14px 16px}
+.mrow-paste-row{display:flex;gap:7px;margin-bottom:10px}
+.mrow-paste{flex:1;padding:8px 10px;border:1.5px dashed #93b4f0;border-radius:8px;font-size:11px;color:#1e2433;font-family:'Inter',sans-serif;background:#f8faff;resize:none;height:44px;line-height:1.4}
+.mrow-paste:focus{outline:none;border-color:#2563eb;border-style:solid;background:#fff}
+.mrow-parse-btn{padding:8px 14px;background:linear-gradient(135deg,#2563eb,#1a4db5);color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap}
+.mrow-std-sel{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;align-items:center}
+.mrow-std-lbl{font-size:9px;font-weight:700;color:#7a8299;text-transform:uppercase;letter-spacing:1px;margin-right:3px;white-space:nowrap}
+.mrow-std-btn{padding:5px 10px;border:1.5px solid #e4e9f4;border-radius:7px;cursor:pointer;background:#fafbfd;font-size:10px;font-weight:700;color:#7a8299;transition:all .12s;white-space:nowrap}
+.mrow-std-btn:hover{border-color:#93b4f0;background:#f0f5ff;color:#2563eb}
+.mrow-std-btn.active{border-color:#2563eb;background:#eef3ff;color:#2563eb;box-shadow:0 0 0 2px rgba(37,99,235,.12)}
+.mrow-result{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:7px;margin-top:8px}
+.mrow-ri{background:#f8faff;border:1px solid #e4e9f4;border-radius:8px;padding:8px 10px;text-align:center}
+.mrow-ri.hl{border-color:#6ee7b7;background:#f0fdf8}
+.mrow-ri-lbl{font-size:8px;color:#9aa3b8;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.mrow-ri-val{font-size:16px;font-weight:800;color:#0d1f3c}
+.mrow-ri.hl .mrow-ri-val{color:#059669}
+.mrow-ri-u{font-size:9px;color:#9aa3b8}
+.mrow-parsed-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
+.mrow-tag{font-size:9.5px;background:#f0fdf8;border:1px solid #6ee7b7;border-radius:5px;padding:2px 7px;color:#065f46;font-weight:600}
+.mrow-tag.warn{background:#fffbeb;border-color:#fcd34d;color:#92400e}
+.mrow-err{font-size:11px;color:#f87171;padding:8px;background:#fef2f2;border-radius:7px;margin-top:6px}
+.mrow-calc-btn{width:100%;padding:10px;background:linear-gradient(135deg,#2563eb,#1a4db5);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;margin-top:6px}
+.mrow-calc-btn:hover:not(:disabled){opacity:.9}
+.mrow-calc-btn:disabled{background:#b0bfd8;cursor:not-allowed}
+.meas-count-badge{font-size:10px;font-weight:700;padding:3px 9px;background:#eef3ff;border:1px solid #93c5fd;border-radius:6px;color:#2563eb}
+
 /* ── LANGUAGE SWITCHER ── */
 .lang-bar{display:flex;align-items:center;justify-content:flex-end;gap:6px;margin-bottom:12px}
 .lang-label{font-size:9px;font-weight:700;color:#94a3b8;letter-spacing:1.5px;text-transform:uppercase;margin-right:4px}
@@ -290,40 +337,15 @@ body{font-family:'Inter',Arial,sans-serif;font-size:13px;color:#1e2433;backgroun
   <div class="main-layout">
     <div>
 
-      <!-- CARD 1: Paste -->
+      <!-- CARD 1: Standard selector (global) -->
       <div class="card">
         <div class="card-header">
           <div class="card-num">1</div>
-          <div class="card-title" data-i18n="c1_title">Measured data — row from Excel</div>
-          <div class="card-hint" data-i18n="c1_hint">Ctrl+C row A3–AT3 → Ctrl+V here</div>
-        </div>
-        <div class="f">
-          <label data-i18n="c1_label">Paste entire row A3–AT3 (tab-separated Excel)</label>
-          <textarea id="pasteArea" data-i18n-ph="c1_ph"
-            placeholder="Copy row 3 from Excel (Ctrl+C) and paste here (Ctrl+V)...&#10;&#10;Parser recognises: Factory · Calo · Kit# · Compressor · Refrigerant · P1[W] · Te_meas · Tc_meas · Qvessel · Tsuc · Tliq"></textarea>
-        </div>
-        <div class="parse-row">
-          <button class="parse-btn" onclick="parsePaste()" data-i18n="c1_parse">⚡ Process data</button>
-          <button class="clear-btn" onclick="clearAll()" data-i18n="c1_clear">✕ Clear</button>
-        </div>
-        <div id="parsedPreview" style="display:none">
-          <div class="sec-label" data-i18n="c1_recog">Recognised values</div>
-          <div class="parsed-grid" id="parsedGrid"></div>
-        </div>
-      </div>
-
-      <!-- CARD 2: Standard -->
-      <div class="card">
-        <div class="card-header">
-          <div class="card-num">2</div>
           <div class="card-title" data-i18n="c2_title">Standard and reference conditions</div>
-          <div class="card-hint" data-i18n="c2_hint">Click standard or enter manually</div>
+          <div class="card-hint" data-i18n="c2_hint">Selected per measurement row</div>
         </div>
-
-        <!-- Dynamic standards panel — built by renderStdButtons() -->
         <div id="stdButtonsPanel"></div>
-
-        <div class="sec-label" data-i18n="c2_cond">Conditions (K4–O4)</div>
+        <div class="sec-label" data-i18n="c2_cond">Custom conditions</div>
         <div class="g5">
           <div class="f"><label>Te [°C]</label><input type="number" id="req_Te" value="-35" step="0.5" oninput="setStd('custom',true)"></div>
           <div class="f"><label>Tc [°C]</label><input type="number" id="req_Tc" value="40" step="0.5" oninput="setStd('custom',true)"></div>
@@ -331,24 +353,18 @@ body{font-family:'Inter',Arial,sans-serif;font-size:13px;color:#1e2433;backgroun
           <div class="f"><label>Tsuc [°C]</label><input type="number" id="req_Tsuc" value="20" step="0.5" oninput="setStd('custom',true)"></div>
           <div class="f"><label>Tliq [°C]</label><input type="number" id="req_Tliq" value="40" step="0.5" oninput="setStd('custom',true)"></div>
         </div>
-        <div class="cond-mini">
-          <div class="f">
-            <label data-i18n="c2_paste_lbl">Or paste K4–O4 directly (5 values, Ctrl+V)</label>
-            <input type="text" id="condPasteLine" data-i18n-ph="c2_paste_ph" placeholder="Paste from Excel here…" onpaste="parseCondPaste(event)">
-          </div>
-        </div>
       </div>
 
-      <!-- CARD 3: Refrigerant -->
+      <!-- CARD 2: Refrigerant -->
       <div class="card">
         <div class="card-header">
-          <div class="card-num">3</div>
+          <div class="card-num">2</div>
           <div class="card-title" data-i18n="c3_title">Refrigerant</div>
-          <div class="card-hint" data-i18n="c3_hint">Auto-detected from data · editable</div>
+          <div class="card-hint" data-i18n="c3_hint">Auto-detected per row · editable</div>
         </div>
         <div class="g2">
           <div class="f">
-            <label data-i18n="c3_ref_lbl">Refrigerant</label>
+            <label data-i18n="c3_ref_lbl">Default refrigerant</label>
             <select id="refrigerant">
               <option value="R290">R290 — Propane</option>
               <option value="R134a">R134a</option>
@@ -368,67 +384,37 @@ body{font-family:'Inter',Arial,sans-serif;font-size:13px;color:#1e2433;backgroun
             <input type="text" id="refrigerantCustom" placeholder="R448A, R452A…">
           </div>
         </div>
-        <div class="acc-note" data-i18n="c3_note">
-          <strong>Built-in PR EOS</strong> covers: R290, R134a, R404A, R407C, R410A, R22, R507A, R600a, R32, R1234yf, R744.
-          For custom blends add <code>coolprop.js</code> to GitHub repository.
-        </div>
       </div>
 
-      <button class="calc-btn" id="calcBtn" onclick="calcSingle()" disabled data-i18n="btn_single">🧮 Calculate — selected standard</button>
-      <button class="calc-btn all" id="calcAllBtn" onclick="calcAll()" disabled data-i18n="btn_all">⚡ Calculate ALL standards at once</button>
-
-      <!-- Single Result -->
-      <div class="card result-card" id="resultCard" style="display:none">
-        <div class="card-header">
-          <div class="card-num" style="background:linear-gradient(135deg,#059669,#047857)">✓</div>
-          <div class="card-title"><span data-i18n="res_title">Result —</span> <span id="resultStdName">—</span></div>
-        </div>
-        <div class="result-main">
-          <div class="res-label" data-i18n="res_qo_lbl">Cooling capacity Qo</div>
-          <div><span class="res-big" id="resQo">—</span><span class="res-unit">W</span></div>
-        </div>
-        <div class="result-row3">
-          <div class="ri hl"><div class="ri-lbl" data-i18n="res_p1">Power input P1</div><div class="ri-val" id="resP1">—</div><div class="ri-u">W</div></div>
-          <div class="ri hl"><div class="ri-lbl">COP</div><div class="ri-val" id="resCOP">—</div><div class="ri-u">W/W</div></div>
-          <div class="ri"><div class="ri-lbl" data-i18n="res_mdot">Mass flow ṁ</div><div class="ri-val" id="resMdot">—</div><div class="ri-u">g/s</div></div>
-        </div>
-        <div style="margin-top:10px;font-size:10px;color:#9aa3b8;text-align:center;line-height:1.6" id="resultMeta"></div>
+      <!-- MEASUREMENTS TOOLBAR -->
+      <div class="meas-toolbar">
+        <span class="meas-count-badge" id="measCountBadge">0 measurements</span>
+        <button class="add-meas-btn" onclick="addMeasRow()">＋ <span data-i18n="add_meas">Add measurement</span></button>
+        <button class="calc-all-meas-btn" id="calcAllMeasBtn" onclick="calcAllMeas()" disabled>
+          🧮 <span data-i18n="calc_all_meas">Calculate all</span>
+        </button>
+        <button class="clear-all-btn" onclick="clearAllMeas()" data-i18n="c1_clear">✕ Clear all</button>
       </div>
 
-      <!-- Comparison Table -->
-      <div class="card" id="compCard" style="display:none">
-        <div class="card-header">
-          <div class="card-num" style="background:linear-gradient(135deg,#7c3aed,#5b21b6)">✦</div>
-          <div class="card-title" data-i18n="comp_title">Comparison of all standards</div>
-          <div class="card-hint" data-i18n="comp_hint">Highlighted = selected standard</div>
-        </div>
-        <div class="comp-wrap">
-          <table class="comp-table">
-            <thead><tr>
-              <th data-i18n="th_std">Standard</th>
-              <th data-i18n="th_range">Range</th>
-              <th>Te</th><th>Tc</th><th>Tsuc</th><th>Tliq</th>
-              <th>Qo [W]</th><th>COP</th><th>ṁ [g/s]</th>
-              <th style="text-align:right" data-i18n="th_vs">vs. selected</th>
-            </tr></thead>
-            <tbody id="compTableBody"></tbody>
-          </table>
-        </div>
-      </div>
+      <!-- Dynamic measurement rows -->
+      <div id="measRowsContainer"></div>
 
     </div><!-- end left -->
 
-    <!-- RIGHT: DEBUG -->
+    <!-- RIGHT: DEBUG (sticky) -->
     <div>
-      <div class="card debug-card">
-        <div class="card-header"><div class="card-title" style="color:#e2e8f0" data-i18n="dbg_title">🔧 Debug — intermediate calculations</div></div>
+      <div class="card debug-card" style="position:sticky;top:16px">
+        <div class="card-header">
+          <div class="card-title" style="color:#e2e8f0" data-i18n="dbg_title">🔧 Debug — intermediate calculations</div>
+        </div>
+        <div style="font-size:10px;color:#475569;margin-bottom:8px;min-height:16px" id="debugRowLabel"></div>
         <div class="dtab-row" id="debugTabs" style="display:none">
           <div class="dtab active" onclick="showTab('measured')" data-i18n="dbg_meas">Measurement</div>
           <div class="dtab" onclick="showTab('requested')" data-i18n="dbg_req">Ref. conditions</div>
           <div class="dtab" onclick="showTab('factors')" data-i18n="dbg_fact">Corrections</div>
           <div class="dtab" onclick="showTab('result')" data-i18n="dbg_res">Result</div>
         </div>
-        <div id="dc_measured" class="dcontent active"><div id="dm"><div class="dph" data-i18n="dbg_ph">Insert data and press<br><strong style="color:#7dd3fc">Calculate</strong><br><br>All intermediate<br>results appear here.</div></div></div>
+        <div id="dc_measured" class="dcontent active"><div id="dm"><div class="dph">Add a measurement,<br>paste data and press<br><strong style="color:#7dd3fc">Calculate</strong><br><br>Debug values appear here.</div></div></div>
         <div id="dc_requested" class="dcontent"><div id="dr"><div class="dph">—</div></div></div>
         <div id="dc_factors" class="dcontent"><div id="df"><div class="dph">—</div></div></div>
         <div id="dc_result" class="dcontent"><div id="dres"><div class="dph">—</div></div></div>
@@ -1139,294 +1125,29 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Backspace') pinBack();
 });
 
-function updateBtns(){
-  const ok=measData;
-  ['calcBtn','calcAllBtn'].forEach(id=>{
-    document.getElementById(id).disabled=!ok;
-  });
-  if(ok){
-    document.getElementById('calcBtn').textContent=t('btn_single');
-    document.getElementById('calcAllBtn').textContent=t('btn_all');
-  } else {
-    document.getElementById('calcBtn').textContent=t('btn_need_data');
-    document.getElementById('calcAllBtn').textContent=t('btn_need_data');
-  }
-}
-
 // ═══════════════════════════════════════════════════════════════════
-//  PASTE PARSER (columns A3–AT3)
+//  COLUMN MAP (0-based, row A3-AT3)
 // ═══════════════════════════════════════════════════════════════════
 const C={factory:0,calo:1,order:2,kitNo:3,compType:4,refrigerant:19,P1:22,
           Te_meas:27,Tc_meas:28,Qvessel:29,Tsuc_meas:31,Pe_uncorr:38,Tliq_meas:39,Tvout_meas:40};
 const FLUID_MAP={'R-290':'R290','R-134a':'R134a','R-404A':'R404A','R-22':'R22',
                   'R-407C':'R407C','R-410A':'R410A','R-600a':'R600a','R-32':'R32'};
 
-function parsePaste(){
-  const raw=document.getElementById('pasteArea').value.trim();
-  if(!raw){ alert(t('c1_parse')); return; }
+function parseRowCols(raw){
   const c=raw.split(/\t/);
   const s=i=>(c[i]||'').trim();
   const n=i=>parseFloat(c[i])||0;
   let fluid=s(C.refrigerant);
   fluid=FLUID_MAP[fluid]||fluid||'R290';
-  measData={
+  return {
     factory:s(C.factory),calo:s(C.calo),order:s(C.order),
     kitNo:s(C.kitNo),compType:s(C.compType),
     refrigerant:fluid,P1:n(C.P1),
     Te_meas:n(C.Te_meas),Tc_meas:n(C.Tc_meas),Qvessel:n(C.Qvessel),
     Tsuc_meas:n(C.Tsuc_meas),Tliq_meas:n(C.Tliq_meas),
-    Tvout_meas:n(C.Tvout_meas),Pe_uncorr:n(C.Pe_uncorr),colCount:c.length
+    Tvout_meas:n(C.Tvout_meas),Pe_uncorr:n(C.Pe_uncorr),
+    colCount:c.length
   };
-  const sel=document.getElementById('refrigerant');
-  for(let i=0;i<sel.options.length;i++) if(sel.options[i].value===fluid){sel.selectedIndex=i;break;}
-  renderPreview(); updateBtns();
-}
-
-function renderPreview(){
-  if(!measData) return;
-  const d=measData;
-  document.getElementById('parsedPreview').style.display='block';
-  const items=[
-    {l:t('pv_comp'),   v:d.kitNo||d.compType, ok:!!(d.kitNo||d.compType)},
-    {l:t('pv_ref'),    v:d.refrigerant, ok:true, bold:true},
-    {l:'Te',           v:d.Te_meas.toFixed(4)+' °C', ok:d.Te_meas!==0},
-    {l:'Tc',           v:d.Tc_meas.toFixed(4)+' °C', ok:d.Tc_meas!==0},
-    {l:'Q vessel',     v:d.Qvessel.toFixed(4)+' W', ok:d.Qvessel>0, bold:true},
-    {l:'P1',           v:d.P1.toFixed(4)+' W', ok:d.P1>0, bold:true},
-    {l:'Tsuc',         v:d.Tsuc_meas.toFixed(4)+' °C', ok:true},
-    {l:'Tliq',         v:d.Tliq_meas.toFixed(4)+' °C', ok:true},
-    {l:'Tvout',        v:d.Tvout_meas.toFixed(4)+' °C', ok:true},
-    {l:t('pv_cols'),   v:d.colCount+'', ok:d.colCount>=41, warn:d.colCount<41},
-  ];
-  document.getElementById('parsedGrid').innerHTML=items.map(it=>
-    `<div class="pv${it.ok?' ok':''}${it.bold?' bold':''}${it.warn?' warn':''}">
-      <div class="pv-label">${it.l}</div><div class="pv-val">${it.v}</div></div>`
-  ).join('');
-}
-
-function clearAll(){
-  document.getElementById('pasteArea').value='';
-  document.getElementById('parsedPreview').style.display='none';
-  document.getElementById('resultCard').style.display='none';
-  document.getElementById('compCard').style.display='none';
-  document.getElementById('debugTabs').style.display='none';
-  document.getElementById('dm').innerHTML='<div class="dph">'+t('dbg_ph')+'</div>';
-  window._lastDebugArgs=null;
-  measData=null; updateBtns();
-}
-
-function parseCondPaste(e){
-  setTimeout(()=>{
-    const raw=document.getElementById('condPasteLine').value.trim();
-    const cols=raw.split(/\t/);
-    if(cols.length>=5){
-      ['req_Te','req_Tc','req_Tamb','req_Tsuc','req_Tliq'].forEach((id,i)=>{
-        const v=parseFloat(cols[i]); if(!isNaN(v)) document.getElementById(id).value=v;
-      });
-      setStd('custom',true);
-      document.getElementById('condPasteLine').value='';
-    }
-  },10);
-}
-
-// ═══════════════════════════════════════════════════════════════════
-//  STANDARDS — dynamic render + editor
-// ═══════════════════════════════════════════════════════════════════
-
-// Build grouped buttons from STANDARDS dynamically
-function renderStdButtons(){
-  const panel = document.getElementById('stdButtonsPanel');
-  if(!panel) return;
-
-  // Group by label
-  const groups = {};
-  ALL_STD_KEYS.forEach(k=>{
-    const p = STANDARDS[k];
-    if(!p) return;
-    if(!groups[p.label]) groups[p.label] = {badge:p.badge, entries:[]};
-    groups[p.label].entries.push({key:k, p});
-  });
-  // Custom entry
-  groups['__custom__'] = {badge:'', entries:[{key:'custom', p:STANDARDS['custom']}]};
-
-  let html = '';
-  Object.entries(groups).forEach(([label, grp])=>{
-    if(label === '__custom__'){
-      html += `<div class="std-family">
-        <div class="std-family-label">${t('std_custom_lbl')}</div>
-        <div class="std-row">
-          <div class="std-btn" id="std_custom" onclick="setStd('custom')">
-            <div class="std-name">${t('std_custom_name')}</div>
-            <div class="std-sub">${t('std_custom_sub')}</div>
-          </div>
-        </div>
-      </div>`;
-      return;
-    }
-    html += `<div class="std-family"><div class="std-family-label">${label}</div><div class="std-row">`;
-    grp.entries.forEach(({key, p})=>{
-      const isActive = key === activeStd;
-      const Te = p.Te >= 0 ? '+'+p.Te : String(p.Te);
-      html += `<div class="std-btn${isActive?' active':''}" id="std_${key}" onclick="setStd('${key}')">
-        <div class="std-name">${p.range}</div>
-        <div class="std-sub">Te ${Te} / Tc ${p.Tc}°C</div>
-      </div>`;
-    });
-    html += `</div></div>`;
-  });
-  panel.innerHTML = html;
-}
-
-function setStd(key, silent){
-  if(!silent){ activeStd=key; }
-  else { activeStd='custom'; key='custom'; }
-  // Update active class
-  document.querySelectorAll('[id^="std_"]').forEach(el=>el.classList.remove('active'));
-  const el = document.getElementById('std_'+key);
-  if(el) el.classList.add('active');
-  const p = STANDARDS[key];
-  if(p && key!=='custom'){
-    document.getElementById('req_Te').value  = p.Te;
-    document.getElementById('req_Tc').value  = p.Tc;
-    document.getElementById('req_Tamb').value= p.Tc;
-    document.getElementById('req_Tsuc').value= p.Tsuc;
-    document.getElementById('req_Tliq').value= p.Tliq;
-  }
-}
-
-// ── STANDARDS EDITOR ──────────────────────────────────────────────
-let _editorRows = []; // working copy during editing
-
-function openStdEditor(){
-  // Deep copy current standards (excluding 'custom')
-  _editorRows = ALL_STD_KEYS.map(k=>({
-    key: k,
-    label: STANDARDS[k]?.label || '',
-    range: STANDARDS[k]?.range || '',
-    Te:    STANDARDS[k]?.Te ?? 0,
-    Tc:    STANDARDS[k]?.Tc ?? 0,
-    Tsuc:  STANDARDS[k]?.Tsuc ?? 0,
-    Tliq:  STANDARDS[k]?.Tliq ?? 0,
-    badge: STANDARDS[k]?.badge || 'nb-en',
-    isNew: false
-  }));
-  renderEditorTable();
-  document.getElementById('stdModal').style.display = 'flex';
-}
-
-function closeStdEditor(){
-  document.getElementById('stdModal').style.display = 'none';
-}
-
-function renderEditorTable(){
-  const BADGES = ['nb-en','nb-cc','nb-ash','nb-ari'];
-  let rows = '';
-  _editorRows.forEach((r, i)=>{
-    const canDel = _editorRows.length > 1;
-    const badgeSel = BADGES.map(b=>
-      `<option value="${b}" ${r.badge===b?'selected':''}>${b.replace('nb-','')}</option>`
-    ).join('');
-    rows += `<tr class="${r.isNew?'new-row':''}">
-      <td><input type="text" value="${r.label}" oninput="_editorRows[${i}].label=this.value" placeholder="EN 12900…" style="min-width:90px"></td>
-      <td><input type="text" value="${r.range}" oninput="_editorRows[${i}].range=this.value" class="narrow" placeholder="LBP"></td>
-      <td><input type="number" value="${r.Te}"   oninput="_editorRows[${i}].Te=parseFloat(this.value)||0"   class="narrow" step="0.1"></td>
-      <td><input type="number" value="${r.Tc}"   oninput="_editorRows[${i}].Tc=parseFloat(this.value)||0"   class="narrow" step="0.1"></td>
-      <td><input type="number" value="${r.Tsuc}" oninput="_editorRows[${i}].Tsuc=parseFloat(this.value)||0" class="narrow" step="0.1"></td>
-      <td><input type="number" value="${r.Tliq}" oninput="_editorRows[${i}].Tliq=parseFloat(this.value)||0" class="narrow" step="0.1"></td>
-      <td><button class="ed-del" onclick="delStdRow(${i})" ${canDel?'':'disabled'}>🗑</button></td>
-    </tr>`;
-  });
-  document.getElementById('stdEditorBody').innerHTML = rows;
-}
-
-function addStdRow(){
-  const lastLabel = _editorRows[_editorRows.length-1]?.label || 'Custom';
-  _editorRows.push({
-    key: 'custom_'+Date.now(),
-    label: lastLabel,
-    range: 'NEW',
-    Te: 0, Tc: 40, Tsuc: 20, Tliq: 40,
-    badge: 'nb-en',
-    isNew: true
-  });
-  renderEditorTable();
-  // Scroll to bottom of modal body
-  const body = document.querySelector('.modal-body');
-  if(body) body.scrollTop = body.scrollHeight;
-}
-
-function delStdRow(i){
-  if(_editorRows.length <= 1) return;
-  _editorRows.splice(i, 1);
-  renderEditorTable();
-}
-
-function saveStds(){
-  // Validate
-  for(const r of _editorRows){
-    if(!r.label.trim() || !r.range.trim()){
-      alert('All standards must have a label and range name.'); return;
-    }
-  }
-
-  // Rebuild STANDARDS and ALL_STD_KEYS from editor rows
-  ALL_STD_KEYS = [];
-  _editorRows.forEach((r, i)=>{
-    const key = r.isNew ? ('std_'+i+'_'+r.range.toLowerCase().replace(/\s+/g,'_')) : r.key;
-    STANDARDS[key] = {
-      Te:    r.Te,
-      Tc:    r.Tc,
-      Tsuc:  r.Tsuc,
-      Tliq:  r.Tliq,
-      label: r.label.trim(),
-      range: r.range.trim(),
-      badge: r.badge || 'nb-en'
-    };
-    ALL_STD_KEYS.push(key);
-  });
-
-  // Reset active standard if it no longer exists
-  if(!ALL_STD_KEYS.includes(activeStd)) {
-    activeStd = ALL_STD_KEYS[0] || 'custom';
-  }
-
-  closeStdEditor();
-  renderStdButtons();
-  setStd(activeStd);
-}
-
-// ═══════════════════════════════════════════════════════════════════
-//  CORE CALCULATION (EN 12900 correction factor method)
-// ═══════════════════════════════════════════════════════════════════
-function computeQo(m, Te_r, Tc_r, Tsuc_r, Tliq_r, fluid){
-  // MEASURED
-  const pe_m=satP(m.Te_meas, fluid);
-  const pc_m=satP(m.Tc_meas, fluid);
-  const hA_m=H(pc_m, m.Tliq_meas, fluid, 'liquid');  // subcooled liquid at condensing P
-  const hB_m=H(pe_m, m.Tsuc_meas, fluid, 'vapor');   // superheated vapor at evap P
-  const dh_m=hB_m-hA_m;
-  const rho_m=RHO(pe_m, m.Tsuc_meas, fluid);
-  const mdot=m.Qvessel/(dh_m*1000);
-
-  // REQUESTED
-  const pe_r=satP(Te_r, fluid);
-  const pc_r=satP(Tc_r, fluid);
-  const hA_r=H(pc_r, Tliq_r, fluid, 'liquid');
-  const hB_r=H(pe_r, Tsuc_r, fluid, 'vapor');
-  const dh_r=hB_r-hA_r;
-  const rho_r=RHO(pe_r, Tsuc_r, fluid);
-
-  // CORRECTION FACTORS
-  const CF_rho=rho_r/rho_m;
-  const CF_dh=dh_r/dh_m;
-
-  // RESULT
-  const Qo=m.Qvessel*CF_rho*CF_dh;
-  const COP=Qo/m.P1;
-
-  return {pe_m,pc_m,hA_m,hB_m,dh_m,rho_m,mdot,
-          pe_r,pc_r,hA_r,hB_r,dh_r,rho_r,
-          CF_rho,CF_dh,Qo,COP};
 }
 
 function getFluid(){
@@ -1434,170 +1155,287 @@ function getFluid(){
       || document.getElementById('refrigerant').value;
 }
 
-// ═══════════════════════════════════════════════════════════════════
-//  CALCULATE SINGLE
-// ═══════════════════════════════════════════════════════════════════
-function calcSingle(){
-  if(!measData) return;
-  const fluid=getFluid();
-  const Te_r=parseFloat(document.getElementById('req_Te').value);
-  const Tc_r=parseFloat(document.getElementById('req_Tc').value);
-  const Tsuc_r=parseFloat(document.getElementById('req_Tsuc').value);
-  const Tliq_r=parseFloat(document.getElementById('req_Tliq').value);
-  try {
-    const r=computeQo(measData,Te_r,Tc_r,Tsuc_r,Tliq_r,fluid);
-    renderSingle(r,fluid);
-    renderDebug(r,fluid,Te_r,Tc_r,Tsuc_r,Tliq_r);
-  } catch(e){ showErr(e); }
+function updateBtns(){
+  const btn = document.getElementById('calcAllMeasBtn');
+  if(btn) btn.disabled = measRows.length === 0;
 }
 
 // ═══════════════════════════════════════════════════════════════════
-//  CALCULATE ALL
+//  STANDARDS
 // ═══════════════════════════════════════════════════════════════════
-function calcAll(){
-  if(!measData) return;
-  const fluid=getFluid();
-  const results={};
+function renderStdButtons(){
+  const panel = document.getElementById('stdButtonsPanel');
+  if(!panel) return;
+  const groups = {};
   ALL_STD_KEYS.forEach(k=>{
-    const p=STANDARDS[k];
-    try { results[k]=computeQo(measData,p.Te,p.Tc,p.Tsuc,p.Tliq,fluid); }
-    catch(e){ results[k]=null; }
+    const p = STANDARDS[k]; if(!p) return;
+    if(!groups[p.label]) groups[p.label] = [];
+    groups[p.label].push({key:k, p});
   });
-  // Also compute selected (for debug)
-  const selKey=ALL_STD_KEYS.includes(activeStd)?activeStd:'en_lbp';
-  if(results[selKey]){
-    const p=STANDARDS[selKey];
-    renderSingle(results[selKey],fluid);
-    renderDebug(results[selKey],fluid,p.Te,p.Tc,p.Tsuc,p.Tliq);
-  }
-  renderCompTable(results,selKey);
-}
+  groups['__custom__'] = [{key:'custom', p:STANDARDS['custom']}];
 
-function renderSingle(r,fluid){
-  const s=STANDARDS[activeStd];
-  document.getElementById('resultStdName').textContent=(s?s.label+' '+s.range:activeStd);
-  document.getElementById('resQo').textContent=r.Qo.toFixed(2);
-  document.getElementById('resP1').textContent=measData.P1.toFixed(2);
-  document.getElementById('resCOP').textContent=r.COP.toFixed(4);
-  document.getElementById('resMdot').textContent=(r.mdot*1000).toFixed(4);
-  document.getElementById('resultMeta').textContent=
-    t('fluid_lbl')+fluid+' | '+t('meta_formula')+
-    measData.Qvessel.toFixed(3)+' × '+r.CF_rho.toFixed(5)+' × '+r.CF_dh.toFixed(5)+
-    (cpReady?'' : ' | ±1% (PR EOS)');
-  document.getElementById('resultCard').style.display='block';
-  document.getElementById('resultCard').scrollIntoView({behavior:'smooth',block:'nearest'});
-}
-
-function renderCompTable(results,selectedKey){
-  const refQo=results[selectedKey]?.Qo||null;
-  let rows='';
-  ALL_STD_KEYS.forEach(k=>{
-    const p=STANDARDS[k], r=results[k], isSel=(k===selectedKey);
-    let qStr='—',copStr='—',mStr='—',diffStr='';
-    if(r){
-      qStr=r.Qo.toFixed(2); copStr=r.COP.toFixed(4); mStr=(r.mdot*1000).toFixed(4);
-      if(refQo&&!isSel){
-        const d=r.Qo-refQo,pct=(d/refQo*100).toFixed(1),cls=d>=0?'pos':'neg';
-        diffStr=`<span class="dv ${cls}">${d>=0?'+':''}${d.toFixed(2)} W (${d>=0?'+':''}${pct}%)</span>`;
-      } else if(isSel){
-        diffStr=`<span style="font-size:10px;color:#2563eb;font-weight:700">${t('comp_sel')}</span>`;
+  let html = '';
+  Object.entries(groups).forEach(([label, entries])=>{
+    const isCustom = label==='__custom__';
+    html += `<div class="std-family"><div class="std-family-label">${isCustom?t('std_custom_lbl'):label}</div><div class="std-row">`;
+    entries.forEach(({key, p})=>{
+      const isActive = key===activeStd;
+      const Te = p.Te>=0?'+'+p.Te:String(p.Te);
+      if(isCustom){
+        html += `<div class="std-btn${isActive?' active':''}" id="std_custom" onclick="setStd('custom')">
+          <div class="std-name">${t('std_custom_name')}</div><div class="std-sub">${t('std_custom_sub')}</div></div>`;
+      } else {
+        html += `<div class="std-btn${isActive?' active':''}" id="std_${key}" onclick="setStd('${key}')">
+          <div class="std-name">${p.range}</div><div class="std-sub">Te ${Te}/Tc ${p.Tc}°C</div></div>`;
       }
-    }
-    rows+=`<tr class="${isSel?'sel':''}">
-      <td><span class="nb ${p.badge}">${p.label}</span></td>
-      <td>${p.range}</td>
-      <td>${p.Te}</td><td>${p.Tc}</td><td>${p.Tsuc}</td><td>${p.Tliq}</td>
-      <td><span class="qv">${qStr}</span></td>
-      <td>${copStr}</td><td>${mStr}</td>
-      <td style="text-align:right">${diffStr}</td>
+    });
+    html += '</div></div>';
+  });
+  panel.innerHTML = html;
+}
+
+function setStd(key, silent){
+  if(!silent){ activeStd=key; }
+  else { activeStd='custom'; key='custom'; }
+  document.querySelectorAll('[id^="std_"]').forEach(el=>el.classList.remove('active'));
+  const el=document.getElementById('std_'+key); if(el) el.classList.add('active');
+  const p=STANDARDS[key];
+  if(p&&key!=='custom'){
+    document.getElementById('req_Te').value=p.Te;
+    document.getElementById('req_Tc').value=p.Tc;
+    document.getElementById('req_Tamb').value=p.Tc;
+    document.getElementById('req_Tsuc').value=p.Tsuc;
+    document.getElementById('req_Tliq').value=p.Tliq;
+  }
+}
+
+// ── STANDARDS EDITOR ─────────────────────────────────────────────
+let _editorRows=[];
+
+function openStdEditor(){
+  _editorRows=ALL_STD_KEYS.map(k=>({
+    key:k, label:STANDARDS[k]?.label||'', range:STANDARDS[k]?.range||'',
+    Te:STANDARDS[k]?.Te??0, Tc:STANDARDS[k]?.Tc??0,
+    Tsuc:STANDARDS[k]?.Tsuc??0, Tliq:STANDARDS[k]?.Tliq??0,
+    badge:STANDARDS[k]?.badge||'nb-en', isNew:false
+  }));
+  renderEditorTable();
+  document.getElementById('stdModal').style.display='flex';
+}
+function closeStdEditor(){ document.getElementById('stdModal').style.display='none'; }
+
+function renderEditorTable(){
+  let rows='';
+  _editorRows.forEach((r,i)=>{
+    const canDel=_editorRows.length>1;
+    rows+=`<tr class="${r.isNew?'new-row':''}">
+      <td><input type="text" value="${r.label}" oninput="_editorRows[${i}].label=this.value" style="min-width:90px"></td>
+      <td><input type="text" value="${r.range}" oninput="_editorRows[${i}].range=this.value" class="narrow"></td>
+      <td><input type="number" value="${r.Te}"   oninput="_editorRows[${i}].Te=parseFloat(this.value)||0"   class="narrow" step="0.1"></td>
+      <td><input type="number" value="${r.Tc}"   oninput="_editorRows[${i}].Tc=parseFloat(this.value)||0"   class="narrow" step="0.1"></td>
+      <td><input type="number" value="${r.Tsuc}" oninput="_editorRows[${i}].Tsuc=parseFloat(this.value)||0" class="narrow" step="0.1"></td>
+      <td><input type="number" value="${r.Tliq}" oninput="_editorRows[${i}].Tliq=parseFloat(this.value)||0" class="narrow" step="0.1"></td>
+      <td><button class="ed-del" onclick="delStdRow(${i})" ${canDel?'':'disabled'}>🗑</button></td>
     </tr>`;
   });
-  document.getElementById('compTableBody').innerHTML=rows;
-  document.getElementById('compCard').style.display='block';
-  document.getElementById('compCard').scrollIntoView({behavior:'smooth',block:'nearest'});
+  document.getElementById('stdEditorBody').innerHTML=rows;
+}
+function addStdRow(){
+  const lastLabel=_editorRows[_editorRows.length-1]?.label||'Custom';
+  _editorRows.push({key:'custom_'+Date.now(),label:lastLabel,range:'NEW',
+    Te:0,Tc:40,Tsuc:20,Tliq:40,badge:'nb-en',isNew:true});
+  renderEditorTable();
+  const body=document.querySelector('.modal-body'); if(body) body.scrollTop=body.scrollHeight;
+}
+function delStdRow(i){ if(_editorRows.length<=1)return; _editorRows.splice(i,1); renderEditorTable(); }
+function saveStds(){
+  for(const r of _editorRows){ if(!r.label.trim()||!r.range.trim()){alert('Label and range required');return;} }
+  ALL_STD_KEYS=[];
+  _editorRows.forEach((r,i)=>{
+    const key=r.isNew?('std_'+i+'_'+r.range.toLowerCase().replace(/\s+/g,'_')):r.key;
+    STANDARDS[key]={Te:r.Te,Tc:r.Tc,Tsuc:r.Tsuc,Tliq:r.Tliq,label:r.label.trim(),range:r.range.trim(),badge:r.badge||'nb-en'};
+    ALL_STD_KEYS.push(key);
+  });
+  if(!ALL_STD_KEYS.includes(activeStd)) activeStd=ALL_STD_KEYS[0]||'custom';
+  closeStdEditor(); renderStdButtons(); setStd(activeStd);
+  renderAllRows(); // refresh row standard buttons
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  MULTI-MEASUREMENT ROWS
+// ═══════════════════════════════════════════════════════════════════
+let measRows=[], rowCounter=0;
+let measData=null; // legacy compatibility (computeQo still works standalone)
+
+function addMeasRow(){
+  const id=++rowCounter;
+  measRows.push({id,data:null,stdKey:activeStd,result:null});
+  renderAllRows(); updateBtns();
+  setTimeout(()=>{ const el=document.getElementById('mrow_'+id); if(el) el.scrollIntoView({behavior:'smooth',block:'nearest'}); },80);
+}
+
+function deleteMeasRow(id){
+  measRows=measRows.filter(r=>r.id!==id);
+  renderAllRows(); updateBtns();
+}
+
+function clearAllMeas(){
+  measRows=[]; rowCounter=0; renderAllRows(); updateBtns();
+  document.getElementById('dm').innerHTML='<div class="dph">Add a measurement row,<br>paste data and press<br><strong style="color:#7dd3fc">Calculate</strong></div>';
+  document.getElementById('debugTabs').style.display='none';
+  document.getElementById('debugRowLabel').textContent='';
+}
+
+function renderAllRows(){
+  const container=document.getElementById('measRowsContainer');
+  const badge=document.getElementById('measCountBadge');
+  if(badge) badge.textContent=measRows.length+' measurement'+(measRows.length!==1?'s':'');
+  if(measRows.length===0){
+    container.innerHTML=`<div style="text-align:center;padding:40px;color:#9aa3b8;font-size:13px;border:2px dashed #e4e9f4;border-radius:12px">
+      <div style="font-size:28px;margin-bottom:10px">📋</div>
+      <strong style="color:#7a8299">No measurements yet</strong><br>
+      <span style="font-size:11px">Click ＋ Add measurement to start</span></div>`;
+    return;
+  }
+  container.innerHTML=measRows.map((row,idx)=>buildRowHTML(row,idx+1)).join('');
+  measRows.forEach(row=>{
+    const ta=document.getElementById('mrow_ta_'+row.id);
+    if(ta) ta.addEventListener('paste',()=>setTimeout(()=>parseRowPaste(row.id),30));
+  });
+}
+
+function buildRowHTML(row, num){
+  const d=row.data, r=row.result;
+  const compId=d?(d.kitNo||d.compType||'—'):'—';
+  const stdLabel=STANDARDS[row.stdKey]?STANDARDS[row.stdKey].label+' '+STANDARDS[row.stdKey].range:row.stdKey;
+  const qoStr=r?r.Qo.toFixed(2)+' W':'';
+  const stdBtns=ALL_STD_KEYS.map(k=>{
+    const p=STANDARDS[k], isA=k===row.stdKey;
+    return `<button class="mrow-std-btn${isA?' active':''}" onclick="setRowStd(${row.id},'${k}')">${p.label} ${p.range}</button>`;
+  }).join('');
+  const tags=d?`<div class="mrow-parsed-tags">
+    <span class="mrow-tag">${d.refrigerant}</span>
+    <span class="mrow-tag">Te ${d.Te_meas.toFixed(2)}°C</span>
+    <span class="mrow-tag">Tc ${d.Tc_meas.toFixed(2)}°C</span>
+    <span class="mrow-tag">Qv ${d.Qvessel.toFixed(1)} W</span>
+    <span class="mrow-tag">P1 ${d.P1.toFixed(1)} W</span>
+    ${d.colCount<41?'<span class="mrow-tag warn">⚠ '+d.colCount+' cols</span>':''}
+  </div>`:'';
+  const resultHtml=r?`
+    <div class="mrow-result">
+      <div class="mrow-ri hl"><div class="mrow-ri-lbl">Cooling Qo</div><div class="mrow-ri-val">${r.Qo.toFixed(2)}</div><div class="mrow-ri-u">W</div></div>
+      <div class="mrow-ri hl"><div class="mrow-ri-lbl">COP</div><div class="mrow-ri-val">${r.COP.toFixed(4)}</div><div class="mrow-ri-u">W/W</div></div>
+      <div class="mrow-ri"><div class="mrow-ri-lbl">Power P1</div><div class="mrow-ri-val">${d.P1.toFixed(2)}</div><div class="mrow-ri-u">W</div></div>
+      <div class="mrow-ri"><div class="mrow-ri-lbl">Mass flow ṁ</div><div class="mrow-ri-val">${(r.mdot*1000).toFixed(3)}</div><div class="mrow-ri-u">g/s</div></div>
+    </div>
+    <div style="margin-top:6px;font-size:9.5px;color:#9aa3b8;text-align:center">
+      ${d.refrigerant} | Qo=${d.Qvessel.toFixed(2)}×${r.CF_rho.toFixed(5)}×${r.CF_dh.toFixed(5)}
+      <span style="margin-left:8px;cursor:pointer;color:#7dd3fc;text-decoration:underline" onclick="showDebugForRow(${row.id})">debug →</span>
+    </div>`:'';
+  return `<div class="mrow-card${r?' has-result':''}" id="mrow_${row.id}">
+    <div class="mrow-head" onclick="toggleRowBody(${row.id})">
+      <div class="mrow-num">${num}</div>
+      <div class="mrow-id">${compId}</div>
+      <div class="mrow-std-badge">${stdLabel}</div>
+      <div class="mrow-qo">${qoStr}</div>
+      <button class="mrow-del" onclick="event.stopPropagation();deleteMeasRow(${row.id})" title="Delete">🗑</button>
+    </div>
+    <div class="mrow-body" id="mrow_body_${row.id}">
+      <div class="mrow-paste-row">
+        <textarea class="mrow-paste" id="mrow_ta_${row.id}" placeholder="Paste row A3–AT3 from Excel (Ctrl+V)…"></textarea>
+        <button class="mrow-parse-btn" onclick="parseRowPaste(${row.id})">⚡ Parse</button>
+      </div>
+      ${tags}
+      <div class="mrow-std-sel"><span class="mrow-std-lbl">Standard:</span>${stdBtns}</div>
+      <button class="mrow-calc-btn" onclick="calcRow(${row.id})" ${d?'':' disabled'}>🧮 Calculate — ${stdLabel}</button>
+      ${resultHtml}
+    </div>
+  </div>`;
+}
+
+function toggleRowBody(id){
+  const b=document.getElementById('mrow_body_'+id);
+  if(b) b.style.display=b.style.display==='none'?'':'none';
+}
+function parseRowPaste(id){
+  const ta=document.getElementById('mrow_ta_'+id); if(!ta) return;
+  const raw=ta.value.trim(); if(!raw) return;
+  const row=measRows.find(r=>r.id===id); if(!row) return;
+  row.data=parseRowCols(raw); row.result=null;
+  renderAllRows();
+}
+function setRowStd(id,stdKey){
+  const row=measRows.find(r=>r.id===id); if(!row) return;
+  row.stdKey=stdKey; row.result=null; renderAllRows();
+}
+function calcRow(id){
+  const row=measRows.find(r=>r.id===id); if(!row||!row.data) return;
+  const fluid=document.getElementById('refrigerantCustom').value.trim()||row.data.refrigerant||document.getElementById('refrigerant').value;
+  const p=STANDARDS[row.stdKey]; if(!p){alert('Unknown standard: '+row.stdKey);return;}
+  try {
+    const result=computeQo(row.data,p.Te,p.Tc,p.Tsuc,p.Tliq,fluid);
+    row.result=result; row.result._fluid=fluid; row.result._stdKey=row.stdKey;
+    renderAllRows(); showDebugForRow(id);
+    setTimeout(()=>{ const el=document.getElementById('mrow_'+id); if(el) el.scrollIntoView({behavior:'smooth',block:'nearest'}); },80);
+  } catch(e){ showErrForRow(id,e); }
+}
+function calcAllMeas(){
+  measRows.forEach(row=>{ if(row.data) calcRow(row.id); });
+}
+function showDebugForRow(id){
+  const row=measRows.find(r=>r.id===id); if(!row||!row.result||!row.data) return;
+  const p=STANDARDS[row.stdKey], fluid=row.result._fluid||row.data.refrigerant;
+  document.getElementById('debugRowLabel').textContent='Row #'+id+' · '+(row.data.kitNo||row.data.compType||'—')+' · '+(p?p.label+' '+p.range:row.stdKey);
+  renderDebug(row.result,fluid,p.Te,p.Tc,p.Tsuc,p.Tliq,row.data);
+}
+function showErrForRow(id,e){
+  document.getElementById('debugRowLabel').textContent='Row #'+id+' — error';
+  document.getElementById('debugTabs').style.display='flex';
+  document.getElementById('dm').innerHTML=`<div style="color:#f87171;padding:16px;font-size:11.5px;line-height:1.7"><strong>${t('err_calc')}</strong><br>${String(e)}<br><br>${t('err_check')}</div>`;
+  showTab('measured');
 }
 
 // ═══════════════════════════════════════════════════════════════════
 //  DEBUG PANEL
 // ═══════════════════════════════════════════════════════════════════
-function showTab(t){
+function showTab(tab){
   const tabs=['measured','requested','factors','result'];
-  document.querySelectorAll('.dtab').forEach((el,i)=>el.classList.toggle('active',tabs[i]===t));
+  document.querySelectorAll('.dtab').forEach((el,i)=>el.classList.toggle('active',tabs[i]===tab));
   document.querySelectorAll('.dcontent').forEach(el=>el.classList.remove('active'));
-  document.getElementById('dc_'+t).classList.add('active');
+  document.getElementById('dc_'+tab).classList.add('active');
 }
 
-function renderDebug(r,fluid,Te_r,Tc_r,Tsuc_r,Tliq_r){
-  window._lastDebugArgs=[r,fluid,Te_r,Tc_r,Tsuc_r,Tliq_r];
+function renderDebug(r,fluid,Te_r,Tc_r,Tsuc_r,Tliq_r,m){
+  if(!m) return;
+  window._lastDebugArgs=[r,fluid,Te_r,Tc_r,Tsuc_r,Tliq_r,m];
   document.getElementById('debugTabs').style.display='flex';
-  // Re-apply tab labels from i18n
   const tabs=document.querySelectorAll('.dtab');
-  const tabKeys=['dbg_meas','dbg_req','dbg_fact','dbg_res'];
-  tabs.forEach((el,i)=>{ if(tabKeys[i]) el.textContent=t(tabKeys[i]); });
-
-  const row=(k,v,u,d=6)=>
-    `<div class="drow"><span class="dk">${k}</span><span class="dv2">${typeof v==='number'?v.toFixed(d):v}</span><span class="du">${u||''}</span></div>`;
+  ['dbg_meas','dbg_req','dbg_fact','dbg_res'].forEach((k,i)=>{ if(tabs[i]) tabs[i].textContent=t(k); });
+  const row=(k,v,u,d=6)=>`<div class="drow"><span class="dk">${k}</span><span class="dv2">${typeof v==='number'?v.toFixed(d):v}</span><span class="du">${u||''}</span></div>`;
   const sect=s=>`<div class="dsect">${s}</div>`;
   const eos=cpReady?'(CoolProp)':'(PR EOS ±1%)';
-
   document.getElementById('dm').innerHTML=
-    sect(t('ds_meas'))+
-    row(t('dk_fluid'),fluid,'')+
-    row(t('dk_te_m'),measData.Te_meas,'°C',5)+
-    row(t('dk_tc_m'),measData.Tc_meas,'°C',5)+
-    row(t('dk_tsuc_m'),measData.Tsuc_meas,'°C',5)+
-    row(t('dk_tliq_m'),measData.Tliq_meas,'°C',5)+
-    row(t('dk_qvessel'),measData.Qvessel,'W',4)+
-    row(t('dk_p1'),measData.P1,'W',4)+
-    sect(t('ds_thermo_m')+' '+eos)+
-    row(t('dk_pe_m'),r.pe_m,'bar',6)+
-    row(t('dk_pc_m'),r.pc_m,'bar',5)+
-    row(t('dk_ha_m'),r.hA_m,'kJ/kg',4)+
-    row(t('dk_hb_m'),r.hB_m,'kJ/kg',4)+
-    row(t('dk_dh_m'),r.dh_m,'kJ/kg',4)+
-    row(t('dk_mdot'),r.mdot,'kg/s',8)+
-    row(t('dk_rho_m'),r.rho_m,'kg/m³',5);
-
+    sect(t('ds_meas'))+row(t('dk_fluid'),fluid,'')+row(t('dk_te_m'),m.Te_meas,'°C',5)+row(t('dk_tc_m'),m.Tc_meas,'°C',5)+
+    row(t('dk_tsuc_m'),m.Tsuc_meas,'°C',5)+row(t('dk_tliq_m'),m.Tliq_meas,'°C',5)+row(t('dk_qvessel'),m.Qvessel,'W',4)+row(t('dk_p1'),m.P1,'W',4)+
+    sect(t('ds_thermo_m')+' '+eos)+row(t('dk_pe_m'),r.pe_m,'bar',6)+row(t('dk_pc_m'),r.pc_m,'bar',5)+
+    row(t('dk_ha_m'),r.hA_m,'kJ/kg',4)+row(t('dk_hb_m'),r.hB_m,'kJ/kg',4)+row(t('dk_dh_m'),r.dh_m,'kJ/kg',4)+
+    row(t('dk_mdot'),r.mdot,'kg/s',8)+row(t('dk_rho_m'),r.rho_m,'kg/m³',5);
   document.getElementById('dr').innerHTML=
-    sect(t('ds_req'))+
-    row(t('dk_te_r'),Te_r,'°C',2)+
-    row(t('dk_tc_r'),Tc_r,'°C',2)+
-    row(t('dk_tsuc_r'),Tsuc_r,'°C',2)+
-    row(t('dk_tliq_r'),Tliq_r,'°C',2)+
-    sect(t('ds_thermo_r')+' '+eos)+
-    row(t('dk_pe_r'),r.pe_r,'bar',6)+
-    row(t('dk_pc_r'),r.pc_r,'bar',5)+
-    row(t('dk_ha_r'),r.hA_r,'kJ/kg',4)+
-    row(t('dk_hb_r'),r.hB_r,'kJ/kg',4)+
-    row(t('dk_dh_r'),r.dh_r,'kJ/kg',4)+
-    row(t('dk_rho_r'),r.rho_r,'kg/m³',5);
-
+    sect(t('ds_req'))+row(t('dk_te_r'),Te_r,'°C',2)+row(t('dk_tc_r'),Tc_r,'°C',2)+row(t('dk_tsuc_r'),Tsuc_r,'°C',2)+row(t('dk_tliq_r'),Tliq_r,'°C',2)+
+    sect(t('ds_thermo_r')+' '+eos)+row(t('dk_pe_r'),r.pe_r,'bar',6)+row(t('dk_pc_r'),r.pc_r,'bar',5)+
+    row(t('dk_ha_r'),r.hA_r,'kJ/kg',4)+row(t('dk_hb_r'),r.hB_r,'kJ/kg',4)+row(t('dk_dh_r'),r.dh_r,'kJ/kg',4)+row(t('dk_rho_r'),r.rho_r,'kg/m³',5);
   document.getElementById('df').innerHTML=
     sect(t('ds_cf'))+
     `<div class="cf-box"><span class="cf-key">${t('dk_cf_rho')}</span><span style="color:#3b82f6;font-size:14px">→</span><span class="cf-val">${r.CF_rho.toFixed(8)}</span></div>
     <div class="cf-box"><span class="cf-key">${t('dk_cf_dh')}</span><span style="color:#3b82f6;font-size:14px">→</span><span class="cf-val">${r.CF_dh.toFixed(8)}</span></div>`+
-    sect(t('ds_breakdown'))+
-    row(t('dk_qvessel2'),measData.Qvessel,'W',4)+
-    row('× CF_ρ',r.CF_rho,'',8)+
-    row('× CF_Δh',r.CF_dh,'',8);
-
+    sect(t('ds_breakdown'))+row(t('dk_qvessel2'),m.Qvessel,'W',4)+row('× CF_ρ',r.CF_rho,'',8)+row('× CF_Δh',r.CF_dh,'',8);
   document.getElementById('dres').innerHTML=
-    `<div class="dres">
-      <div class="dres-lbl">${t('dres_lbl')}</div>
-      <div class="dres-val">${r.Qo.toFixed(4)} W</div>
-      <div style="font-size:10px;color:#475569;margin-top:6px">COP = Qo/P1 = ${r.Qo.toFixed(4)}/${measData.P1.toFixed(4)} = <strong style="color:#a78bfa">${r.COP.toFixed(5)}</strong></div>
-      <div style="font-size:10px;color:#475569;margin-top:3px">ṁ = ${(r.mdot*1000).toFixed(5)} g/s</div>
-      ${!cpReady?`<div style="font-size:9px;color:#64748b;margin-top:6px;border-top:1px solid #1e3a5f;padding-top:6px">${t('eos_note')}</div>`:''}
+    `<div class="dres"><div class="dres-lbl">${t('dres_lbl')}</div>
+    <div class="dres-val">${r.Qo.toFixed(4)} W</div>
+    <div style="font-size:10px;color:#475569;margin-top:6px">COP=${r.Qo.toFixed(4)}/${m.P1.toFixed(4)}=<strong style="color:#a78bfa">${r.COP.toFixed(5)}</strong></div>
+    <div style="font-size:10px;color:#475569;margin-top:3px">ṁ=${(r.mdot*1000).toFixed(5)} g/s</div>
+    ${!cpReady?`<div style="font-size:9px;color:#64748b;margin-top:6px;border-top:1px solid #1e3a5f;padding-top:6px">${t('eos_note')}</div>`:''}
     </div>`;
-
-  showTab('measured');
-}
-
-function showErr(e){
-  document.getElementById('debugTabs').style.display='flex';
-  document.getElementById('dm').innerHTML=
-    `<div style="color:#f87171;padding:16px;font-size:11.5px;line-height:1.7">
-    <strong>${t('err_calc')}</strong><br>${String(e)}<br><br>${t('err_check')}</div>`;
   showTab('measured');
 }
 
@@ -1606,8 +1444,9 @@ document.addEventListener('DOMContentLoaded',()=>{
   setLang('en');
   renderStdButtons();
   setStd('en_lbp');
-  document.getElementById('pasteArea').addEventListener('paste',()=>setTimeout(parsePaste,50));
+  addMeasRow(); // start with one empty row
 });
+
 </script>
 </body>
 </html>
