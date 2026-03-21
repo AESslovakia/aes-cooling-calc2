@@ -1126,28 +1126,22 @@ document.addEventListener('keydown',e=>{
 });
 
 // ═══════════════════════════════════════════════════════════════════
-//  COLUMN MAP (0-based, row A3-AT3)
-// ═══════════════════════════════════════════════════════════════════
+//  COLUMN MAP + MULTI-MEASUREMENT ENGINE
+// =================================================================
 const C={factory:0,calo:1,order:2,kitNo:3,compType:4,refrigerant:19,P1:22,
-          Te_meas:27,Tc_meas:28,Qvessel:29,Tsuc_meas:31,Pe_uncorr:38,Tliq_meas:39,Tvout_meas:40};
+  Te_meas:27,Tc_meas:28,Qvessel:29,Tsuc_meas:31,Pe_uncorr:38,Tliq_meas:39,Tvout_meas:40};
 const FLUID_MAP={'R-290':'R290','R-134a':'R134a','R-404A':'R404A','R-22':'R22',
-                  'R-407C':'R407C','R-410A':'R410A','R-600a':'R600a','R-32':'R32'};
+  'R-407C':'R407C','R-410A':'R410A','R-600a':'R600a','R-32':'R32'};
 
 function parseRowCols(raw){
   const c=raw.split(/\t/);
-  const s=i=>(c[i]||'').trim();
-  const n=i=>parseFloat(c[i])||0;
-  let fluid=s(C.refrigerant);
-  fluid=FLUID_MAP[fluid]||fluid||'R290';
-  return {
-    factory:s(C.factory),calo:s(C.calo),order:s(C.order),
-    kitNo:s(C.kitNo),compType:s(C.compType),
-    refrigerant:fluid,P1:n(C.P1),
+  const s=i=>(c[i]||'').trim(), n=i=>parseFloat(c[i])||0;
+  let fluid=s(C.refrigerant); fluid=FLUID_MAP[fluid]||fluid||'R290';
+  return {factory:s(C.factory),calo:s(C.calo),order:s(C.order),
+    kitNo:s(C.kitNo),compType:s(C.compType),refrigerant:fluid,P1:n(C.P1),
     Te_meas:n(C.Te_meas),Tc_meas:n(C.Tc_meas),Qvessel:n(C.Qvessel),
     Tsuc_meas:n(C.Tsuc_meas),Tliq_meas:n(C.Tliq_meas),
-    Tvout_meas:n(C.Tvout_meas),Pe_uncorr:n(C.Pe_uncorr),
-    colCount:c.length
-  };
+    Tvout_meas:n(C.Tvout_meas),Pe_uncorr:n(C.Pe_uncorr),colCount:c.length};
 }
 
 function getFluid(){
@@ -1155,82 +1149,61 @@ function getFluid(){
       || document.getElementById('refrigerant').value;
 }
 
-// ═══════════════════════════════════════════════════════════════════
+// =================================================================
 //  CORE CALCULATION — EN 12900 correction factor method
-// ═══════════════════════════════════════════════════════════════════
+// =================================================================
 function computeQo(m, Te_r, Tc_r, Tsuc_r, Tliq_r, fluid){
-  // MEASURED conditions
-  const pe_m = satP(m.Te_meas, fluid);
-  const pc_m = satP(m.Tc_meas, fluid);
-  const hA_m = H(pc_m, m.Tliq_meas, fluid, 'liquid');  // saturated liquid
-  const hB_m = H(pe_m, m.Tsuc_meas, fluid, 'vapor');   // superheated vapor
-  const dh_m  = hB_m - hA_m;
-  const rho_m = RHO(pe_m, m.Tsuc_meas, fluid);
-  const mdot  = m.Qvessel / (dh_m * 1000);             // kg/s
-
-  // REQUESTED (reference) conditions
-  const pe_r  = satP(Te_r, fluid);
-  const pc_r  = satP(Tc_r, fluid);
-  const hA_r  = H(pc_r, Tliq_r, fluid, 'liquid');
-  const hB_r  = H(pe_r, Tsuc_r, fluid, 'vapor');
-  const dh_r  = hB_r - hA_r;
-  const rho_r = RHO(pe_r, Tsuc_r, fluid);
-
-  // CORRECTION FACTORS
-  const CF_rho = rho_r / rho_m;
-  const CF_dh  = dh_r  / dh_m;
-
-  // RESULT
-  const Qo  = m.Qvessel * CF_rho * CF_dh;
-  const COP = Qo / m.P1;
-
-  return { pe_m, pc_m, hA_m, hB_m, dh_m, rho_m, mdot,
-           pe_r, pc_r, hA_r, hB_r, dh_r, rho_r,
-           CF_rho, CF_dh, Qo, COP };
+  const pe_m=satP(m.Te_meas,fluid), pc_m=satP(m.Tc_meas,fluid);
+  const hA_m=H(pc_m,m.Tliq_meas,fluid,'liquid'), hB_m=H(pe_m,m.Tsuc_meas,fluid,'vapor');
+  const dh_m=hB_m-hA_m, rho_m=RHO(pe_m,m.Tsuc_meas,fluid), mdot=m.Qvessel/(dh_m*1000);
+  const pe_r=satP(Te_r,fluid), pc_r=satP(Tc_r,fluid);
+  const hA_r=H(pc_r,Tliq_r,fluid,'liquid'), hB_r=H(pe_r,Tsuc_r,fluid,'vapor');
+  const dh_r=hB_r-hA_r, rho_r=RHO(pe_r,Tsuc_r,fluid);
+  const CF_rho=rho_r/rho_m, CF_dh=dh_r/dh_m;
+  const Qo=m.Qvessel*CF_rho*CF_dh, COP=Qo/m.P1;
+  return {pe_m,pc_m,hA_m,hB_m,dh_m,rho_m,mdot,pe_r,pc_r,hA_r,hB_r,dh_r,rho_r,CF_rho,CF_dh,Qo,COP};
 }
 
 function updateBtns(){
-  const btn = document.getElementById('calcAllMeasBtn');
-  if(btn) btn.disabled = measRows.length === 0;
+  const btn=document.getElementById('calcAllMeasBtn');
+  if(btn) btn.disabled=measRows.length===0;
 }
 
-// ═══════════════════════════════════════════════════════════════════
+// =================================================================
 //  STANDARDS
-// ═══════════════════════════════════════════════════════════════════
+// =================================================================
 function renderStdButtons(){
-  const panel = document.getElementById('stdButtonsPanel');
+  const panel=document.getElementById('stdButtonsPanel');
   if(!panel) return;
-  const groups = {};
+  const groups={};
   ALL_STD_KEYS.forEach(k=>{
-    const p = STANDARDS[k]; if(!p) return;
-    if(!groups[p.label]) groups[p.label] = [];
-    groups[p.label].push({key:k, p});
+    const p=STANDARDS[k]; if(!p) return;
+    if(!groups[p.label]) groups[p.label]=[];
+    groups[p.label].push({key:k,p});
   });
-  groups['__custom__'] = [{key:'custom', p:STANDARDS['custom']}];
-
-  let html = '';
-  Object.entries(groups).forEach(([label, entries])=>{
-    const isCustom = label==='__custom__';
-    html += `<div class="std-family"><div class="std-family-label">${isCustom?t('std_custom_lbl'):label}</div><div class="std-row">`;
-    entries.forEach(({key, p})=>{
-      const isActive = key===activeStd;
-      const Te = p.Te>=0?'+'+p.Te:String(p.Te);
+  groups['__custom__']=[{key:'custom',p:STANDARDS['custom']}];
+  let html='';
+  Object.entries(groups).forEach(([label,entries])=>{
+    const isCustom=label==='__custom__';
+    html+=`<div class="std-family"><div class="std-family-label">${isCustom?t('std_custom_lbl'):label}</div><div class="std-row">`;
+    entries.forEach(({key,p})=>{
+      const isA=key===activeStd;
+      const Te=p.Te>=0?'+'+p.Te:String(p.Te);
       if(isCustom){
-        html += `<div class="std-btn${isActive?' active':''}" id="std_custom" onclick="setStd('custom')">
+        html+=`<div class="std-btn${isA?' active':''}" id="std_custom" onclick="setStd('custom')">
           <div class="std-name">${t('std_custom_name')}</div><div class="std-sub">${t('std_custom_sub')}</div></div>`;
       } else {
-        html += `<div class="std-btn${isActive?' active':''}" id="std_${key}" onclick="setStd('${key}')">
+        html+=`<div class="std-btn${isA?' active':''}" id="std_${key}" onclick="setStd('${key}')">
           <div class="std-name">${p.range}</div><div class="std-sub">Te ${Te}/Tc ${p.Tc}°C</div></div>`;
       }
     });
-    html += '</div></div>';
+    html+='</div></div>';
   });
-  panel.innerHTML = html;
+  panel.innerHTML=html;
 }
 
-function setStd(key, silent){
-  if(!silent){ activeStd=key; }
-  else { activeStd='custom'; key='custom'; }
+function setStd(key,silent){
+  if(!silent){activeStd=key;} else {activeStd='custom';key='custom';}
   document.querySelectorAll('[id^="std_"]').forEach(el=>el.classList.remove('active'));
   const el=document.getElementById('std_'+key); if(el) el.classList.add('active');
   const p=STANDARDS[key];
@@ -1245,19 +1218,16 @@ function setStd(key, silent){
 
 // ── STANDARDS EDITOR ─────────────────────────────────────────────
 let _editorRows=[];
-
 function openStdEditor(){
   _editorRows=ALL_STD_KEYS.map(k=>({
-    key:k, label:STANDARDS[k]?.label||'', range:STANDARDS[k]?.range||'',
-    Te:STANDARDS[k]?.Te??0, Tc:STANDARDS[k]?.Tc??0,
-    Tsuc:STANDARDS[k]?.Tsuc??0, Tliq:STANDARDS[k]?.Tliq??0,
-    badge:STANDARDS[k]?.badge||'nb-en', isNew:false
-  }));
+    key:k,label:STANDARDS[k]?.label||'',range:STANDARDS[k]?.range||'',
+    Te:STANDARDS[k]?.Te??0,Tc:STANDARDS[k]?.Tc??0,
+    Tsuc:STANDARDS[k]?.Tsuc??0,Tliq:STANDARDS[k]?.Tliq??0,
+    badge:STANDARDS[k]?.badge||'nb-en',isNew:false}));
   renderEditorTable();
   document.getElementById('stdModal').style.display='flex';
 }
-function closeStdEditor(){ document.getElementById('stdModal').style.display='none'; }
-
+function closeStdEditor(){document.getElementById('stdModal').style.display='none';}
 function renderEditorTable(){
   let rows='';
   _editorRows.forEach((r,i)=>{
@@ -1265,8 +1235,8 @@ function renderEditorTable(){
     rows+=`<tr class="${r.isNew?'new-row':''}">
       <td><input type="text" value="${r.label}" oninput="_editorRows[${i}].label=this.value" style="min-width:90px"></td>
       <td><input type="text" value="${r.range}" oninput="_editorRows[${i}].range=this.value" class="narrow"></td>
-      <td><input type="number" value="${r.Te}"   oninput="_editorRows[${i}].Te=parseFloat(this.value)||0"   class="narrow" step="0.1"></td>
-      <td><input type="number" value="${r.Tc}"   oninput="_editorRows[${i}].Tc=parseFloat(this.value)||0"   class="narrow" step="0.1"></td>
+      <td><input type="number" value="${r.Te}" oninput="_editorRows[${i}].Te=parseFloat(this.value)||0" class="narrow" step="0.1"></td>
+      <td><input type="number" value="${r.Tc}" oninput="_editorRows[${i}].Tc=parseFloat(this.value)||0" class="narrow" step="0.1"></td>
       <td><input type="number" value="${r.Tsuc}" oninput="_editorRows[${i}].Tsuc=parseFloat(this.value)||0" class="narrow" step="0.1"></td>
       <td><input type="number" value="${r.Tliq}" oninput="_editorRows[${i}].Tliq=parseFloat(this.value)||0" class="narrow" step="0.1"></td>
       <td><button class="ed-del" onclick="delStdRow(${i})" ${canDel?'':'disabled'}>🗑</button></td>
@@ -1279,33 +1249,33 @@ function addStdRow(){
   _editorRows.push({key:'custom_'+Date.now(),label:lastLabel,range:'NEW',
     Te:0,Tc:40,Tsuc:20,Tliq:40,badge:'nb-en',isNew:true});
   renderEditorTable();
-  const body=document.querySelector('.modal-body'); if(body) body.scrollTop=body.scrollHeight;
+  const body=document.querySelector('.modal-body');if(body)body.scrollTop=body.scrollHeight;
 }
-function delStdRow(i){ if(_editorRows.length<=1)return; _editorRows.splice(i,1); renderEditorTable(); }
+function delStdRow(i){if(_editorRows.length<=1)return;_editorRows.splice(i,1);renderEditorTable();}
 function saveStds(){
-  for(const r of _editorRows){ if(!r.label.trim()||!r.range.trim()){alert('Label and range required');return;} }
+  for(const r of _editorRows){if(!r.label.trim()||!r.range.trim()){alert('Label and range required');return;}}
   ALL_STD_KEYS=[];
   _editorRows.forEach((r,i)=>{
     const key=r.isNew?('std_'+i+'_'+r.range.toLowerCase().replace(/\s+/g,'_')):r.key;
-    STANDARDS[key]={Te:r.Te,Tc:r.Tc,Tsuc:r.Tsuc,Tliq:r.Tliq,label:r.label.trim(),range:r.range.trim(),badge:r.badge||'nb-en'};
+    STANDARDS[key]={Te:r.Te,Tc:r.Tc,Tsuc:r.Tsuc,Tliq:r.Tliq,
+      label:r.label.trim(),range:r.range.trim(),badge:r.badge||'nb-en'};
     ALL_STD_KEYS.push(key);
   });
   if(!ALL_STD_KEYS.includes(activeStd)) activeStd=ALL_STD_KEYS[0]||'custom';
-  closeStdEditor(); renderStdButtons(); setStd(activeStd);
-  renderAllRows(); // refresh row standard buttons
+  closeStdEditor(); renderStdButtons(); setStd(activeStd); renderAllRows();
 }
 
-// ═══════════════════════════════════════════════════════════════════
+// =================================================================
 //  MULTI-MEASUREMENT ROWS
-// ═══════════════════════════════════════════════════════════════════
+// =================================================================
 let measRows=[], rowCounter=0;
-let measData=null; // legacy compatibility (computeQo still works standalone)
+let measData=null; // kept for legacy compat
 
 function addMeasRow(){
   const id=++rowCounter;
   measRows.push({id,data:null,stdKey:activeStd,result:null});
   renderAllRows(); updateBtns();
-  setTimeout(()=>{ const el=document.getElementById('mrow_'+id); if(el) el.scrollIntoView({behavior:'smooth',block:'nearest'}); },80);
+  setTimeout(()=>{const el=document.getElementById('mrow_'+id);if(el)el.scrollIntoView({behavior:'smooth',block:'nearest'});},80);
 }
 
 function deleteMeasRow(id){
@@ -1315,7 +1285,7 @@ function deleteMeasRow(id){
 
 function clearAllMeas(){
   measRows=[]; rowCounter=0; renderAllRows(); updateBtns();
-  document.getElementById('dm').innerHTML='<div class="dph">Add a measurement row,<br>paste data and press<br><strong style="color:#7dd3fc">Calculate</strong></div>';
+  document.getElementById('dm').innerHTML='<div class="dph">Add a measurement,<br>paste data and press<br><strong style="color:#7dd3fc">Calculate</strong></div>';
   document.getElementById('debugTabs').style.display='none';
   document.getElementById('debugRowLabel').textContent='';
 }
@@ -1325,10 +1295,7 @@ function renderAllRows(){
   const badge=document.getElementById('measCountBadge');
   if(badge) badge.textContent=measRows.length+' measurement'+(measRows.length!==1?'s':'');
   if(measRows.length===0){
-    container.innerHTML=`<div style="text-align:center;padding:40px;color:#9aa3b8;font-size:13px;border:2px dashed #e4e9f4;border-radius:12px">
-      <div style="font-size:28px;margin-bottom:10px">📋</div>
-      <strong style="color:#7a8299">No measurements yet</strong><br>
-      <span style="font-size:11px">Click ＋ Add measurement to start</span></div>`;
+    container.innerHTML='<div style="text-align:center;padding:40px;color:#9aa3b8;font-size:13px;border:2px dashed #e4e9f4;border-radius:12px"><div style="font-size:28px;margin-bottom:10px">📋</div><strong style="color:#7a8299">No measurements yet</strong><br><span style="font-size:11px">Click + Add measurement to start</span></div>';
     return;
   }
   container.innerHTML=measRows.map((row,idx)=>buildRowHTML(row,idx+1)).join('');
@@ -1338,53 +1305,60 @@ function renderAllRows(){
   });
 }
 
-function buildRowHTML(row, num){
+function buildRowHTML(row,num){
   const d=row.data, r=row.result;
   const compId=d?(d.kitNo||d.compType||'—'):'—';
   const stdLabel=STANDARDS[row.stdKey]?STANDARDS[row.stdKey].label+' '+STANDARDS[row.stdKey].range:row.stdKey;
   const qoStr=r?r.Qo.toFixed(2)+' W':'';
   const stdBtns=ALL_STD_KEYS.map(k=>{
-    const p=STANDARDS[k], isA=k===row.stdKey;
-    return `<button class="mrow-std-btn${isA?' active':''}" onclick="setRowStd(${row.id},'${k}')">${p.label} ${p.range}</button>`;
+    const p=STANDARDS[k],isA=k===row.stdKey;
+    const cls='mrow-std-btn'+(isA?' active':'');
+    const onclick='setRowStd('+row.id+',"'+k+'")';
+    return '<button class="'+cls+'" onclick="'+onclick+'">'+p.label+' '+p.range+'</button>';
   }).join('');
-  const tags=d?`<div class="mrow-parsed-tags">
-    <span class="mrow-tag">${d.refrigerant}</span>
-    <span class="mrow-tag">Te ${d.Te_meas.toFixed(2)}°C</span>
-    <span class="mrow-tag">Tc ${d.Tc_meas.toFixed(2)}°C</span>
-    <span class="mrow-tag">Qv ${d.Qvessel.toFixed(1)} W</span>
-    <span class="mrow-tag">P1 ${d.P1.toFixed(1)} W</span>
-    ${d.colCount<41?'<span class="mrow-tag warn">⚠ '+d.colCount+' cols</span>':''}
-  </div>`:'';
-  const resultHtml=r?`
-    <div class="mrow-result">
-      <div class="mrow-ri hl"><div class="mrow-ri-lbl">Cooling Qo</div><div class="mrow-ri-val">${r.Qo.toFixed(2)}</div><div class="mrow-ri-u">W</div></div>
-      <div class="mrow-ri hl"><div class="mrow-ri-lbl">COP</div><div class="mrow-ri-val">${r.COP.toFixed(4)}</div><div class="mrow-ri-u">W/W</div></div>
-      <div class="mrow-ri"><div class="mrow-ri-lbl">Power P1</div><div class="mrow-ri-val">${d.P1.toFixed(2)}</div><div class="mrow-ri-u">W</div></div>
-      <div class="mrow-ri"><div class="mrow-ri-lbl">Mass flow ṁ</div><div class="mrow-ri-val">${(r.mdot*1000).toFixed(3)}</div><div class="mrow-ri-u">g/s</div></div>
-    </div>
-    <div style="margin-top:6px;font-size:9.5px;color:#9aa3b8;text-align:center">
-      ${d.refrigerant} | Qo=${d.Qvessel.toFixed(2)}×${r.CF_rho.toFixed(5)}×${r.CF_dh.toFixed(5)}
-      <span style="margin-left:8px;cursor:pointer;color:#7dd3fc;text-decoration:underline" onclick="showDebugForRow(${row.id})">debug →</span>
-    </div>`:'';
-  return `<div class="mrow-card${r?' has-result':''}" id="mrow_${row.id}">
-    <div class="mrow-head" onclick="toggleRowBody(${row.id})">
-      <div class="mrow-num">${num}</div>
-      <div class="mrow-id">${compId}</div>
-      <div class="mrow-std-badge">${stdLabel}</div>
-      <div class="mrow-qo">${qoStr}</div>
-      <button class="mrow-del" onclick="event.stopPropagation();deleteMeasRow(${row.id})" title="Delete">🗑</button>
-    </div>
-    <div class="mrow-body" id="mrow_body_${row.id}">
-      <div class="mrow-paste-row">
-        <textarea class="mrow-paste" id="mrow_ta_${row.id}" placeholder="Paste row A3–AT3 from Excel (Ctrl+V)…"></textarea>
-        <button class="mrow-parse-btn" onclick="parseRowPaste(${row.id})">⚡ Parse</button>
-      </div>
-      ${tags}
-      <div class="mrow-std-sel"><span class="mrow-std-lbl">Standard:</span>${stdBtns}</div>
-      <button class="mrow-calc-btn" onclick="calcRow(${row.id})" ${d?'':' disabled'}>🧮 Calculate — ${stdLabel}</button>
-      ${resultHtml}
-    </div>
-  </div>`;
+  let tags='';
+  if(d){
+    tags='<div class="mrow-parsed-tags">'
+      +'<span class="mrow-tag">'+d.refrigerant+'</span>'
+      +'<span class="mrow-tag">Te '+d.Te_meas.toFixed(2)+'°C</span>'
+      +'<span class="mrow-tag">Tc '+d.Tc_meas.toFixed(2)+'°C</span>'
+      +'<span class="mrow-tag">Qv '+d.Qvessel.toFixed(1)+' W</span>'
+      +'<span class="mrow-tag">P1 '+d.P1.toFixed(1)+' W</span>'
+      +(d.colCount<41?'<span class="mrow-tag warn">⚠ '+d.colCount+' cols</span>':'')
+      +'</div>';
+  }
+  let resultHtml='';
+  if(r){
+    resultHtml='<div class="mrow-result">'
+      +'<div class="mrow-ri hl"><div class="mrow-ri-lbl">Cooling Qo</div><div class="mrow-ri-val">'+r.Qo.toFixed(2)+'</div><div class="mrow-ri-u">W</div></div>'
+      +'<div class="mrow-ri hl"><div class="mrow-ri-lbl">COP</div><div class="mrow-ri-val">'+r.COP.toFixed(4)+'</div><div class="mrow-ri-u">W/W</div></div>'
+      +'<div class="mrow-ri"><div class="mrow-ri-lbl">Power P1</div><div class="mrow-ri-val">'+d.P1.toFixed(2)+'</div><div class="mrow-ri-u">W</div></div>'
+      +'<div class="mrow-ri"><div class="mrow-ri-lbl">Mass flow</div><div class="mrow-ri-val">'+(r.mdot*1000).toFixed(3)+'</div><div class="mrow-ri-u">g/s</div></div>'
+      +'</div>'
+      +'<div style="margin-top:6px;font-size:9.5px;color:#9aa3b8;text-align:center">'
+      +d.refrigerant+' | Qo='+d.Qvessel.toFixed(2)+'×'+r.CF_rho.toFixed(5)+'×'+r.CF_dh.toFixed(5)
+      +' <span style="margin-left:8px;cursor:pointer;color:#7dd3fc;text-decoration:underline" onclick="showDebugForRow('+row.id+')">debug →</span>'
+      +'</div>';
+  }
+  return '<div class="mrow-card'+(r?' has-result':'')+'" id="mrow_'+row.id+'">'
+    +'<div class="mrow-head" onclick="toggleRowBody('+row.id+')">'
+    +'<div class="mrow-num">'+num+'</div>'
+    +'<div class="mrow-id">'+compId+'</div>'
+    +'<div class="mrow-std-badge">'+stdLabel+'</div>'
+    +'<div class="mrow-qo">'+qoStr+'</div>'
+    +'<button class="mrow-del" onclick="event.stopPropagation();deleteMeasRow('+row.id+')" title="Delete">🗑</button>'
+    +'</div>'
+    +'<div class="mrow-body" id="mrow_body_'+row.id+'">'
+    +'<div class="mrow-paste-row">'
+    +'<textarea class="mrow-paste" id="mrow_ta_'+row.id+'" placeholder="Paste row A3-AT3 from Excel (Ctrl+V)..."></textarea>'
+    +'<button class="mrow-parse-btn" onclick="parseRowPaste('+row.id+')">⚡ Parse</button>'
+    +'</div>'
+    +tags
+    +'<div class="mrow-std-sel"><span class="mrow-std-lbl">Standard:</span>'+stdBtns+'</div>'
+    +'<button class="mrow-calc-btn" onclick="calcRow('+row.id+')"'+(d?'':' disabled')+'>🧮 Calculate — '+stdLabel+'</button>'
+    +resultHtml
+    +'</div>'
+    +'</div>';
 }
 
 function toggleRowBody(id){
@@ -1392,46 +1366,45 @@ function toggleRowBody(id){
   if(b) b.style.display=b.style.display==='none'?'':'none';
 }
 function parseRowPaste(id){
-  const ta=document.getElementById('mrow_ta_'+id); if(!ta) return;
-  const raw=ta.value.trim(); if(!raw) return;
-  const row=measRows.find(r=>r.id===id); if(!row) return;
-  row.data=parseRowCols(raw); row.result=null;
-  renderAllRows();
+  const ta=document.getElementById('mrow_ta_'+id);if(!ta)return;
+  const raw=ta.value.trim();if(!raw)return;
+  const row=measRows.find(r=>r.id===id);if(!row)return;
+  row.data=parseRowCols(raw);row.result=null;renderAllRows();
 }
 function setRowStd(id,stdKey){
-  const row=measRows.find(r=>r.id===id); if(!row) return;
-  row.stdKey=stdKey; row.result=null; renderAllRows();
+  const row=measRows.find(r=>r.id===id);if(!row)return;
+  row.stdKey=stdKey;row.result=null;renderAllRows();
 }
 function calcRow(id){
-  const row=measRows.find(r=>r.id===id); if(!row||!row.data) return;
+  const row=measRows.find(r=>r.id===id);if(!row||!row.data)return;
   const fluid=document.getElementById('refrigerantCustom').value.trim()||row.data.refrigerant||document.getElementById('refrigerant').value;
-  const p=STANDARDS[row.stdKey]; if(!p){alert('Unknown standard: '+row.stdKey);return;}
-  try {
+  const p=STANDARDS[row.stdKey];if(!p){alert('Unknown standard: '+row.stdKey);return;}
+  try{
     const result=computeQo(row.data,p.Te,p.Tc,p.Tsuc,p.Tliq,fluid);
-    row.result=result; row.result._fluid=fluid; row.result._stdKey=row.stdKey;
-    renderAllRows(); showDebugForRow(id);
-    setTimeout(()=>{ const el=document.getElementById('mrow_'+id); if(el) el.scrollIntoView({behavior:'smooth',block:'nearest'}); },80);
-  } catch(e){ showErrForRow(id,e); }
+    row.result=result;row.result._fluid=fluid;row.result._stdKey=row.stdKey;
+    renderAllRows();showDebugForRow(id);
+    setTimeout(()=>{const el=document.getElementById('mrow_'+id);if(el)el.scrollIntoView({behavior:'smooth',block:'nearest'});},80);
+  }catch(e){showErrForRow(id,e);}
 }
 function calcAllMeas(){
-  measRows.forEach(row=>{ if(row.data) calcRow(row.id); });
+  measRows.forEach(row=>{if(row.data)calcRow(row.id);});
 }
 function showDebugForRow(id){
-  const row=measRows.find(r=>r.id===id); if(!row||!row.result||!row.data) return;
-  const p=STANDARDS[row.stdKey], fluid=row.result._fluid||row.data.refrigerant;
+  const row=measRows.find(r=>r.id===id);if(!row||!row.result||!row.data)return;
+  const p=STANDARDS[row.stdKey],fluid=row.result._fluid||row.data.refrigerant;
   document.getElementById('debugRowLabel').textContent='Row #'+id+' · '+(row.data.kitNo||row.data.compType||'—')+' · '+(p?p.label+' '+p.range:row.stdKey);
   renderDebug(row.result,fluid,p.Te,p.Tc,p.Tsuc,p.Tliq,row.data);
 }
 function showErrForRow(id,e){
   document.getElementById('debugRowLabel').textContent='Row #'+id+' — error';
   document.getElementById('debugTabs').style.display='flex';
-  document.getElementById('dm').innerHTML=`<div style="color:#f87171;padding:16px;font-size:11.5px;line-height:1.7"><strong>${t('err_calc')}</strong><br>${String(e)}<br><br>${t('err_check')}</div>`;
+  document.getElementById('dm').innerHTML='<div style="color:#f87171;padding:16px;font-size:11.5px;line-height:1.7"><strong>'+t('err_calc')+'</strong><br>'+String(e)+'<br><br>'+t('err_check')+'</div>';
   showTab('measured');
 }
 
-// ═══════════════════════════════════════════════════════════════════
+// =================================================================
 //  DEBUG PANEL
-// ═══════════════════════════════════════════════════════════════════
+// =================================================================
 function showTab(tab){
   const tabs=['measured','requested','factors','result'];
   document.querySelectorAll('.dtab').forEach((el,i)=>el.classList.toggle('active',tabs[i]===tab));
@@ -1443,33 +1416,43 @@ function renderDebug(r,fluid,Te_r,Tc_r,Tsuc_r,Tliq_r,m){
   if(!m) return;
   window._lastDebugArgs=[r,fluid,Te_r,Tc_r,Tsuc_r,Tliq_r,m];
   document.getElementById('debugTabs').style.display='flex';
-  const tabs=document.querySelectorAll('.dtab');
-  ['dbg_meas','dbg_req','dbg_fact','dbg_res'].forEach((k,i)=>{ if(tabs[i]) tabs[i].textContent=t(k); });
-  const row=(k,v,u,d=6)=>`<div class="drow"><span class="dk">${k}</span><span class="dv2">${typeof v==='number'?v.toFixed(d):v}</span><span class="du">${u||''}</span></div>`;
-  const sect=s=>`<div class="dsect">${s}</div>`;
+  ['dbg_meas','dbg_req','dbg_fact','dbg_res'].forEach((k,i)=>{
+    const tabs=document.querySelectorAll('.dtab');if(tabs[i])tabs[i].textContent=t(k);
+  });
+  const row=(k,v,u,d=6)=>'<div class="drow"><span class="dk">'+k+'</span><span class="dv2">'+(typeof v==='number'?v.toFixed(d):v)+'</span><span class="du">'+(u||'')+'</span></div>';
+  const sect=s=>'<div class="dsect">'+s+'</div>';
   const eos=cpReady?'(CoolProp)':'(PR EOS ±1%)';
   document.getElementById('dm').innerHTML=
-    sect(t('ds_meas'))+row(t('dk_fluid'),fluid,'')+row(t('dk_te_m'),m.Te_meas,'°C',5)+row(t('dk_tc_m'),m.Tc_meas,'°C',5)+
-    row(t('dk_tsuc_m'),m.Tsuc_meas,'°C',5)+row(t('dk_tliq_m'),m.Tliq_meas,'°C',5)+row(t('dk_qvessel'),m.Qvessel,'W',4)+row(t('dk_p1'),m.P1,'W',4)+
-    sect(t('ds_thermo_m')+' '+eos)+row(t('dk_pe_m'),r.pe_m,'bar',6)+row(t('dk_pc_m'),r.pc_m,'bar',5)+
-    row(t('dk_ha_m'),r.hA_m,'kJ/kg',4)+row(t('dk_hb_m'),r.hB_m,'kJ/kg',4)+row(t('dk_dh_m'),r.dh_m,'kJ/kg',4)+
-    row(t('dk_mdot'),r.mdot,'kg/s',8)+row(t('dk_rho_m'),r.rho_m,'kg/m³',5);
+    sect(t('ds_meas'))+row(t('dk_fluid'),fluid,'')+
+    row(t('dk_te_m'),m.Te_meas,'°C',5)+row(t('dk_tc_m'),m.Tc_meas,'°C',5)+
+    row(t('dk_tsuc_m'),m.Tsuc_meas,'°C',5)+row(t('dk_tliq_m'),m.Tliq_meas,'°C',5)+
+    row(t('dk_qvessel'),m.Qvessel,'W',4)+row(t('dk_p1'),m.P1,'W',4)+
+    sect(t('ds_thermo_m')+' '+eos)+
+    row(t('dk_pe_m'),r.pe_m,'bar',6)+row(t('dk_pc_m'),r.pc_m,'bar',5)+
+    row(t('dk_ha_m'),r.hA_m,'kJ/kg',4)+row(t('dk_hb_m'),r.hB_m,'kJ/kg',4)+
+    row(t('dk_dh_m'),r.dh_m,'kJ/kg',4)+row(t('dk_mdot'),r.mdot,'kg/s',8)+
+    row(t('dk_rho_m'),r.rho_m,'kg/m3',5);
   document.getElementById('dr').innerHTML=
-    sect(t('ds_req'))+row(t('dk_te_r'),Te_r,'°C',2)+row(t('dk_tc_r'),Tc_r,'°C',2)+row(t('dk_tsuc_r'),Tsuc_r,'°C',2)+row(t('dk_tliq_r'),Tliq_r,'°C',2)+
-    sect(t('ds_thermo_r')+' '+eos)+row(t('dk_pe_r'),r.pe_r,'bar',6)+row(t('dk_pc_r'),r.pc_r,'bar',5)+
-    row(t('dk_ha_r'),r.hA_r,'kJ/kg',4)+row(t('dk_hb_r'),r.hB_r,'kJ/kg',4)+row(t('dk_dh_r'),r.dh_r,'kJ/kg',4)+row(t('dk_rho_r'),r.rho_r,'kg/m³',5);
+    sect(t('ds_req'))+
+    row(t('dk_te_r'),Te_r,'°C',2)+row(t('dk_tc_r'),Tc_r,'°C',2)+
+    row(t('dk_tsuc_r'),Tsuc_r,'°C',2)+row(t('dk_tliq_r'),Tliq_r,'°C',2)+
+    sect(t('ds_thermo_r')+' '+eos)+
+    row(t('dk_pe_r'),r.pe_r,'bar',6)+row(t('dk_pc_r'),r.pc_r,'bar',5)+
+    row(t('dk_ha_r'),r.hA_r,'kJ/kg',4)+row(t('dk_hb_r'),r.hB_r,'kJ/kg',4)+
+    row(t('dk_dh_r'),r.dh_r,'kJ/kg',4)+row(t('dk_rho_r'),r.rho_r,'kg/m3',5);
   document.getElementById('df').innerHTML=
     sect(t('ds_cf'))+
-    `<div class="cf-box"><span class="cf-key">${t('dk_cf_rho')}</span><span style="color:#3b82f6;font-size:14px">→</span><span class="cf-val">${r.CF_rho.toFixed(8)}</span></div>
-    <div class="cf-box"><span class="cf-key">${t('dk_cf_dh')}</span><span style="color:#3b82f6;font-size:14px">→</span><span class="cf-val">${r.CF_dh.toFixed(8)}</span></div>`+
-    sect(t('ds_breakdown'))+row(t('dk_qvessel2'),m.Qvessel,'W',4)+row('× CF_ρ',r.CF_rho,'',8)+row('× CF_Δh',r.CF_dh,'',8);
+    '<div class="cf-box"><span class="cf-key">'+t('dk_cf_rho')+'</span><span style="color:#3b82f6;font-size:14px">→</span><span class="cf-val">'+r.CF_rho.toFixed(8)+'</span></div>'+
+    '<div class="cf-box"><span class="cf-key">'+t('dk_cf_dh')+'</span><span style="color:#3b82f6;font-size:14px">→</span><span class="cf-val">'+r.CF_dh.toFixed(8)+'</span></div>'+
+    sect(t('ds_breakdown'))+
+    row(t('dk_qvessel2'),m.Qvessel,'W',4)+row('× CF_ρ',r.CF_rho,'',8)+row('× CF_Δh',r.CF_dh,'',8);
   document.getElementById('dres').innerHTML=
-    `<div class="dres"><div class="dres-lbl">${t('dres_lbl')}</div>
-    <div class="dres-val">${r.Qo.toFixed(4)} W</div>
-    <div style="font-size:10px;color:#475569;margin-top:6px">COP=${r.Qo.toFixed(4)}/${m.P1.toFixed(4)}=<strong style="color:#a78bfa">${r.COP.toFixed(5)}</strong></div>
-    <div style="font-size:10px;color:#475569;margin-top:3px">ṁ=${(r.mdot*1000).toFixed(5)} g/s</div>
-    ${!cpReady?`<div style="font-size:9px;color:#64748b;margin-top:6px;border-top:1px solid #1e3a5f;padding-top:6px">${t('eos_note')}</div>`:''}
-    </div>`;
+    '<div class="dres"><div class="dres-lbl">'+t('dres_lbl')+'</div>'
+    +'<div class="dres-val">'+r.Qo.toFixed(4)+' W</div>'
+    +'<div style="font-size:10px;color:#475569;margin-top:6px">COP='+r.Qo.toFixed(4)+'/'+m.P1.toFixed(4)+'=<strong style="color:#a78bfa">'+r.COP.toFixed(5)+'</strong></div>'
+    +'<div style="font-size:10px;color:#475569;margin-top:3px">m\u0307='+(r.mdot*1000).toFixed(5)+' g/s</div>'
+    +(!cpReady?'<div style="font-size:9px;color:#64748b;margin-top:6px;border-top:1px solid #1e3a5f;padding-top:6px">'+t('eos_note')+'</div>':'')
+    +'</div>';
   showTab('measured');
 }
 
@@ -1478,7 +1461,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   setLang('en');
   renderStdButtons();
   setStd('en_lbp');
-  addMeasRow(); // start with one empty row
+  addMeasRow();
 });
 
 </script>
