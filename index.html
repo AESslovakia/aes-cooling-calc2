@@ -239,6 +239,11 @@ body{font-family:'Inter',Arial,sans-serif;font-size:13px;color:#1e2433;backgroun
 .mrow-custom label{font-size:9px;color:#7a8299;font-weight:700;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:3px}
 .mrow-custom input{width:100%;padding:6px 8px;border:1.5px solid #e4e9f4;border-radius:7px;font-size:11.5px;font-family:'Inter',sans-serif;background:#fff;color:#1e2433}
 .mrow-custom input:focus{outline:none;border-color:#2563eb}
+/* Set values strip */
+.mrow-setvals{display:flex;flex-wrap:wrap;gap:5px;margin:4px 0 8px;padding:8px 10px;background:#fffbeb;border:1.5px solid #fcd34d;border-radius:8px}
+.mrow-setvals-title{font-size:8.5px;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:1px;width:100%;margin-bottom:4px}
+.sv-tag{font-size:10.5px;background:#fff;border:1px solid #fde68a;border-radius:5px;padding:3px 8px;color:#78350f;font-weight:600}
+.sv-tag span{font-size:8.5px;color:#b45309;font-weight:700;text-transform:uppercase;margin-right:3px}
 .meas-count-badge{font-size:10px;font-weight:700;padding:3px 9px;background:#eef3ff;border:1px solid #93c5fd;border-radius:6px;color:#2563eb}
 
 /* ── LANGUAGE SWITCHER ── */
@@ -1112,7 +1117,13 @@ document.addEventListener('keydown',e=>{
 // ═══════════════════════════════════════════════════════════════════
 //  COLUMN MAP + MULTI-MEASUREMENT ENGINE
 // =================================================================
-const C={factory:0,calo:1,order:2,kitNo:3,compType:4,refrigerant:19,P1:22,
+const C={factory:0,calo:1,order:2,kitNo:3,compType:4,
+  // Set values K-U
+  Te_set:10,Tc_set:11,Tamb_set:12,Tsuc_set:13,Tliq_set:14,
+  voltage:15,freq:16,cooling:17,rpm:18,
+  refrigerant:19,capacitor:20,
+  // Power & measured
+  P1:22,
   Te_meas:27,Tc_meas:28,Qvessel:29,Tsuc_meas:31,Pe_uncorr:38,Tliq_meas:39,Tvout_meas:40};
 const FLUID_MAP={'R-290':'R290','R-134a':'R134a','R-404A':'R404A','R-22':'R22',
   'R-407C':'R407C','R-410A':'R410A','R-600a':'R600a','R-32':'R32'};
@@ -1123,6 +1134,12 @@ function parseRowCols(raw){
   let fluid=s(C.refrigerant); fluid=FLUID_MAP[fluid]||fluid||'R290';
   return {factory:s(C.factory),calo:s(C.calo),order:s(C.order),
     kitNo:s(C.kitNo),compType:s(C.compType),refrigerant:fluid,P1:n(C.P1),
+    // Set values (K-U)
+    Te_set:n(C.Te_set),Tc_set:n(C.Tc_set),Tamb_set:n(C.Tamb_set),
+    Tsuc_set:n(C.Tsuc_set),Tliq_set:n(C.Tliq_set),
+    voltage:n(C.voltage),freq:n(C.freq),cooling:s(C.cooling),
+    rpm:n(C.rpm),capacitor:n(C.capacitor),
+    // Measured values
     Te_meas:n(C.Te_meas),Tc_meas:n(C.Tc_meas),Qvessel:n(C.Qvessel),
     Tsuc_meas:n(C.Tsuc_meas),Tliq_meas:n(C.Tliq_meas),
     Tvout_meas:n(C.Tvout_meas),Pe_uncorr:n(C.Pe_uncorr),colCount:c.length};
@@ -1320,14 +1337,28 @@ function buildRowHTML(row,num){
     +'</div></div>';
 
   let tags='';
+  let setVals='';
   if(d){
     tags='<div class="mrow-parsed-tags">'
       +'<span class="mrow-tag">'+d.refrigerant+'</span>'
-      +'<span class="mrow-tag">Te '+d.Te_meas.toFixed(2)+'°C</span>'
-      +'<span class="mrow-tag">Tc '+d.Tc_meas.toFixed(2)+'°C</span>'
+      +'<span class="mrow-tag">Te_meas '+d.Te_meas.toFixed(2)+'°C</span>'
+      +'<span class="mrow-tag">Tc_meas '+d.Tc_meas.toFixed(2)+'°C</span>'
       +'<span class="mrow-tag">Qv '+d.Qvessel.toFixed(1)+' W</span>'
       +'<span class="mrow-tag">P1 '+d.P1.toFixed(1)+' W</span>'
       +(d.colCount<41?'<span class="mrow-tag warn">⚠ '+d.colCount+' cols</span>':'')
+      +'</div>';
+    setVals='<div class="mrow-setvals">'
+      +'<div class="mrow-setvals-title">Set values (K–U)</div>'
+      +'<span class="sv-tag"><span>Te</span>'+d.Te_set+'°C</span>'
+      +'<span class="sv-tag"><span>Tc</span>'+d.Tc_set+'°C</span>'
+      +'<span class="sv-tag"><span>Tamb</span>'+d.Tamb_set+'°C</span>'
+      +'<span class="sv-tag"><span>Tsuc</span>'+d.Tsuc_set+'°C</span>'
+      +'<span class="sv-tag"><span>Tliq</span>'+d.Tliq_set+'°C</span>'
+      +'<span class="sv-tag"><span>V</span>'+d.voltage+' V</span>'
+      +'<span class="sv-tag"><span>Hz</span>'+d.freq+' Hz</span>'
+      +(d.cooling?'<span class="sv-tag"><span>Cooling</span>'+d.cooling+'</span>':'')
+      +(d.rpm?'<span class="sv-tag"><span>RPM</span>'+d.rpm+'</span>':'')
+      +(d.capacitor?'<span class="sv-tag"><span>Cap</span>'+d.capacitor+' µF</span>':'')
       +'</div>';
   }
   let resultHtml='';
@@ -1357,6 +1388,7 @@ function buildRowHTML(row,num){
     +'<button class="mrow-parse-btn" onclick="parseRowPaste('+row.id+')">⚡ Parse</button>'
     +'</div>'
     +tags
+    +setVals
     +'<div class="mrow-std-sel"><span class="mrow-std-lbl">Standard:</span>'+stdBtns+'</div>'
     +customBlock
     +'<button class="mrow-calc-btn" onclick="calcRow('+row.id+')"'+(d?'':' disabled')+'>🧮 Calculate — '+stdLabel+'</button>'
@@ -1661,6 +1693,35 @@ async function exportToWord(){
       children.push(KVTable([
         ['Compressor ID', d.kitNo||d.compType||'—'],
         ['Refrigerant', fluid],
+        ['Factory / Calo', (d.factory||'—')+' / '+(d.calo||'—')],
+      ]));
+      children.push(P('',{after:80}));
+
+      // Set values table
+      children.push(new Paragraph({spacing:{after:60},children:[new TextRun({text:'Set values (K–U)',bold:true,size:20,color:'92400E',font:'Calibri'})]}));
+      children.push(new Table({
+        width:{size:9360,type:WidthType.DXA},
+        columnWidths:[1600,1040,1040,1040,1040,800,800,800,800,800,800],
+        rows:[
+          new TableRow({children:['Te set','Tc set','Tamb set','Tsuc set','Tliq set','V','Hz','Cooling','RPM','Cap µF'].map(h=>
+            new TableCell({borders:brdAll,margins:{top:80,bottom:80,left:100,right:100},
+              shading:{fill:'FEF3C7',type:ShadingType.CLEAR},
+              children:[new Paragraph({children:[new TextRun({text:h,bold:true,size:17,color:'92400E',font:'Calibri'})]})]}))
+          }),
+          new TableRow({children:[
+            d.Te_set+'°C',d.Tc_set+'°C',d.Tamb_set+'°C',d.Tsuc_set+'°C',d.Tliq_set+'°C',
+            d.voltage+' V',d.freq+' Hz',d.cooling||'—',String(d.rpm||'—'),String(d.capacitor||'—')
+          ].map(v=>
+            new TableCell({borders:brdAll,margins:{top:80,bottom:80,left:100,right:100},
+              shading:{fill:'FFFBEB',type:ShadingType.CLEAR},
+              children:[new Paragraph({children:[new TextRun({text:v,size:18,font:'Calibri',color:'78350F'})]})]}))
+          })
+        ]
+      }));
+      children.push(P('',{after:120}));
+
+      children.push(new Paragraph({spacing:{after:60},children:[new TextRun({text:'Measured values',bold:true,size:20,color:'0D1F3C',font:'Calibri'})]}));
+      children.push(KVTable([
         ['Te measured', d.Te_meas.toFixed(5)+' °C'],
         ['Tc measured', d.Tc_meas.toFixed(5)+' °C'],
         ['Tsuc measured', d.Tsuc_meas.toFixed(5)+' °C'],
