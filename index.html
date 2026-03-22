@@ -700,32 +700,27 @@ body{font-family:'Inter',Arial,sans-serif;font-size:13px;color:#1e2433;backgroun
 
 <!-- ═══ COOLPROP LOADER ═══ -->
 <script>
-// ── CoolProp WASM loader (same pattern as original) ──────────────────
+// ── CoolProp WASM loader — Emscripten správny vzor ─────────────────────
 var cpReady = false;
-var Module = {};
 
-(function loadCoolProp(){
-  Module['locateFile'] = function(f){ return f; };
-  Module['onRuntimeInitialized'] = function(){
+// POZOR: Module musí byť definovaný PRED načítaním coolprop.js
+var Module = {
+  locateFile: function(filename) { return filename; },
+  onRuntimeInitialized: function() {
     cpReady = true;
     onCoolPropReady();
-  };
+  }
+};
+
+(function loadCoolProp(){
   var s = document.createElement('script');
   s.src = 'coolprop.js';
-  s.onerror = function(){ cpFallback('Script load error'); };
-  s.onload = function(){
-    if (typeof Module !== 'undefined') {
-      var _orig = Module.onRuntimeInitialized;
-      Module.onRuntimeInitialized = function(){
-        if (_orig) _orig();
-        if (!cpReady){ cpReady=true; onCoolPropReady(); }
-      };
-    }
-    setTimeout(function(){
-      if (!cpReady) cpFallback('WASM timeout — coolprop.js/coolprop.wasm chýbajú v priečinku');
-    }, 10000);
-  };
+  s.onerror = function(){ cpFallback('coolprop.js sa nenašiel v priečinku'); };
   document.head.appendChild(s);
+  // coolprop.wasm je veľký súbor (~8MB), timeout 90 sekúnd
+  setTimeout(function(){
+    if (!cpReady) cpFallback('Timeout (90s) — WASM sa nenačítal. Skontrolujte konzolu (F12)');
+  }, 90000);
 })();
 
 function onCoolPropReady(){
