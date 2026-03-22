@@ -700,46 +700,101 @@ body{font-family:'Inter',Arial,sans-serif;font-size:13px;color:#1e2433;backgroun
 
 <!-- ═══ COOLPROP LOADER ═══ -->
 <script>
-// ── CoolProp WASM loader — Emscripten správny vzor ─────────────────────
-var cpReady = false;
+// ═══════════════════════════════════════════════════════════════════
+//  CoolProp WASM — rovnaký loader ako v kalkulátore (overený na GitHub Pages)
+//  CoolProp v7.0.0 je ES Modul → dynamic import(), NIE <script src>
+//  makeInstantiateWasm() obchádza GitHub Pages MIME type problém pre .wasm
+// ═══════════════════════════════════════════════════════════════════
+let cpReady = false;
+var Module = {};
 
-// POZOR: Module musí byť definovaný PRED načítaním coolprop.js
-var Module = {
-  locateFile: function(filename) { return filename; },
-  onRuntimeInitialized: function() {
-    cpReady = true;
-    onCoolPropReady();
-  }
-};
-
-(function loadCoolProp(){
-  var s = document.createElement('script');
-  s.src = 'coolprop.js';
-  s.onerror = function(){ cpFallback('coolprop.js sa nenašiel v priečinku'); };
-  document.head.appendChild(s);
-  // coolprop.wasm je veľký súbor (~8MB), timeout 90 sekúnd
-  setTimeout(function(){
-    if (!cpReady) cpFallback('Timeout (90s) — WASM sa nenačítal. Skontrolujte konzolu (F12)');
-  }, 90000);
-})();
-
-function onCoolPropReady(){
-  document.getElementById('cpBadge').className='status-badge st-ok';
-  document.getElementById('cpBadge').innerHTML='<span class="st-dot"></span>CoolProp ✓';
+function onCoolPropReady() {
+  document.getElementById('cpBadge').className = 'status-badge st-ok';
+  document.getElementById('cpBadge').innerHTML = '<span class="st-dot"></span>CoolProp ✓';
   const bar = document.getElementById('cpInfoBar');
-  bar.className='info-ok';
-  bar.innerHTML='<span>✅</span><span><strong>CoolProp WASM</strong> je načítaný a pripravený. Výpočty sú teraz k dispozícii.</span>';
+  bar.className = 'info-ok';
+  bar.innerHTML = '<span>✅</span><span><strong>CoolProp WASM</strong> je načítaný a pripravený. Výpočty sú teraz k dispozícii.</span>';
   document.getElementById('calcBtn').disabled = false;
 }
 
-function cpFallback(reason){
-  document.getElementById('cpBadge').className='status-badge st-warn';
-  document.getElementById('cpBadge').innerHTML='<span class="st-dot"></span>CoolProp chyba';
-  const bar = document.getElementById('cpInfoBar');
-  bar.style.background='rgba(220,38,38,.08)';
-  bar.style.borderColor='rgba(220,38,38,.25)';
-  bar.innerHTML='<span>❌</span><span><strong>CoolProp WASM sa nepodarilo načítať</strong> ('+reason+'). Uistite sa, že súbory <strong>coolprop.js</strong> a <strong>coolprop.wasm</strong> sú v rovnakom priečinku ako tento súbor.</span>';
+function cpSuccess(instance) {
+  Module = instance;
+  cpReady = true;
+  console.log('[CoolProp] ✅ Ready | PropsSI:', typeof Module.PropsSI === 'function');
+  onCoolPropReady();
 }
+
+function cpFallback(reason) {
+  console.warn('[CoolProp] Failed:', reason);
+  document.getElementById('cpBadge').className = 'status-badge st-warn';
+  document.getElementById('cpBadge').innerHTML = '<span class="st-dot"></span>CoolProp chyba';
+  const bar = document.getElementById('cpInfoBar');
+  bar.style.background = 'rgba(220,38,38,.08)';
+  bar.style.borderColor = 'rgba(220,38,38,.25)';
+  bar.innerHTML = '<span>❌</span><span><strong>CoolProp WASM sa nepodarilo načítať</strong> (' + reason + '). Uistite sa, že súbory <strong>coolprop.js</strong> a <strong>coolprop.wasm</strong> sú v rovnakom priečinku.</span>';
+}
+
+// Fetch WASM ako ArrayBuffer — obchádza GitHub Pages MIME type problém
+function makeInstantiateWasm() {
+  return function(imports, successCb) {
+    fetch('coolprop.wasm')
+      .then(function(r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.arrayBuffer();
+      })
+      .then(function(buf) { return WebAssembly.instantiate(buf, imports); })
+      .then(function(res) {
+        console.log('[CoolProp] ✅ WASM skompilovaný');
+        successCb(res.instance, res.module);
+      })
+      .catch(function(e) { console.error('[CoolProp] WASM chyba:', e); });
+    return {};
+  };
+}
+
+// CoolProp v7 = ES Modul → dynamic import()
+(function() {
+  import('./coolprop.js')
+    .then(function(mod) {
+      console.log('[CoolProp] ES modul načítaný');
+      var factory = (typeof mod.default === 'function') ? mod.default
+                  : (typeof mod === 'function') ? mod
+                  : null;
+      if (!factory) {
+        cpSuccess(mod.default || mod);
+        return;
+      }
+      return factory({
+        instantiateWasm: makeInstantiateWasm(),
+        onRuntimeInitialized: function() {},
+        print:    function(m) { console.log('[CP]', m); },
+        printErr: function(m) { console.warn('[CP]', m); }
+      });
+    })
+    .then(function(instance) {
+      if (instance) cpSuccess(instance);
+    })
+    .catch(function(err) {
+      console.warn('[CoolProp] ES import zlyhal:', err.message, '— skúšam classic script');
+      var s = document.createElement('script');
+      s.src = 'coolprop.js';
+      s.onerror = function() { cpFallback('coolprop.js sa nenašiel'); };
+      s.onload = function() {
+        console.log('[CoolProp] Classic script načítaný');
+        if (typeof Module !== 'undefined') {
+          var _orig = Module.onRuntimeInitialized;
+          Module.onRuntimeInitialized = function() {
+            if (_orig) _orig();
+            cpSuccess(Module);
+          };
+        }
+        setTimeout(function() {
+          if (!cpReady) cpFallback('WASM timeout (30s)');
+        }, 30000);
+      };
+      document.head.appendChild(s);
+    });
+})();
 </script>
 
 <!-- ═══ MAIN JAVASCRIPT ═══ -->
