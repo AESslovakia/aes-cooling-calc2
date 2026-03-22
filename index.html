@@ -323,86 +323,117 @@ body{font-family:'Inter',Arial,sans-serif;font-size:13px;color:#1e2433;backgroun
           <div class="card-title" data-i18n="card2_title">Bloková schéma — namerané hodnoty</div>
         </div>
 
-        <!-- SVG Circuit Diagram -->
+        <!-- SVG Circuit Diagram – Výparník hore, Kompresor vpravo, Kondenzátor dole, Exp. ventil vľavo -->
         <div class="circuit-svg-wrap">
-          <svg viewBox="0 0 620 280" xmlns="http://www.w3.org/2000/svg" style="background:linear-gradient(135deg,#f8faff,#f0f4ff)">
-            <!-- LP label left -->
-            <text x="16" y="140" font-family="Inter,sans-serif" font-size="9" font-weight="700" fill="#2563eb" letter-spacing="1">LP</text>
-            <text x="16" y="152" font-family="Inter,sans-serif" font-size="8" fill="#93b4f0">níz. tlak</text>
-            <!-- HP label right -->
-            <text x="582" y="140" font-family="Inter,sans-serif" font-size="9" font-weight="700" fill="#dc2626" text-anchor="end" letter-spacing="1">HP</text>
-            <text x="582" y="152" font-family="Inter,sans-serif" font-size="8" fill="#f87171" text-anchor="end">vys. tlak</text>
+          <svg id="circuitSvg" viewBox="0 0 660 330" xmlns="http://www.w3.org/2000/svg" style="background:linear-gradient(135deg,#f8faff,#f0f4ff)">
 
-            <!-- ── PIPES ── -->
-            <!-- Left vertical pipe (LP, vapor going up) -->
-            <line x1="105" y1="80" x2="105" y2="195" stroke="#93c5fd" stroke-width="5" stroke-linecap="round"/>
-            <!-- Top horizontal pipe (HP, hot gas going right) -->
-            <line x1="195" y1="60" x2="420" y2="60" stroke="#fca5a5" stroke-width="5" stroke-linecap="round"/>
-            <!-- Right vertical pipe (HP, liquid going down) -->
-            <line x1="515" y1="80" x2="515" y2="195" stroke="#6ee7b7" stroke-width="5" stroke-linecap="round"/>
-            <!-- Bottom horizontal pipe (LP, mixture going left) -->
-            <line x1="195" y1="215" x2="420" y2="215" stroke="#c4b5fd" stroke-width="5" stroke-linecap="round"/>
+            <!-- ══ PIPE LOOP RECTANGLE ══ -->
+            <!-- Top pipe (LP vapor, blue) – left segment: Exp.valve → Evaporator -->
+            <line x1="148" y1="78" x2="228" y2="78" stroke="#93c5fd" stroke-width="5" stroke-linecap="round"/>
+            <!-- Top pipe – right segment: Evaporator → Compressor -->
+            <line x1="432" y1="78" x2="512" y2="78" stroke="#93c5fd" stroke-width="5" stroke-linecap="round"/>
+            <!-- Right pipe (HP gas→liquid, red) – top segment: corner → Compressor -->
+            <line x1="512" y1="78" x2="512" y2="118" stroke="#fca5a5" stroke-width="5" stroke-linecap="round"/>
+            <!-- Right pipe – bottom segment: Compressor → corner -->
+            <line x1="512" y1="218" x2="512" y2="252" stroke="#fca5a5" stroke-width="5" stroke-linecap="round"/>
+            <!-- Bottom pipe (liquid, green) – right segment: Condenser → Compressor corner -->
+            <line x1="432" y1="252" x2="512" y2="252" stroke="#6ee7b7" stroke-width="5" stroke-linecap="round"/>
+            <!-- Bottom pipe – left segment: Exp.valve corner → Condenser -->
+            <line x1="148" y1="252" x2="228" y2="252" stroke="#6ee7b7" stroke-width="5" stroke-linecap="round"/>
+            <!-- Left pipe (two-phase, purple) – bottom segment: corner → Exp.valve -->
+            <line x1="148" y1="218" x2="148" y2="252" stroke="#c4b5fd" stroke-width="5" stroke-linecap="round"/>
+            <!-- Left pipe – top segment: Exp.valve → corner -->
+            <line x1="148" y1="78" x2="148" y2="118" stroke="#c4b5fd" stroke-width="5" stroke-linecap="round"/>
 
-            <!-- ── ARROWS on pipes ── -->
-            <!-- Up arrow on left pipe -->
-            <polygon points="105,75 100,87 110,87" fill="#2563eb"/>
-            <!-- Right arrow on top pipe -->
-            <polygon points="350,60 338,54.5 338,65.5" fill="#dc2626"/>
-            <!-- Down arrow on right pipe -->
-            <polygon points="515,205 509,193 521,193" fill="#059669"/>
-            <!-- Left arrow on bottom pipe -->
-            <polygon points="270,215 282,209.5 282,220.5" fill="#7c3aed"/>
+            <!-- ══ FLOW ARROWS ══ -->
+            <!-- Top pipe: LP vapor going RIGHT (→ Compressor) -->
+            <polygon points="400,78 388,72.5 388,83.5" fill="#2563eb"/>
+            <!-- Right pipe: HP going DOWN -->
+            <polygon points="512,185 506.5,173 517.5,173" fill="#dc2626"/>
+            <!-- Bottom pipe: liquid going LEFT (→ Exp.valve) -->
+            <polygon points="260,252 272,246.5 272,257.5" fill="#059669"/>
+            <!-- Left pipe: two-phase going UP (→ Evaporator) -->
+            <polygon points="148,108 142.5,120 153.5,120" fill="#7c3aed"/>
 
-            <!-- ── COMPRESSOR ── -->
-            <rect x="40" y="30" width="130" height="55" rx="10" fill="#eff6ff" stroke="#93c5fd" stroke-width="2"/>
-            <text x="105" y="53" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="700" fill="#1e3a5f">🔧 KOMPRESOR</text>
-            <text x="105" y="68" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#3b82f6">Compressor</text>
+            <!-- ══ HP / LP REGION LABELS ══ -->
+            <text x="330" y="18" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" font-weight="700" fill="#2563eb" letter-spacing="1.5">LP — NÍZKY TLAK</text>
+            <text x="330" y="315" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" font-weight="700" fill="#dc2626" letter-spacing="1.5">HP — VYSOKÝ TLAK</text>
 
-            <!-- ── CONDENSER ── -->
-            <rect x="420" y="30" width="130" height="55" rx="10" fill="#fff1f2" stroke="#fca5a5" stroke-width="2"/>
-            <text x="485" y="50" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#7f1d1d">☀ KONDENZÁTOR</text>
-            <text x="485" y="65" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#dc2626">Condenser</text>
-            <!-- Fan symbol -->
-            <circle cx="485" cy="57" r="0" fill="none"/>
+            <!-- ══ COMPONENTS ══ -->
 
-            <!-- ── EXPANSION VALVE ── -->
-            <rect x="420" y="193" width="130" height="55" rx="10" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="2"/>
-            <text x="485" y="213" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" font-weight="700" fill="#4c1d95">🔩 EXP. VENTIL</text>
-            <text x="485" y="228" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#7c3aed">Expansion Valve</text>
-            <text x="485" y="241" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#a78bfa">h₃=h₄ (izentalp)</text>
+            <!-- EVAPORATOR (TOP – horizontal) -->
+            <rect x="228" y="28" width="204" height="60" rx="11" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="2.5"/>
+            <text x="330" y="52" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="700" fill="#064e3b">❄ VÝPARNÍK</text>
+            <text x="330" y="67" text-anchor="middle" font-family="Inter,sans-serif" font-size="8.5" fill="#059669">Evaporator</text>
 
-            <!-- ── EVAPORATOR ── -->
-            <rect x="40" y="193" width="130" height="55" rx="10" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="2"/>
-            <text x="105" y="213" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#064e3b">❄ VÝPARNÍK</text>
-            <text x="105" y="228" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#059669">Evaporator</text>
+            <!-- COMPRESSOR (RIGHT – vertical) -->
+            <rect x="484" y="118" width="80" height="100" rx="11" fill="#eff6ff" stroke="#93c5fd" stroke-width="2.5"/>
+            <text x="524" y="152" text-anchor="middle" font-family="Inter,sans-serif" font-size="16">🔧</text>
+            <text x="524" y="169" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" font-weight="700" fill="#1e3a5f">KOMPRESOR</text>
+            <text x="524" y="182" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#3b82f6">Compressor</text>
+            <text x="524" y="194" text-anchor="middle" font-family="Inter,sans-serif" font-size="7.5" fill="#93b4f0">↑ sanie  výtlak ↓</text>
 
-            <!-- ── MEASUREMENT POINTS ── -->
-            <!-- Point 1: between evap top and comp bottom (left pipe, ~140) -->
-            <circle cx="105" cy="155" r="13" fill="#2563eb" stroke="#fff" stroke-width="3"/>
-            <text x="105" y="160" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="800" fill="#fff">1</text>
-            <text x="125" y="152" font-family="Inter,sans-serif" font-size="9" font-weight="600" fill="#2563eb">T₁, P₁</text>
-            <text x="125" y="163" font-family="Inter,sans-serif" font-size="8" fill="#3b82f6">sanie</text>
+            <!-- CONDENSER (BOTTOM – horizontal) -->
+            <rect x="228" y="242" width="204" height="60" rx="11" fill="#fff1f2" stroke="#fca5a5" stroke-width="2.5"/>
+            <text x="330" y="266" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#7f1d1d">☀ KONDENZÁTOR</text>
+            <text x="330" y="281" text-anchor="middle" font-family="Inter,sans-serif" font-size="8.5" fill="#dc2626">Condenser</text>
 
-            <!-- Point 2: top pipe, between comp and cond -->
-            <circle cx="310" cy="60" r="13" fill="#dc2626" stroke="#fff" stroke-width="3"/>
-            <text x="310" y="65" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="800" fill="#fff">2</text>
-            <text x="328" y="55" font-family="Inter,sans-serif" font-size="9" font-weight="600" fill="#dc2626">T₂, P₂</text>
-            <text x="328" y="66" font-family="Inter,sans-serif" font-size="8" fill="#ef4444">výtlak</text>
+            <!-- EXPANSION VALVE (LEFT – vertical) -->
+            <rect x="96" y="118" width="80" height="100" rx="11" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="2.5"/>
+            <text x="136" y="152" text-anchor="middle" font-family="Inter,sans-serif" font-size="16">🔩</text>
+            <text x="136" y="169" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" font-weight="700" fill="#4c1d95">EXP. VENTIL</text>
+            <text x="136" y="182" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#7c3aed">Exp. Valve</text>
+            <text x="136" y="195" text-anchor="middle" font-family="Inter,sans-serif" font-size="7.5" fill="#a78bfa">h₃=h₄</text>
 
-            <!-- Point 3: right pipe, between cond and exp (liquid) -->
-            <circle cx="515" cy="150" r="13" fill="#059669" stroke="#fff" stroke-width="3"/>
-            <text x="515" y="155" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="800" fill="#fff">3</text>
-            <text x="534" y="147" font-family="Inter,sans-serif" font-size="9" font-weight="600" fill="#059669">T₃</text>
-            <text x="534" y="158" font-family="Inter,sans-serif" font-size="8" fill="#10b981">kvapalina</text>
+            <!-- ══ MEASUREMENT POINT CIRCLES (corners) ══ -->
 
-            <!-- Point 4: bottom pipe, between exp and evap -->
-            <circle cx="310" cy="215" r="13" fill="#7c3aed" stroke="#fff" stroke-width="3"/>
-            <text x="310" y="220" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="800" fill="#fff">4</text>
-            <text x="328" y="210" font-family="Inter,sans-serif" font-size="9" font-weight="600" fill="#7c3aed">T₄ (opt.)</text>
-            <text x="328" y="221" font-family="Inter,sans-serif" font-size="8" fill="#8b5cf6">2-fáza</text>
+            <!-- Pt 1 – Top-Right (suction: Evaporator → Compressor, LP vapor) -->
+            <circle cx="512" cy="78" r="14" fill="#2563eb" stroke="#fff" stroke-width="3"/>
+            <text x="512" y="83" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" font-weight="800" fill="#fff">1</text>
 
-            <!-- ── LEGEND TOP ── -->
-            <text x="310" y="270" text-anchor="middle" font-family="Inter,sans-serif" font-size="8.5" fill="#9aa3b8">Body 1–4 = merané miesta · Šípky = smer prúdenia chladiva</text>
+            <!-- Pt 2 – Bottom-Right (discharge: Compressor → Condenser, HP gas) -->
+            <circle cx="512" cy="252" r="14" fill="#dc2626" stroke="#fff" stroke-width="3"/>
+            <text x="512" y="257" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" font-weight="800" fill="#fff">2</text>
+
+            <!-- Pt 3 – Bottom-Left (liquid: Condenser → Exp.valve) -->
+            <circle cx="148" cy="252" r="14" fill="#059669" stroke="#fff" stroke-width="3"/>
+            <text x="148" y="257" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" font-weight="800" fill="#fff">3</text>
+
+            <!-- Pt 4 – Top-Left (after expansion: Exp.valve → Evaporator, two-phase) -->
+            <circle cx="148" cy="78" r="14" fill="#7c3aed" stroke="#fff" stroke-width="3"/>
+            <text x="148" y="83" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" font-weight="800" fill="#fff">4</text>
+
+            <!-- ══ LIVE VALUE DISPLAYS ══ -->
+
+            <!-- Pt 1 values (top-right corner, text goes right) -->
+            <g id="dv1_group">
+              <text x="530" y="62" font-family="Inter,sans-serif" font-size="9.5" font-weight="700" fill="#2563eb">T₁ = <tspan id="dv_T1">—</tspan> °C</text>
+              <text x="530" y="75" font-family="Inter,sans-serif" font-size="9.5" font-weight="700" fill="#2563eb">P₁ = <tspan id="dv_P1">—</tspan></text>
+              <text id="dv_SH_row" x="530" y="88" font-family="Inter,sans-serif" font-size="8.5" fill="#1d4ed8" display="none">SH = <tspan id="dv_SH" font-weight="700">—</tspan> K · Te = <tspan id="dv_Te" font-weight="700">—</tspan>°C</text>
+            </g>
+
+            <!-- Pt 2 values (bottom-right corner, text goes right) -->
+            <g id="dv2_group">
+              <text x="530" y="246" font-family="Inter,sans-serif" font-size="9.5" font-weight="700" fill="#dc2626">T₂ = <tspan id="dv_T2">—</tspan> °C</text>
+              <text x="530" y="259" font-family="Inter,sans-serif" font-size="9.5" font-weight="700" fill="#dc2626">P₂ = <tspan id="dv_P2">—</tspan></text>
+              <text id="dv_Tc_row" x="530" y="272" font-family="Inter,sans-serif" font-size="8.5" fill="#b91c1c" display="none">Tc = <tspan id="dv_Tc" font-weight="700">—</tspan> °C</text>
+            </g>
+
+            <!-- Pt 3 values (bottom-left corner, text goes left) -->
+            <g id="dv3_group">
+              <text x="130" y="246" text-anchor="end" font-family="Inter,sans-serif" font-size="9.5" font-weight="700" fill="#059669">T₃ = <tspan id="dv_T3">—</tspan> °C</text>
+              <text id="dv_SC_row" x="130" y="259" text-anchor="end" font-family="Inter,sans-serif" font-size="8.5" fill="#047857" display="none">SC = <tspan id="dv_SC" font-weight="700">—</tspan> K</text>
+            </g>
+
+            <!-- Pt 4 values (top-left corner, text goes left) -->
+            <g id="dv4_group">
+              <text x="130" y="62" text-anchor="end" font-family="Inter,sans-serif" font-size="9.5" font-weight="700" fill="#7c3aed">T₄ = <tspan id="dv_T4">—</tspan></text>
+              <text x="130" y="75" text-anchor="end" font-family="Inter,sans-serif" font-size="8.5" fill="#8b5cf6">2-fázová oblasť</text>
+              <text id="dv_x4_row" x="130" y="88" text-anchor="end" font-family="Inter,sans-serif" font-size="8.5" fill="#7c3aed" display="none">x₄ = <tspan id="dv_x4" font-weight="700">—</tspan> %</text>
+            </g>
+
+            <!-- Caption -->
+            <text x="330" y="325" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#b0bac8">Body 1–4 = merané miesta · hodnoty sa aktualizujú automaticky</text>
           </svg>
         </div>
 
@@ -1113,6 +1144,7 @@ function calculateCycle(){
     };
 
     displayResults(lastResult);
+    updateDiagramCalc(lastResult);
     drawPHDiagram(lastResult);
     runDiagnostics(lastResult);
     document.getElementById('resultsCard').style.display='block';
@@ -1131,6 +1163,7 @@ function resetAll(){
   document.getElementById('phRefrigBadge').style.display='none';
   document.getElementById('diagOutput').innerHTML=`<div class="diag-empty"><span>🔍</span><p>${t('diag_placeholder')}</p></div>`;
   document.getElementById('diagBadge').style.display='none';
+  resetDiagramCalc();
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -1716,11 +1749,69 @@ function updateLogoPreview(){
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeHeaderEditor(); });
 
 // ═══════════════════════════════════════════════════════════════════
+//  DIAGRAM LIVE VALUES
+// ═══════════════════════════════════════════════════════════════════
+function svgTspan(id, val){ const el=document.getElementById(id); if(el) el.textContent=val; }
+function svgShow(id, vis){ const el=document.getElementById(id); if(el) el.setAttribute('display', vis?'':'none'); }
+
+function updateDiagramValues(){
+  const punit = getPUnit();
+  const pSuffix = punit==='bara' ? ' bar(a)' : ' bar(g)';
+  const fmt = v => isNaN(v) ? '—' : v.toFixed(1);
+
+  const T1 = parseFloat(document.getElementById('T_suc').value);
+  const P1 = parseFloat(document.getElementById('P_suc').value);
+  const T2 = parseFloat(document.getElementById('T_disch').value);
+  const P2 = parseFloat(document.getElementById('P_disch').value);
+  const T3 = parseFloat(document.getElementById('T_liq').value);
+  const T4 = parseFloat(document.getElementById('T_evap_in').value);
+
+  svgTspan('dv_T1', isNaN(T1)?'—':T1.toFixed(1));
+  svgTspan('dv_P1', isNaN(P1)?'—':(P1.toFixed(2)+pSuffix));
+  svgTspan('dv_T2', isNaN(T2)?'—':T2.toFixed(1));
+  svgTspan('dv_P2', isNaN(P2)?'—':(P2.toFixed(2)+pSuffix));
+  svgTspan('dv_T3', isNaN(T3)?'—':T3.toFixed(1));
+  svgTspan('dv_T4', isNaN(T4)?'— °C':(T4.toFixed(1)+' °C'));
+}
+
+function updateDiagramCalc(r){
+  // SH, Te near Pt 1
+  svgTspan('dv_SH', r.SH.toFixed(1));
+  svgTspan('dv_Te', r.Te_sat.toFixed(1));
+  svgShow('dv_SH_row', true);
+  // Tc near Pt 2
+  svgTspan('dv_Tc', r.Tc_sat.toFixed(1));
+  svgShow('dv_Tc_row', true);
+  // SC near Pt 3
+  svgTspan('dv_SC', r.SC.toFixed(1));
+  svgShow('dv_SC_row', true);
+  // x4 near Pt 4
+  svgTspan('dv_x4', (r.x4*100).toFixed(1));
+  svgShow('dv_x4_row', true);
+}
+
+function resetDiagramCalc(){
+  svgShow('dv_SH_row', false);
+  svgShow('dv_Tc_row', false);
+  svgShow('dv_SC_row', false);
+  svgShow('dv_x4_row', false);
+}
+
+// ═══════════════════════════════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded',()=>{
   setLang('sk');
   updatePressureLabels();
+  // Wire live diagram updates to all input fields
+  ['T_suc','P_suc','T_disch','P_disch','T_liq','T_evap_in'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.addEventListener('input', updateDiagramValues);
+  });
+  document.querySelectorAll('input[name="punit"]').forEach(r=>{
+    r.addEventListener('change', updateDiagramValues);
+  });
+  updateDiagramValues();
 });
 </script>
 </body>
