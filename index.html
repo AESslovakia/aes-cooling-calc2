@@ -551,45 +551,34 @@ body{font-family:'Inter',Arial,sans-serif;font-size:13px;color:#1e2433;backgroun
         </div>
 
         <!-- COOLING CAPACITY INPUTS -->
-        <div class="sec-label" style="color:#059669;margin-top:16px">Výpočet chladiaceho výkonu <span style="font-size:8px;color:#9aa3b8;text-transform:none;letter-spacing:0">(zadajte aspoň jednu možnosť)</span></div>
+        <div class="sec-label" style="color:#059669;margin-top:16px">Výpočet chladiaceho výkonu <span style="font-size:8px;color:#9aa3b8;text-transform:none;letter-spacing:0">(A = príkon/prúd, B = zdvihový objem)</span></div>
 
         <!-- Method A: Electric power -->
         <div style="background:#f0fdf4;border:1.5px solid #6ee7b7;border-radius:10px;padding:12px 14px;margin-bottom:8px">
           <div style="font-size:9px;font-weight:700;color:#059669;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">⚡ A — Elektrický príkon</div>
           <div class="g3">
             <div class="f">
-              <label data-i18n="lbl_Pcomp">Príkon kompresora [W]</label>
-              <input type="number" id="P_comp" value="" step="10" min="0" placeholder="napr. 2500">
+              <label>I — Prúd [A]</label>
+              <input type="number" id="I_meas" value="" step="0.1" min="0" placeholder="napr. 10.5" oninput="calcPower()">
             </div>
             <div class="f">
-              <label data-i18n="lbl_current">I — Prúd [A]</label>
-              <input type="number" id="I_meas" value="" step="0.1" min="0" placeholder="napr. 10.5">
+              <label>U — Napätie [V]</label>
+              <input type="number" id="U_meas" value="" step="1" min="0" placeholder="napr. 230" oninput="calcPower()">
             </div>
             <div class="f">
-              <label data-i18n="lbl_voltage">U — Napätie [V]</label>
-              <input type="number" id="U_meas" value="" step="1" min="0" placeholder="napr. 230">
+              <label style="color:#059669;font-weight:800">P = I × U [W] <span style="font-size:8px;color:#9aa3b8;font-weight:400">(vypočíta sa automaticky)</span></label>
+              <input type="number" id="P_comp" value="" step="1" min="0" placeholder="alebo zadajte priamo" style="font-weight:700;color:#059669" title="Auto-calculated from I×U, or enter manually for 3-phase">
             </div>
+          </div>
+          <div style="font-size:9px;color:#6b7280;margin-top:6px">
+            💡 <strong>1-fázové:</strong> P = I × U &nbsp;|&nbsp; <strong>3-fázové:</strong> P = I × U × √3 × cosφ → zadajte príkon priamo
           </div>
         </div>
 
-        <!-- Method B: Direct mass flow -->
-        <div style="background:#eff6ff;border:1.5px solid #93c5fd;border-radius:10px;padding:12px 14px;margin-bottom:8px">
-          <div style="font-size:9px;font-weight:700;color:#2563eb;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">🌊 B — Hmotnostný prietok (priamy)</div>
-          <div class="g2">
-            <div class="f">
-              <label>Hmotnostný prietok ṁ [g/s]</label>
-              <input type="number" id="mdot_direct" value="" step="0.1" min="0" placeholder="napr. 15.0">
-            </div>
-            <div class="f">
-              <label style="color:#9aa3b8">alebo ṁ [kg/h]</label>
-              <input type="number" id="mdot_kgh" value="" step="0.1" min="0" placeholder="napr. 54.0">
-            </div>
-          </div>
-        </div>
 
         <!-- Method C: Compressor displacement -->
         <div style="background:#fff7ed;border:1.5px solid #fed7aa;border-radius:10px;padding:12px 14px;margin-bottom:8px">
-          <div style="font-size:9px;font-weight:700;color:#ea580c;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">🔧 C — Zdvihový objem kompresora</div>
+          <div style="font-size:9px;font-weight:700;color:#ea580c;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">🔧 B — Zdvihový objem kompresora</div>
           <div class="g4">
             <div class="f">
               <label>V<sub>h</sub> — Zdvihový objem [cm³]</label>
@@ -1285,7 +1274,7 @@ function calculateCycle(){
       const Vhm3 = comp_vh * 1e-6 * comp_cyl;       // m³/rev total
       const n_rps = comp_rpm / 60;                    // rev/s
       mdot      = Vhm3 * n_rps * (comp_etavol/100) * rho1; // kg/s
-      capMethod = 'C — Zdvihový objem: ' + (comp_vh*comp_cyl).toFixed(1) + ' cm³ × ' + comp_rpm + ' RPM × η=' + comp_etavol + '%';
+      capMethod = 'B — Zdvihový objem: ' + (comp_vh*comp_cyl).toFixed(1) + ' cm³ × ' + comp_rpm + ' RPM × η=' + comp_etavol + '%';
     }
 
     if(mdot && mdot > 0 && q0 > 0){
@@ -1937,9 +1926,7 @@ function displayCapacity(r){
       <div style="grid-column:1/-1;background:#fffbeb;border:1.5px solid #fcd34d;border-radius:10px;padding:14px 16px;text-align:center;color:#92400e;font-size:11px">
         <div style="font-size:20px;margin-bottom:6px">⚡</div>
         <strong>Pre výpočet absolútneho výkonu (kW)</strong> zadajte aspoň jednu z možností:<br>
-        <strong>A</strong> — Príkon [W] alebo Prúd [A] + Napätie [V] &nbsp;|&nbsp;
-        <strong>B</strong> — Hmotnostný prietok [g/s alebo kg/h] &nbsp;|&nbsp;
-        <strong>C</strong> — Zdvihový objem [cm³] + RPM
+        <strong>A</strong> — Prúd [A] + Napätie [V] alebo Príkon [W] &nbsp;|&nbsp; <strong>B</strong> — Zdvihový objem kompresora [cm³] + RPM
       </div>`;
     capBody.innerHTML = '';
     badge.textContent = 'Len mernoenergetické hodnoty';
@@ -2044,6 +2031,25 @@ function resetDiagramCalc(){
 // ═══════════════════════════════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════════════════════════════
+function calcPower(){
+  const I = parseFloat(document.getElementById('I_meas').value);
+  const U = parseFloat(document.getElementById('U_meas').value);
+  const pField = document.getElementById('P_comp');
+  if(!isNaN(I) && !isNaN(U) && I > 0 && U > 0){
+    const P = Math.round(I * U);
+    pField.value = P;
+    pField.style.color = '#059669';
+    pField.style.background = '#f0fdf4';
+  } else {
+    // Only clear if it was auto-set (green), not manually entered
+    if(pField.style.color === 'rgb(5, 150, 105)' || pField.style.color === '#059669'){
+      pField.value = '';
+      pField.style.color = '';
+      pField.style.background = '';
+    }
+  }
+}
+
 document.addEventListener('DOMContentLoaded',()=>{
   setLang('sk');
   updatePressureLabels();
