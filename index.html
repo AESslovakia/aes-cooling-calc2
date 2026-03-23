@@ -1193,8 +1193,6 @@ function calculateCycle(){
   const P_comp = parseFloat(document.getElementById('P_comp').value) || null;
   const I_meas = parseFloat(document.getElementById('I_meas').value) || null;
   const U_meas = parseFloat(document.getElementById('U_meas').value) || null;
-  const mdot_direct = parseFloat(document.getElementById('mdot_direct').value) || null; // g/s
-  const mdot_kgh    = parseFloat(document.getElementById('mdot_kgh').value) || null;    // kg/h
   const comp_vh     = parseFloat(document.getElementById('comp_vh').value) || null;     // cm³
   const comp_rpm    = parseFloat(document.getElementById('comp_rpm').value) || null;
   const comp_etavol = parseFloat(document.getElementById('comp_etavol').value) || 75;
@@ -1259,17 +1257,7 @@ function calculateCycle(){
       mdot      = P_elec_used / (w * 1000);
       capMethod = 'A — I×U: ' + I_meas.toFixed(1) + 'A × ' + U_meas.toFixed(0) + 'V = ' + P_elec_used.toFixed(0) + ' W';
     }
-    // Method B: direct mass flow g/s
-    else if(mdot_direct && mdot_direct > 0){
-      mdot      = mdot_direct / 1000;        // kg/s
-      capMethod = 'B — Prietok: ' + mdot_direct.toFixed(2) + ' g/s';
-    }
-    // Method B2: direct mass flow kg/h
-    else if(mdot_kgh && mdot_kgh > 0){
-      mdot      = mdot_kgh / 3600;           // kg/s
-      capMethod = 'B — Prietok: ' + mdot_kgh.toFixed(2) + ' kg/h';
-    }
-    // Method C: compressor displacement
+    // Method B: compressor displacement
     else if(comp_vh && comp_rpm && rho1 > 0 && w > 0){
       const Vhm3 = comp_vh * 1e-6 * comp_cyl;       // m³/rev total
       const n_rps = comp_rpm / 60;                    // rev/s
