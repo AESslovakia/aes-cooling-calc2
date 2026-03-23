@@ -541,26 +541,72 @@ body{font-family:'Inter',Arial,sans-serif;font-size:13px;color:#1e2433;backgroun
             <input type="number" id="T_amb" value="25" step="0.5" placeholder="napr. 25">
           </div>
           <div class="f">
-            <label data-i18n="lbl_Pcomp">P₁ — Príkon kompresora [W]</label>
-            <input type="number" id="P_comp" value="" step="10" min="0" placeholder="nepovinné">
-          </div>
-          <div class="f">
-            <label data-i18n="lbl_current">I — Prúd [A]</label>
-            <input type="number" id="I_meas" value="" step="0.1" min="0" placeholder="nepovinné">
-          </div>
-        </div>
-        <div class="g3" style="margin-top:8px">
-          <div class="f">
-            <label data-i18n="lbl_voltage">U — Napätie [V]</label>
-            <input type="number" id="U_meas" value="" step="1" min="0" placeholder="nepovinné">
-          </div>
-          <div class="f">
             <label data-i18n="lbl_T_evap_surf">T povrch výparníka [°C]</label>
             <input type="number" id="T_evap_surf" value="" step="0.5" placeholder="nepovinné">
           </div>
           <div class="f">
             <label data-i18n="lbl_note">Poznámka</label>
             <input type="text" id="note_field" placeholder="Stroj, zákazník, dátum...">
+          </div>
+        </div>
+
+        <!-- COOLING CAPACITY INPUTS -->
+        <div class="sec-label" style="color:#059669;margin-top:16px">Výpočet chladiaceho výkonu <span style="font-size:8px;color:#9aa3b8;text-transform:none;letter-spacing:0">(zadajte aspoň jednu možnosť)</span></div>
+
+        <!-- Method A: Electric power -->
+        <div style="background:#f0fdf4;border:1.5px solid #6ee7b7;border-radius:10px;padding:12px 14px;margin-bottom:8px">
+          <div style="font-size:9px;font-weight:700;color:#059669;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">⚡ A — Elektrický príkon</div>
+          <div class="g3">
+            <div class="f">
+              <label data-i18n="lbl_Pcomp">Príkon kompresora [W]</label>
+              <input type="number" id="P_comp" value="" step="10" min="0" placeholder="napr. 2500">
+            </div>
+            <div class="f">
+              <label data-i18n="lbl_current">I — Prúd [A]</label>
+              <input type="number" id="I_meas" value="" step="0.1" min="0" placeholder="napr. 10.5">
+            </div>
+            <div class="f">
+              <label data-i18n="lbl_voltage">U — Napätie [V]</label>
+              <input type="number" id="U_meas" value="" step="1" min="0" placeholder="napr. 230">
+            </div>
+          </div>
+        </div>
+
+        <!-- Method B: Direct mass flow -->
+        <div style="background:#eff6ff;border:1.5px solid #93c5fd;border-radius:10px;padding:12px 14px;margin-bottom:8px">
+          <div style="font-size:9px;font-weight:700;color:#2563eb;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">🌊 B — Hmotnostný prietok (priamy)</div>
+          <div class="g2">
+            <div class="f">
+              <label>Hmotnostný prietok ṁ [g/s]</label>
+              <input type="number" id="mdot_direct" value="" step="0.1" min="0" placeholder="napr. 15.0">
+            </div>
+            <div class="f">
+              <label style="color:#9aa3b8">alebo ṁ [kg/h]</label>
+              <input type="number" id="mdot_kgh" value="" step="0.1" min="0" placeholder="napr. 54.0">
+            </div>
+          </div>
+        </div>
+
+        <!-- Method C: Compressor displacement -->
+        <div style="background:#fff7ed;border:1.5px solid #fed7aa;border-radius:10px;padding:12px 14px;margin-bottom:8px">
+          <div style="font-size:9px;font-weight:700;color:#ea580c;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">🔧 C — Zdvihový objem kompresora</div>
+          <div class="g4">
+            <div class="f">
+              <label>V<sub>h</sub> — Zdvihový objem [cm³]</label>
+              <input type="number" id="comp_vh" value="" step="0.1" min="0" placeholder="napr. 28.5">
+            </div>
+            <div class="f">
+              <label>n — Otáčky [RPM]</label>
+              <input type="number" id="comp_rpm" value="" step="50" min="0" placeholder="napr. 2900">
+            </div>
+            <div class="f">
+              <label>η<sub>vol</sub> — Obj. účinnosť [%]</label>
+              <input type="number" id="comp_etavol" value="75" step="1" min="1" max="100" placeholder="napr. 75">
+            </div>
+            <div class="f">
+              <label>Počet valcov / piestov</label>
+              <input type="number" id="comp_cyl" value="1" step="1" min="1" max="20" placeholder="1">
+            </div>
           </div>
         </div>
       </div>
@@ -608,11 +654,35 @@ body{font-family:'Inter',Arial,sans-serif;font-size:13px;color:#1e2433;backgroun
           <tbody id="derivedBody"></tbody>
         </table>
 
-        <!-- Mass flow / capacity (if P_comp provided) -->
-        <div id="massFlowSection" style="display:none">
-          <div class="sec-label green" data-i18n="sec_massflow">Prietok a výkony (príkon zadaný)</div>
-          <div class="extra-row" id="massFlowGrid"></div>
+      </div>
+
+      <!-- COOLING CAPACITY CARD – always shown after calc -->
+      <div class="card" id="capacityCard" style="display:none">
+        <div class="card-header">
+          <div class="card-num" style="background:linear-gradient(135deg,#059669,#047857)">❄</div>
+          <div class="card-title">Chladiaci výkon — Výsledky</div>
+          <div id="capMethodBadge" style="margin-left:auto;font-size:9px;font-weight:700;padding:3px 10px;border-radius:6px;background:#dcfce7;color:#14532d"></div>
         </div>
+
+        <!-- Big KPI row -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px" id="capKpiGrid"></div>
+
+        <!-- Detail table -->
+        <table class="res-table" id="capTable">
+          <thead><tr>
+            <th>Parameter</th>
+            <th style="text-align:right">Hodnota</th>
+            <th>Jednotka</th>
+          </tr></thead>
+          <tbody id="capBody"></tbody>
+        </table>
+
+        <!-- Specific values always shown -->
+        <div class="sec-label" style="color:#6b7280">Mernoenergetické hodnoty (bez prietoku)</div>
+        <table class="res-table" id="specTable">
+          <thead><tr><th>Parameter</th><th style="text-align:right">Hodnota</th><th>Jednotka</th></tr></thead>
+          <tbody id="specBody"></tbody>
+        </table>
       </div>
 
       <!-- P-H Diagram card -->
@@ -1134,6 +1204,12 @@ function calculateCycle(){
   const P_comp = parseFloat(document.getElementById('P_comp').value) || null;
   const I_meas = parseFloat(document.getElementById('I_meas').value) || null;
   const U_meas = parseFloat(document.getElementById('U_meas').value) || null;
+  const mdot_direct = parseFloat(document.getElementById('mdot_direct').value) || null; // g/s
+  const mdot_kgh    = parseFloat(document.getElementById('mdot_kgh').value) || null;    // kg/h
+  const comp_vh     = parseFloat(document.getElementById('comp_vh').value) || null;     // cm³
+  const comp_rpm    = parseFloat(document.getElementById('comp_rpm').value) || null;
+  const comp_etavol = parseFloat(document.getElementById('comp_etavol').value) || 75;
+  const comp_cyl    = parseFloat(document.getElementById('comp_cyl').value) || 1;
 
   if([T1,P1,T2,P2,T3].some(isNaN)){
     alert(activeLang==='sk'?'Vyplňte body 1, 2 a 3 (T a P).':'Fill in points 1, 2 and 3 (T and P).');
@@ -1178,19 +1254,44 @@ function calculateCycle(){
     const COP = q0 / w;
     const eta_is = (h2s - h1) / (h2 - h1);
 
-    // Capacities if power is known
-    let mdot=null, Q_evap=null, Q_cond=null, COP_real=null;
+    // ── Resolve mass flow from whichever method is provided ──
+    let mdot=null, Q_evap=null, Q_cond=null, COP_real=null, P_elec_used=null;
+    let capMethod = null;
+
+    // Method A: direct power input
     if(P_comp && P_comp > 0 && w > 0){
-      mdot   = P_comp / (w * 1000);       // kg/s
-      Q_evap = mdot * q0 * 1000;          // W
-      Q_cond = mdot * qc * 1000;          // W
-      COP_real = Q_evap / P_comp;
-    } else if(I_meas && U_meas){
-      const P_elec = I_meas * U_meas;
-      mdot   = P_elec / (w * 1000);
-      Q_evap = mdot * q0 * 1000;
-      Q_cond = mdot * qc * 1000;
-      COP_real = Q_evap / P_elec;
+      mdot      = P_comp / (w * 1000);       // kg/s
+      P_elec_used = P_comp;
+      capMethod = 'A — Príkon: ' + P_comp.toFixed(0) + ' W';
+    }
+    // Method A2: I × U
+    else if(I_meas && U_meas && I_meas > 0 && U_meas > 0 && w > 0){
+      P_elec_used = I_meas * U_meas;
+      mdot      = P_elec_used / (w * 1000);
+      capMethod = 'A — I×U: ' + I_meas.toFixed(1) + 'A × ' + U_meas.toFixed(0) + 'V = ' + P_elec_used.toFixed(0) + ' W';
+    }
+    // Method B: direct mass flow g/s
+    else if(mdot_direct && mdot_direct > 0){
+      mdot      = mdot_direct / 1000;        // kg/s
+      capMethod = 'B — Prietok: ' + mdot_direct.toFixed(2) + ' g/s';
+    }
+    // Method B2: direct mass flow kg/h
+    else if(mdot_kgh && mdot_kgh > 0){
+      mdot      = mdot_kgh / 3600;           // kg/s
+      capMethod = 'B — Prietok: ' + mdot_kgh.toFixed(2) + ' kg/h';
+    }
+    // Method C: compressor displacement
+    else if(comp_vh && comp_rpm && rho1 > 0 && w > 0){
+      const Vhm3 = comp_vh * 1e-6 * comp_cyl;       // m³/rev total
+      const n_rps = comp_rpm / 60;                    // rev/s
+      mdot      = Vhm3 * n_rps * (comp_etavol/100) * rho1; // kg/s
+      capMethod = 'C — Zdvihový objem: ' + (comp_vh*comp_cyl).toFixed(1) + ' cm³ × ' + comp_rpm + ' RPM × η=' + comp_etavol + '%';
+    }
+
+    if(mdot && mdot > 0 && q0 > 0){
+      Q_evap   = mdot * q0 * 1000;   // W
+      Q_cond   = mdot * qc * 1000;   // W
+      if(P_elec_used) COP_real = Q_evap / P_elec_used;
     }
 
     lastResult = {
@@ -1199,14 +1300,16 @@ function calculateCycle(){
       h1, s1, rho1, h2, h2s, h3, h4,
       Te_sat, Tc_sat, x4,
       SH, SC, CR, q0, w, qc, COP, eta_is,
-      mdot, Q_evap, Q_cond, COP_real
+      mdot, Q_evap, Q_cond, COP_real, P_elec_used, capMethod
     };
 
     displayResults(lastResult);
+    displayCapacity(lastResult);
     updateDiagramCalc(lastResult);
     drawPHDiagram(lastResult);
     runDiagnostics(lastResult);
     document.getElementById('resultsCard').style.display='block';
+    document.getElementById('capacityCard').style.display='block';
 
   } catch(e){
     console.error(e);
@@ -1222,6 +1325,7 @@ function resetAll(){
   document.getElementById('phRefrigBadge').style.display='none';
   document.getElementById('diagOutput').innerHTML=`<div class="diag-empty"><span>🔍</span><p>${t('diag_placeholder')}</p></div>`;
   document.getElementById('diagBadge').style.display='none';
+  document.getElementById('capacityCard').style.display='none';
   resetDiagramCalc();
 }
 
@@ -1806,6 +1910,87 @@ function updateLogoPreview(){
 }
 
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeHeaderEditor(); });
+
+
+// ═══════════════════════════════════════════════════════════════════
+//  DISPLAY COOLING CAPACITY
+// ═══════════════════════════════════════════════════════════════════
+function displayCapacity(r){
+  const card = document.getElementById('capacityCard');
+  const kpiGrid = document.getElementById('capKpiGrid');
+  const capBody = document.getElementById('capBody');
+  const specBody = document.getElementById('specBody');
+  const badge = document.getElementById('capMethodBadge');
+
+  // ── Specific values — always available ──
+  specBody.innerHTML = [
+    {n:'Merný chladiaci výkon q₀', v:r.q0.toFixed(2), u:'kJ/kg'},
+    {n:'Merná práca kompresora w',  v:r.w.toFixed(2),  u:'kJ/kg'},
+    {n:'Merný výkon kondenzátora q_c', v:r.qc.toFixed(2), u:'kJ/kg'},
+    {n:'COP (termodynamický)',      v:r.COP.toFixed(3), u:'W/W'},
+    {n:'Izentropická účinnosť η_is', v:(r.eta_is*100).toFixed(1), u:'%'},
+  ].map(d=>`<tr><td>${d.n}</td><td class="num">${d.v}</td><td class="unit">${d.u}</td></tr>`).join('');
+
+  if(!r.mdot || r.mdot <= 0){
+    // No mass flow — show only specific values, prompt user
+    kpiGrid.innerHTML = `
+      <div style="grid-column:1/-1;background:#fffbeb;border:1.5px solid #fcd34d;border-radius:10px;padding:14px 16px;text-align:center;color:#92400e;font-size:11px">
+        <div style="font-size:20px;margin-bottom:6px">⚡</div>
+        <strong>Pre výpočet absolútneho výkonu (kW)</strong> zadajte aspoň jednu z možností:<br>
+        <strong>A</strong> — Príkon [W] alebo Prúd [A] + Napätie [V] &nbsp;|&nbsp;
+        <strong>B</strong> — Hmotnostný prietok [g/s alebo kg/h] &nbsp;|&nbsp;
+        <strong>C</strong> — Zdvihový objem [cm³] + RPM
+      </div>`;
+    capBody.innerHTML = '';
+    badge.textContent = 'Len mernoenergetické hodnoty';
+    badge.style.background = '#fef3c7';
+    badge.style.color = '#92400e';
+    return;
+  }
+
+  // ── Mass flow known → full results ──
+  const mdot_gs  = r.mdot * 1000;          // g/s
+  const mdot_kgh = r.mdot * 3600;          // kg/h
+  const Q0_kW    = r.Q_evap / 1000;
+  const Qc_kW    = r.Q_cond / 1000;
+  const Pth_kW   = r.mdot * r.w;           // theoretical compressor power [kW]
+  const EER      = r.COP_real || r.COP;
+
+  badge.textContent = r.capMethod || 'Vypočítané';
+  badge.style.background = '#dcfce7';
+  badge.style.color = '#14532d';
+
+  // Big KPIs
+  kpiGrid.innerHTML = [
+    {lbl:'Chladiaci výkon Q₀', val:Q0_kW.toFixed(2), u:'kW', cls:'hl-green', big:true},
+    {lbl:'Výkon kondenzátora Q_c', val:Qc_kW.toFixed(2), u:'kW', cls:'hl-orange', big:true},
+    {lbl:'Prietok chladiva ṁ', val:mdot_gs.toFixed(2), u:'g/s', cls:'hl-blue'},
+    {lbl:'ṁ', val:mdot_kgh.toFixed(1), u:'kg/h', cls:''},
+    {lbl:'COP / EER', val:EER.toFixed(3), u:'W/W', cls:'hl-green'},
+    {lbl:'Teor. príkon kompresora', val:(Pth_kW*1000).toFixed(0), u:'W', cls:''},
+  ].map(k=>`<div class="kpi ${k.cls}" ${k.big?'style="grid-column:span 1"':''}">
+    <div class="kpi-lbl">${k.lbl}</div>
+    <div><span class="kpi-val" ${k.big?'style="font-size:22px"':''}>${k.val}</span><span class="kpi-u"> ${k.u}</span></div>
+  </div>`).join('');
+
+  // Detail table
+  let rows = [
+    {n:'Chladiaci výkon Q₀',          v:Q0_kW.toFixed(3),      u:'kW'},
+    {n:'Výkon kondenzátora Q_c',       v:Qc_kW.toFixed(3),      u:'kW'},
+    {n:'Hmotnostný prietok ṁ',         v:mdot_gs.toFixed(3),    u:'g/s'},
+    {n:'Hmotnostný prietok ṁ',         v:mdot_kgh.toFixed(2),   u:'kg/h'},
+    {n:'Teor. príkon kompresora',      v:(Pth_kW).toFixed(3),   u:'kW'},
+  ];
+  if(r.P_elec_used){
+    rows.push({n:'Elektrický príkon (meraný)', v:(r.P_elec_used/1000).toFixed(3), u:'kW'});
+    rows.push({n:'COP reálny (Q₀/P_el)',       v:(r.Q_evap/r.P_elec_used).toFixed(3), u:'W/W'});
+    rows.push({n:'Elektrická účinnosť motora', v:((Pth_kW*1000)/r.P_elec_used*100).toFixed(1), u:'%'});
+  }
+  if(r.Q_evap > 0){
+    rows.push({n:'Q₀ na jednotku prietoku', v:(Q0_kW/mdot_gs*1000).toFixed(1), u:'W/(g/s)'});
+  }
+  capBody.innerHTML = rows.map(d=>`<tr><td>${d.n}</td><td class="num">${d.v}</td><td class="unit">${d.u}</td></tr>`).join('');
+}
 
 // ═══════════════════════════════════════════════════════════════════
 //  DIAGRAM LIVE VALUES
